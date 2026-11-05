@@ -1,3 +1,21 @@
+# Stage 1: Build frontend assets with Node.js
+FROM node:22-bookworm-slim AS frontend
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN if [ -f package-lock.json ]; then \
+      npm ci; \
+    else \
+      npm install; \
+    fi
+
+COPY ..
+
+RUN npm run build
+
+
 FROM php:8.2-apache
 
 # Enable Apache rewrite
