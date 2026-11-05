@@ -5,11 +5,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN if [ -f package-lock.json ]; then \
-      npm ci; \
-    else \
-      npm install; \
-    fi
+RUN npm install
 
 COPY . .
 
@@ -39,6 +35,10 @@ WORKDIR /var/www/html
 
 # Copy Laravel app code
 COPY . /var/www/html
+
+# Copy compiled Vite assets from Node stage
+COPY --from=frontend /app/public/build \
+    /var/www/html/public/build
 
 # Copy Apache virtual host config
 COPY apache/laravel.conf /etc/apache2/sites-available/000-default.conf
