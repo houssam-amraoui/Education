@@ -1,0 +1,31 @@
+{
+   // "dockerComposeFile": "docker-compose.yml",
+    "image": "larevel_dev",
+    "dockerFile": "Dockerfile",
+
+    "runArgs": ["--name", "dev_stock", "--network=dev-network"],
+    "postAttachCommand": {
+
+    }
+    ,"initializeCommand": "docker-compose -f docker-compose.dev.yml up -d"
+
+
+
+  /*
+  "appPort": [3000],
+  "react": "cd frontend && npm start",
+"laravel": "cd api && php artisan serve"
+
+    ,"runArgs": ["-u", "node"],
+    "settings": {
+        "workbench.colorTheme": "Cobalt2",
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "postCreateCommand": "npm install",
+
+    "extensions": [
+		"esbenp.prettier-vscode",
+		"wesbos.theme-cobalt2",
+		"rvest.vs-code-prettier-eslint"
+	]*/
+}
