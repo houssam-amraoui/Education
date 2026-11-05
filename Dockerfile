@@ -11,7 +11,7 @@ RUN if [ -f package-lock.json ]; then \
       npm install; \
     fi
 
-COPY ..
+COPY . .
 
 RUN npm run build
 
