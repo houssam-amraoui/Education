@@ -1,6 +1,6 @@
 @if($template === 'attempt')
 <div class="row between wrap attempt-meta"><x-prototype.badge tone="info">7 question formats · Sample attempt</x-prototype.badge>@if($screen['id'] === 'S07')<strong><x-prototype.icon name="clock"/> 30:00 · Static timer preview</strong>@endif<a href="{{ $url($screen['parent']) }}">Return to instructions</a></div>
-<form class="stack reading" data-attempt-form data-result-url="{{ $url($screen['id'] === 'S07' ? 'S08' : 'S05') }}">
+<form class="stack reading" lang="en" dir="ltr" data-attempt-form data-result-url="{{ $url($screen['id'] === 'S07' ? 'S08' : 'S05') }}">
 <x-prototype.card><fieldset><legend>1. Choose the correct passive sentence.</legend>@foreach(['They write the report.','The report is written by them.','The report writes them.'] as $option)<label class="choice"><input type="radio" name="q1" value="{{ $loop->index }}"> {{ $option }}</label>@endforeach</fieldset></x-prototype.card>
 <x-prototype.card><fieldset><legend>2. Select all past participles.</legend>@foreach(['Written','Went','Seen','Speak'] as $option)<label class="choice"><input type="checkbox" name="q2[]" value="{{ $option }}"> {{ $option }}</label>@endforeach</fieldset></x-prototype.card>
 <x-prototype.card><fieldset><legend>3. “The room was cleaned” is in the passive voice.</legend><label class="choice"><input type="radio" name="q3" value="true"> True</label><label class="choice"><input type="radio" name="q3" value="false"> False</label></fieldset></x-prototype.card>

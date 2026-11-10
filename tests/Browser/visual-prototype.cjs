@@ -155,7 +155,10 @@ const fs = require("node:fs");
         );
 
         await page.goto(base + "/lessons/passive-voice");
-        await page.locator("[data-language]").selectOption("ar");
+        await Promise.all([
+            page.waitForNavigation(),
+            page.locator("[data-language]").selectOption("ar"),
+        ]);
         assert.equal(await page.locator("html").getAttribute("dir"), "rtl");
         assert.equal(await page.locator(".reading").getAttribute("dir"), "ltr");
         assert.equal(

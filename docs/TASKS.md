@@ -1,13 +1,13 @@
-# MVP Implementation Tasks
+# Application Implementation Tasks
 
-Sources: [PRD](docs/PRD.md), [screen inventory](SCREEN_INVENTORY.md), and [design system](DESIGN_SYSTEM.md). This is a planning backlog; no application work is included in creating this document.
+This backlog covers the application described in the [PRD](PRD.md) and [screen inventory](SCREEN_INVENTORY.md). Use the [design system](DESIGN_SYSTEM.md) for interface work.
 
 ## Scope and task rules
 
-The PRD defines the complete product, without a separate MVP boundary. The working MVP below preserves its core learning journey: public discovery, accounts, structured lessons, all seven named question formats, exercises, document/interactive exams, resources, YouTube videos, search/topics, persistent progress, basic recommendations, teacher communication, configurable points/achievements/streaks, access controls, and administration/analytics for those capabilities. Start content with 2nd Baccalaureate; keep levels and categories configurable.
+Start with the 2nd Baccalaureate learning journey and keep levels and categories configurable. Existing prototype checkmarks describe the earlier 89-screen review. The additional inventory screens have their own tasks below.
 
-- Optional daily rewards, leaderboards, subscriptions, advertising integrations, additional video providers, and future question formats are outside this MVP backlog. Conditional inventory screens remain documented, not deleted.
-- Premium classification and entitlement enforcement are included. Payment processing, paid-lesson fulfillment, teacher-service lead capture, and conversion tracking depend on unresolved product decisions listed at the end; the MVP must not be described as a complete commercial launch until those are resolved.
+- **Conditional** modules apply when the capability is selected for the release. **Decision needed** tasks depend on the cited scope decision. Their mockups can use neutral fixtures while the live workflow is defined.
+- Select one task ID at a time. For an integration task, finish the corresponding prototype and backend behavior first. Run focused tests as each behavior becomes available, then use the release tasks to check the assembled flows.
 - Each checkbox is one independently requested implementation task. IDs remain stable; do not implement neighboring tasks automatically. If a task expands beyond its named outcome, split it before implementation.
 - Each feature separates **1. Prototype**, **2. Backend implementation**, **3. Integration**, and **4. Testing**. Prototype means fixture-driven UI and local interactions without real persistence. Backend means migrations, models, validation, policies, and application behavior. Integration replaces fixtures with authorized live data and submits real forms. Testing adds focused behavioral coverage or records a focused manual check.
 - Respect `AGENTS.md`: read `docs/` and relevant requirements first, preserve existing behavior, use Laravel conventions and existing patterns, run relevant tests after each change, and report changed files/results. Dedicated testing tasks do not postpone basic verification of implementation tasks.
@@ -38,7 +38,13 @@ Prototype work can use fixtures independently after the shared foundations. Back
 | Access / premium (`ACCESS`) | AUTH; add adapters as content schemas become available; REWARD for points unlocks |
 | Platform settings (`SETTINGS`) | AUTH, BASE localization |
 | Analytics (`ANALYTICS`) | Recorded events from implemented modules; authorized admin access |
-| Release verification (`RELEASE`) | Included feature integrations and focused tests |
+| Paid offers (`PAID`) | AUTH, ACCESS. Fulfillment requires SCOPE-01, and conversion reporting requires SCOPE-03. |
+| Teacher services (`SERVICE`) | AUTH. Lead handling requires SCOPE-02, and reporting requires SCOPE-03. |
+| Subscriptions (`SUB`) | ACCESS, PAID offer configuration, and SCOPE-04 |
+| Advertising (`ADS`) | SETTINGS and SCOPE-05. Reward credit also requires REWARD. |
+| Daily rewards (`DAILY`) | REWARD ledger, SETTINGS, and SCOPE-06 |
+| Leaderboards (`RANK`) | REWARD activity, SETTINGS, and SCOPE-07 |
+| Release verification (`RELEASE`) | Required integrations and focused tests for the selected release |
 
 Build access policy primitives early, then connect each content type as it becomes available. Create exercise/exam ownership schemas before their question authoring tasks; connect attempt submission only after the relevant graders exist. Configure points access after the reward ledger exists. These are incremental dependencies, not whole-feature completion cycles.
 
@@ -49,22 +55,22 @@ Screens: shared rules for all included screens; navigation entry points G01, S01
 ### 1. Prototype tasks
 
 - [ ] **BASE-01** — Define design-system color, typography, spacing, and breakpoint tokens in the existing styling setup; demonstrate their use in an isolated fixture view.
-- [ ] **BASE-02** — Prototype reusable button, link, badge, and feedback components with focus/disabled/loading variants.
-- [ ] **BASE-03** — Prototype reusable labeled field, checkbox/radio group, and validation-summary components.
+- [x] **BASE-02** — Prototype reusable button, link, badge, and feedback components with focus/disabled/loading variants.
+- [x] **BASE-03** — Prototype reusable labeled field, checkbox/radio group, and validation-summary components.
 - [ ] **BASE-04** — Prototype reusable card, paginated table, and modal/drawer primitives with keyboard interactions.
-- [ ] **BASE-05** — Prototype the public navigation shell with language selection and mobile menu.
-- [ ] **BASE-06** — Prototype the student navigation shell with every included PRD destination reachable.
-- [ ] **BASE-07** — Prototype the administration navigation shell with links to included management modules.
+- [x] **BASE-05** — Prototype the public navigation shell with language selection and mobile menu.
+- [x] **BASE-06** — Prototype the student navigation shell with every included PRD destination reachable.
+- [x] **BASE-07** — Prototype the administration navigation shell with links to included management modules.
 
 ### 2. Backend implementation tasks
 
-- [ ] **BASE-08** — Configure supported Arabic/French/English locales and locale validation; unsupported locale values fall back predictably.
-- [ ] **BASE-09** — Add shared translation keys and direction metadata for navigation, controls, and common feedback.
+- [x] **BASE-08** — Configure supported Arabic/French/English locales and locale validation; unsupported locale values fall back predictably.
+- [x] **BASE-09** — Add shared translation keys and direction metadata for navigation, controls, and common feedback.
 
 ### 3. Integration tasks
 
-- [ ] **BASE-10** — Bind language switching to the supported locale mechanism and render correct `lang`/`dir` attributes.
-- [ ] **BASE-11** — Connect shell links to implemented routes, active navigation, and breadcrumbs; expose only authorized destinations as modules arrive.
+- [x] **BASE-10** — Bind language switching to the supported locale mechanism and render correct `lang`/`dir` attributes.
+- [x] **BASE-11** — Connect shell links to implemented routes, active navigation, and breadcrumbs; expose only authorized destinations as modules arrive.
 
 ### 4. Testing tasks
 
@@ -77,10 +83,10 @@ Screens: G21–G22, A02–A06. PRD §§3, 18–19. Do not add social login or un
 
 ### 1. Prototype tasks
 
-- [ ] **AUTH-01** — Prototype registration with labeled fields, validation, and a simulated success state.
+- [x] **AUTH-01** — Prototype registration with labeled fields, validation, and a simulated success state.
 - [ ] **AUTH-02** — Prototype login with validation, failed-login feedback, and return-destination behavior.
-- [ ] **AUTH-03** — Prototype the user list and reusable create/edit user form using fixtures.
-- [ ] **AUTH-04** — Prototype the role list and reusable create/edit role form for the PRD roles.
+- [x] **AUTH-03** — Prototype the user list and reusable create/edit user form using fixtures.
+- [x] **AUTH-04** — Prototype the role list and reusable create/edit role form for the PRD roles.
 
 ### 2. Backend implementation tasks
 
@@ -107,8 +113,8 @@ Screens: S02, S22–S23. PRD §§18, 22.
 
 ### 1. Prototype tasks
 
-- [ ] **PROFILE-01** — Prototype the profile editor with saved/error states.
-- [ ] **PROFILE-02** — Prototype language/preferences settings and multi-level/goal selection using fixtures.
+- [x] **PROFILE-01** — Prototype the profile editor with saved/error states.
+- [x] **PROFILE-02** — Prototype language/preferences settings and multi-level/goal selection using fixtures.
 
 ### 2. Backend implementation tasks
 
@@ -131,12 +137,12 @@ Screens: G01–G06, A07–A12. PRD §§4, 19–20, 23.
 
 ### 1. Prototype tasks
 
-- [ ] **STRUCT-01** — Prototype Home and path listing using public-content fixtures.
-- [ ] **STRUCT-02** — Prototype level detail and unit listing with working fixture navigation.
+- [x] **STRUCT-01** — Prototype Home and path listing using public-content fixtures.
+- [x] **STRUCT-02** — Prototype level detail and unit listing with working fixture navigation.
 - [ ] **STRUCT-03** — Prototype unit detail and category lesson listing with empty-category states.
-- [ ] **STRUCT-04** — Prototype the level management list and create/edit form.
-- [ ] **STRUCT-05** — Prototype the unit management list and create/edit form.
-- [ ] **STRUCT-06** — Prototype the category management list and create/edit form.
+- [x] **STRUCT-04** — Prototype the level management list and create/edit form.
+- [x] **STRUCT-05** — Prototype the unit management list and create/edit form.
+- [x] **STRUCT-06** — Prototype the category management list and create/edit form.
 
 ### 2. Backend implementation tasks
 
@@ -167,8 +173,8 @@ Screens: G07, A13–A15. PRD §§7, 19–20.
 ### 1. Prototype tasks
 
 - [ ] **LESSON-01** — Prototype lesson reading with rich text, images, video, document links, and responsive English/Arabic content.
-- [ ] **LESSON-02** — Prototype lesson management listing and content editor using fixtures.
-- [ ] **LESSON-03** — Prototype the shared related-content selector for exercises, exams, resources, and next lessons.
+- [x] **LESSON-02** — Prototype lesson management listing and content editor using fixtures.
+- [x] **LESSON-03** — Prototype the shared related-content selector for exercises, exams, resources, and next lessons.
 
 ### 2. Backend implementation tasks
 
@@ -197,8 +203,8 @@ Screens: G16–G18, A25–A26; document use from G07/G14. PRD §§9–10.
 
 ### 1. Prototype tasks
 
-- [ ] **RES-01** — Prototype resource listing/search/filter and resource detail using fixtures.
-- [ ] **RES-02** — Prototype document viewing with a download fallback when inline viewing is unavailable.
+- [x] **RES-01** — Prototype resource listing/search/filter and resource detail using fixtures.
+- [x] **RES-02** — Prototype document viewing with a download fallback when inline viewing is unavailable.
 - [ ] **RES-03** — Prototype resource management list and create/edit upload form with file errors.
 
 ### 2. Backend implementation tasks
@@ -224,8 +230,8 @@ Screens: G19–G20, A27–A28. PRD §11.
 
 ### 1. Prototype tasks
 
-- [ ] **VIDEO-01** — Prototype video listing/filter/search and watch view with unavailable-media feedback.
-- [ ] **VIDEO-02** — Prototype video management list and create/edit source form.
+- [x] **VIDEO-01** — Prototype video listing/filter/search and watch view with unavailable-media feedback.
+- [x] **VIDEO-02** — Prototype video management list and create/edit source form.
 
 ### 2. Backend implementation tasks
 
@@ -251,10 +257,10 @@ Screens: question controls within S04/S07 and A18–A19/A23–A24. PRD §§8–9
 - [ ] **QUESTION-01** — Prototype single-choice answer and authoring controls with selected/error states.
 - [ ] **QUESTION-02** — Prototype multiple-selection answer and authoring controls.
 - [ ] **QUESTION-03** — Prototype true/false answer and authoring controls.
-- [ ] **QUESTION-04** — Prototype matching answer and authoring controls with a keyboard/touch alternative to dragging.
+- [x] **QUESTION-04** — Prototype matching answer and authoring controls with a keyboard/touch alternative to dragging.
 - [ ] **QUESTION-05** — Prototype fill-in-the-blanks answer and accepted-answer authoring controls.
 - [ ] **QUESTION-06** — Prototype short-answer and accepted-answer authoring controls.
-- [ ] **QUESTION-07** — Prototype ordering answer and authoring controls with keyboard/touch reordering.
+- [x] **QUESTION-07** — Prototype ordering answer and authoring controls with keyboard/touch reordering.
 - [ ] **QUESTION-08** — Prototype reusable question list with add/edit/remove/reorder interactions using fixtures.
 
 ### 2. Backend implementation tasks
@@ -277,7 +283,13 @@ Screens: question controls within S04/S07 and A18–A19/A23–A24. PRD §§8–9
 - [ ] **QUESTION-21** — Connect matching authoring to its validated definition.
 - [ ] **QUESTION-22** — Connect blanks and short-answer authoring to explicit accepted-answer definitions.
 - [ ] **QUESTION-23** — Connect ordering authoring to its validated definition.
-- [ ] **QUESTION-24** — Render the saved question type in learner attempts and serialize answers using the backend contract; keep answer keys absent from the pre-submission response.
+- [ ] **QUESTION-24** — Connect the shared learner question renderer and single-choice control to the attempt payload. Check that the response omits answer keys before submission.
+- [ ] **QUESTION-30** — Connect multiple-selection rendering and answer serialization to the learner renderer from QUESTION-24.
+- [ ] **QUESTION-31** — Connect true/false rendering and answer serialization to the learner renderer.
+- [ ] **QUESTION-32** — Connect matching rendering and pair-ID serialization to the learner renderer.
+- [ ] **QUESTION-33** — Connect fill-in-the-blanks rendering and slot answer serialization to the learner renderer.
+- [ ] **QUESTION-34** — Connect short-answer rendering and text answer serialization to the learner renderer.
+- [ ] **QUESTION-35** — Connect ordering rendering and ordered-ID serialization to the learner renderer.
 
 ### 4. Testing tasks
 
@@ -295,10 +307,10 @@ Screens: G11–G12, S04–S06, A16–A17. PRD §8.
 
 ### 1. Prototype tasks
 
-- [ ] **EXERCISE-01** — Prototype exercise catalog and instructions with prerequisites/access feedback.
-- [ ] **EXERCISE-02** — Prototype exercise attempt submission using fixture questions and simulated results.
+- [x] **EXERCISE-01** — Prototype exercise catalog and instructions with prerequisites/access feedback.
+- [x] **EXERCISE-02** — Prototype exercise attempt submission using fixture questions and simulated results.
 - [ ] **EXERCISE-03** — Prototype results/corrections and attempt history with retry navigation.
-- [ ] **EXERCISE-04** — Prototype exercise management list and create/edit instructions/placement form.
+- [x] **EXERCISE-04** — Prototype exercise management list and create/edit instructions/placement form.
 
 ### 2. Backend implementation tasks
 
@@ -328,8 +340,8 @@ Screens: G13–G15, S07–S09, A20–A24. PRD §9.
 - [ ] **EXAM-01** — Prototype exam catalog and document-exam detail with exam/correction file links.
 - [ ] **EXAM-02** — Prototype interactive-exam instructions and timed/untimed attempt states.
 - [ ] **EXAM-03** — Prototype exam results/corrections and attempt history.
-- [ ] **EXAM-04** — Prototype document-exam management list and create/edit form.
-- [ ] **EXAM-05** — Prototype interactive-exam create/edit form with timing, availability, and question-management entry.
+- [x] **EXAM-04** — Prototype document-exam management list and create/edit form.
+- [x] **EXAM-05** — Prototype interactive-exam create/edit form with timing, availability, and question-management entry.
 
 ### 2. Backend implementation tasks
 
@@ -358,14 +370,19 @@ Screens: G08–G10, A29–A30. PRD §12.
 
 ### 1. Prototype tasks
 
-- [ ] **SEARCH-01** — Prototype topic index/detail and topic management list/form using fixture relationships.
-- [ ] **SEARCH-02** — Prototype global results with type, title, context, destination, and no-match state.
+- [x] **SEARCH-01** — Prototype topic index/detail and topic management list/form using fixture relationships.
+- [x] **SEARCH-02** — Prototype global results with type, title, context, destination, and no-match state.
 
 ### 2. Backend implementation tasks
 
 - [ ] **SEARCH-03** — Add topic persistence, validated management actions, archive behavior, and learning-content associations.
 - [ ] **SEARCH-04** — Add global/level topic queries returning only visible related content.
-- [ ] **SEARCH-05** — Implement a paginated global search query across lessons, exercises, exams, resources, videos, and topics using existing database capabilities.
+- [ ] **SEARCH-05** — Implement the paginated global search query with lessons as the first result type. Include title, type, context, canonical destination, and the existing visibility scope.
+- [ ] **SEARCH-10** — Add authorized exercise results to the shared query from SEARCH-05.
+- [ ] **SEARCH-11** — Add authorized document and interactive exam results to the shared query.
+- [ ] **SEARCH-12** — Add authorized resource results to the shared query.
+- [ ] **SEARCH-13** — Add authorized video results to the shared query.
+- [ ] **SEARCH-14** — Add visible topic results to the shared query.
 
 ### 3. Integration tasks
 
@@ -383,14 +400,15 @@ Screens: S01, S10–S12, A04. PRD §§6, 13.
 
 ### 1. Prototype tasks
 
-- [ ] **PROGRESS-01** — Prototype overview and per-level progress with completion, scores, and empty-history fixtures.
-- [ ] **PROGRESS-02** — Prototype activity/score history and administrator student-detail reading.
-- [ ] **PROGRESS-03** — Prototype dashboard learning/progress sections with continue-learning, selected levels, and recent scores.
+- [x] **PROGRESS-01** — Prototype overview and per-level progress with completion, scores, and empty-history fixtures.
+- [x] **PROGRESS-02** — Prototype activity/score history and administrator student-detail reading.
+- [x] **PROGRESS-03** — Prototype dashboard learning/progress sections with continue-learning, selected levels, and recent scores.
 
 ### 2. Backend implementation tasks
 
 - [ ] **PROGRESS-04** — Persist lesson views and explicit completion per student; repeating completion does not duplicate completed records.
-- [ ] **PROGRESS-05** — Record finalized exercise/exam activity from existing attempt results without duplicating source scores.
+- [ ] **PROGRESS-05** — Expose finalized exercise activity from persisted attempts while keeping the attempt as the source of score and completion.
+- [ ] **PROGRESS-14** — Expose exam attempt and completion activity from persisted exam attempts while keeping the attempt as the source of score and completion.
 - [ ] **PROGRESS-06** — Add overall/per-level completion and history queries with documented denominators and zero-content behavior.
 - [ ] **PROGRESS-07** — Add continue-learning/recent-content queries scoped to current visibility and selected levels.
 - [ ] **PROGRESS-08** — Add authorized manager queries for a student's progress, activity, and owned attempt review.
@@ -412,14 +430,17 @@ Screens: S03, A15; sections within G07/G12/G15/S01. PRD §14.
 
 ### 1. Prototype tasks
 
-- [ ] **RECOMMEND-01** — Prototype prerequisite guidance and its editor with incomplete/complete preparation states.
+- [x] **RECOMMEND-01** — Prototype prerequisite guidance and its editor with incomplete/complete preparation states.
 - [ ] **RECOMMEND-02** — Prototype recommended-next-content sections with fixture reasons and an empty state.
 
 ### 2. Backend implementation tasks
 
 - [ ] **RECOMMEND-03** — Persist lesson prerequisite links for lessons/exercises/exams; reject self-links, invalid targets, and cycles.
 - [ ] **RECOMMEND-04** — Add student-specific prerequisite completion queries; distinguish recommendation from configured access restriction.
-- [ ] **RECOMMEND-05** — Implement deterministic next-content selection from selected level, completion, configured relationships, recent activity, and exercise/exam performance; document ranking and exclude inaccessible targets.
+- [ ] **RECOMMEND-05** — Select accessible next lessons using selected levels, completion, and configured next-lesson relationships. Document the ranking and fallback.
+- [ ] **RECOMMEND-09** — Add recent activity as a documented tie-breaker for next-lesson ordering.
+- [ ] **RECOMMEND-10** — Add pending or recommended exercises based on the learner's saved exercise performance.
+- [ ] **RECOMMEND-11** — Use exam performance to surface accessible review content related to the exam.
 
 ### 3. Integration tasks
 
@@ -436,9 +457,9 @@ Screens: S13–S15, A31–A32; entry from G07. PRD §15.
 
 ### 1. Prototype tasks
 
-- [ ] **MESSAGE-01** — Prototype student inbox and teacher conversation using fixture messages.
-- [ ] **MESSAGE-02** — Prototype new-message/Ask Teacher composition with visible source-content context.
-- [ ] **MESSAGE-03** — Prototype teacher conversation list/filter and reply view.
+- [x] **MESSAGE-01** — Prototype student inbox and teacher conversation using fixture messages.
+- [x] **MESSAGE-02** — Prototype new-message/Ask Teacher composition with visible source-content context.
+- [x] **MESSAGE-03** — Prototype teacher conversation list/filter and reply view.
 
 ### 2. Backend implementation tasks
 
@@ -449,7 +470,9 @@ Screens: S13–S15, A31–A32; entry from G07. PRD §15.
 
 ### 3. Integration tasks
 
-- [ ] **MESSAGE-08** — Connect Ask Teacher entry/composition, inbox, conversation reading, and student follow-ups.
+- [ ] **MESSAGE-08** — Connect Ask Teacher entry and new-message submission to saved conversations with source context.
+- [ ] **MESSAGE-13** — Bind the student inbox to owned conversations and their latest replies.
+- [ ] **MESSAGE-14** — Bind the conversation detail and follow-up form to the owned thread.
 - [ ] **MESSAGE-09** — Connect teacher list/filter/reply actions and valid source-content links.
 - [ ] **MESSAGE-10** — Bind recent teacher replies on the dashboard to authorized conversations.
 
@@ -464,10 +487,10 @@ Screens: S16–S18, A33–A37 excluding optional daily rewards/leaderboards. PRD
 
 ### 1. Prototype tasks
 
-- [ ] **REWARD-01** — Prototype rewards overview/achievement detail and dashboard reward summary with fixtures.
-- [ ] **REWARD-02** — Prototype points-rule management list/form for earning and spending rules.
-- [ ] **REWARD-03** — Prototype achievement management and streak settings forms.
-- [ ] **REWARD-04** — Prototype points unlock confirmation/outcome including insufficient-balance feedback.
+- [x] **REWARD-01** — Prototype rewards overview/achievement detail and dashboard reward summary with fixtures.
+- [x] **REWARD-02** — Prototype points-rule management list/form for earning and spending rules.
+- [x] **REWARD-03** — Prototype achievement management and streak settings forms.
+- [x] **REWARD-04** — Prototype points unlock confirmation/outcome including insufficient-balance feedback.
 
 ### 2. Backend implementation tasks
 
@@ -497,15 +520,19 @@ Screens: G23, S18, premium requirement portion of S20, A38–A39. PRD §§17, 19
 ### 1. Prototype tasks
 
 - [ ] **ACCESS-01** — Prototype contextual access requirements for guest, level, prerequisite, points, and premium restrictions.
-- [ ] **ACCESS-02** — Prototype access-rule listing/editor with clear free/restricted classification and feature targets such as Ask Teacher.
+- [x] **ACCESS-02** — Prototype access-rule listing/editor with clear free/restricted classification and feature targets such as Ask Teacher.
 
 ### 2. Backend implementation tasks
 
 - [ ] **ACCESS-03** — Add access-rule/entitlement persistence and a policy contract for public, registered, level, prerequisite, points, and premium access.
 - [ ] **ACCESS-04** — Implement consistent guest/student/manager evaluation with explicit rule-combination semantics; deny access when required configuration is missing.
 - [ ] **ACCESS-05** — Implement authorized rule create/update and target validation for supported content and Ask Teacher.
-- [ ] **ACCESS-06** — Apply policies to level/lesson/resource/video reads and direct protected file delivery as each schema becomes available.
-- [ ] **ACCESS-07** — Apply policies to exercise/exam start, submission/results where applicable, and messaging creation; UI-only checks are insufficient.
+- [ ] **ACCESS-06** — Enforce access policies on level and lesson reads, including direct links and ancestor visibility.
+- [ ] **ACCESS-14** — Enforce access policies on resource reads and direct protected file delivery.
+- [ ] **ACCESS-15** — Enforce access policies on video listings and direct watch requests.
+- [ ] **ACCESS-07** — Enforce exercise policy and attempt ownership at start, submission, and result review.
+- [ ] **ACCESS-16** — Enforce exam policy and attempt ownership at start, submission, and result review.
+- [ ] **ACCESS-17** — Enforce configured Ask Teacher access on the message creation action.
 - [ ] **ACCESS-08** — Connect persisted points-unlock entitlements and premium entitlement lookups to policy decisions; no payment grants are invented.
 
 ### 3. Integration tasks
@@ -525,7 +552,7 @@ Screens: A01, A43. PRD §§19, 22–23.
 
 ### 1. Prototype tasks
 
-- [ ] **SETTINGS-01** — Prototype administration home with included management destinations and platform settings form.
+- [x] **SETTINGS-01** — Prototype administration home with included management destinations and platform settings form.
 
 ### 2. Backend implementation tasks
 
@@ -546,14 +573,19 @@ Screens: A44–A49; student drill-down A04. PRD §21. Included reports use actua
 
 ### 1. Prototype tasks
 
-- [ ] **ANALYTICS-01** — Prototype analytics overview plus acquisition/engagement report views with clearly labeled fixture metrics.
-- [ ] **ANALYTICS-02** — Prototype learning/communication reports and business-report unavailable state.
+- [x] **ANALYTICS-01** — Prototype analytics overview plus acquisition/engagement report views with clearly labeled fixture metrics.
+- [x] **ANALYTICS-02** — Prototype learning/communication reports and business-report unavailable state.
 
 ### 2. Backend implementation tasks
 
 - [ ] **ANALYTICS-03** — Document visitor/active-user/event definitions and add minimal deduplicated acquisition/activity recording consistent with those definitions.
 - [ ] **ANALYTICS-04** — Add acquisition aggregates for visitors, registrations, and active students over an explicit reporting period.
-- [ ] **ANALYTICS-05** — Record resource/video usage and aggregate learning engagement from lesson/exercise/exam/streak source data.
+- [ ] **ANALYTICS-05** — Record authorized resource opens and expose a period-scoped usage count.
+- [ ] **ANALYTICS-14** — Record video usage using an explicit playback signal and expose a period-scoped count.
+- [ ] **ANALYTICS-15** — Aggregate lesson opens and completions from existing activity.
+- [ ] **ANALYTICS-16** — Aggregate exercise starts, completions, and repeat attempts from attempt records.
+- [ ] **ANALYTICS-17** — Aggregate exam attempts and completions from exam activity.
+- [ ] **ANALYTICS-18** — Aggregate learning streak activity using the REWARD day-boundary rules.
 - [ ] **ANALYTICS-06** — Add learning aggregates for completion rates, scores, progress, and question-level difficulty with documented denominators.
 - [ ] **ANALYTICS-07** — Add communication aggregates for Ask Teacher requests, messages, and teacher response activity.
 - [ ] **ANALYTICS-08** — Add authorized report/overview queries with shared reporting-period validation and explicit unavailable business metrics.
@@ -569,13 +601,26 @@ Screens: A44–A49; student drill-down A04. PRD §21. Included reports use actua
 - [ ] **ANALYTICS-12** — Test aggregate denominators, empty periods, event deduplication, period boundaries, and active-student definitions.
 - [ ] **ANALYTICS-13** — Test report authorization, valid drill-down access, and unavailable business metrics when commercial sources are absent.
 
-## 19. MVP release verification — RELEASE
+## 19. Release verification — RELEASE
 
 PRD §§20, 22, 24. These tasks verify completed integrations; they do not add new features.
 
 ### 1. Prototype tasks
 
-- [ ] **RELEASE-01** — Audit included prototype navigation against inventory IDs; record missing destinations or states without implementing them in this task.
+- [x] **RELEASE-01** — Audit included prototype navigation against inventory IDs; record missing destinations or states without implementing them in this task.
+
+The earlier screen catalogue review covered 89 inventory IDs. The modules below cover the remaining S19–S21 and A40–A42 screens. The browser checks for the original catalogue are recorded in the [visual prototype review](VISUAL_PROTOTYPE.md).
+
+The following prototype tasks have partial coverage and remain open.
+
+- **BASE-01, BASE-04** need an isolated token fixture and a table with working pagination. The current table shows one sample page with disabled controls.
+- **AUTH-02, ACCESS-01** need destination-specific previews. Login offers a fixed dashboard link, and the access screen presents a shared set of examples.
+- **STRUCT-03, RECOMMEND-02** need dedicated empty states for a category with no lessons and a learner with no recommendations.
+- **LESSON-01, RES-03, EXAM-01, EXAM-02** still need lesson media and Arabic reading fixtures, file error feedback, distinct exam and correction downloads, or an untimed attempt preview, respectively.
+- **QUESTION-01–03, QUESTION-05–06, QUESTION-08** still need question-specific authoring or error states and a remove action on the question list. Matching and ordering use native selects for learners and text mapping in the shared editor.
+- **EXERCISE-03, EXAM-03** need histories scoped to the relevant exercise or exam. Both currently show the same mixed activity table.
+
+The broader keyboard, text zoom, reduced motion, and multilingual checks remain open under **BASE-13** and **RELEASE-08**.
 
 ### 2. Backend implementation tasks
 
@@ -593,17 +638,177 @@ PRD §§20, 22, 24. These tasks verify completed integrations; they do not add n
 - [ ] **RELEASE-07** — Verify lesson Ask Teacher → teacher reply and earned points → unlock → restricted content with no duplicate charges.
 - [ ] **RELEASE-08** — Audit included public/student/admin flows in Arabic, French, and English at mobile/desktop widths with keyboard, zoom, and reduced motion; record defects individually.
 - [ ] **RELEASE-09** — Run the full relevant automated suite and production asset build; report results and unresolved defects against PRD acceptance criteria.
+- [ ] **RELEASE-10** — Verify the configured paid offer through entitlement activation and access to its protected content after PAID integration.
+- [ ] **RELEASE-11** — Check navigation to S19–S21 and A40–A42 for the features enabled in the release. Record missing destinations or permission mismatches by screen ID.
 
-## Decision-gated commercial work
+## 20. Paid content and paid lessons — PAID
 
-These are requirement-resolution tasks, not permission to implement an unspecified commercial workflow. Once resolved, add separate prototype/backend/integration/test tasks with new IDs; preserve existing IDs.
+Screens S20 and the paid offer portion of A40. PRD §§17, 19, 21. ACCESS owns the entitlement check. SCOPE-01 defines how real paid access is granted.
+
+### 1. Prototype tasks
+
+- [ ] **PAID-01** — Prototype the S20 offer view with fixture terms and pending, granted, and unavailable access states.
+- [ ] **PAID-02** — Prototype the A40 paid offer editor with a linked content selector and validation feedback.
+
+### 2. Backend implementation tasks
+
+- [ ] **PAID-03** — Store offer title, price, currency, terms, publication state, and association to eligible content. Validate editor permissions and inputs.
+- [ ] **PAID-04** — Add an eligible-offer query for a restricted target that excludes unpublished and unrelated offers.
+- [ ] **PAID-05** — **Decision needed · SCOPE-01.** Implement the authorized fulfillment action that creates the student's ACCESS entitlement from a verified source. Replays reuse the grant.
+- [ ] **PAID-06** — **Decision needed · SCOPE-01.** Apply the agreed expiration or reversal behavior to a previously granted entitlement.
+- [ ] **PAID-07** — **Decision needed · SCOPE-03.** Record one paid conversion per verified fulfillment event for A49.
+
+### 3. Integration tasks
+
+- [ ] **PAID-08** — Connect the A40 paid offer editor to persisted offers and content associations.
+- [ ] **PAID-09** — Connect G23 to the applicable S20 offer and render its real terms and current access state.
+- [ ] **PAID-10** — **Decision needed · SCOPE-01.** Connect the agreed purchase or fulfillment entry point to S20 and route a student with confirmed access back to the protected content.
+- [ ] **PAID-11** — **Decision needed · SCOPE-03.** Connect the paid conversion count to the A49 reporting period.
+
+### 4. Testing tasks
+
+- [ ] **PAID-12** — Test offer validation and selection for unpublished, unrelated, and visible offers.
+- [ ] **PAID-13** — Test verified grant, duplicate fulfillment, expiration or reversal, and access isolation across accounts.
+- [ ] **PAID-14** — Test that a repeated fulfillment event counts as one conversion in the correct reporting period.
+
+## 21. Teacher-service promotion and leads — SERVICE
+
+Screens G01 and the teacher-service portion of A40, with results in A49. PRD §§2, 17, 21. Confirm the placement and lead action under SCOPE-02.
+
+### 1. Prototype tasks
+
+- [ ] **SERVICE-01** — Prototype a teacher-service promotion with fixture copy and a sample action within an existing discovery screen.
+- [ ] **SERVICE-02** — Prototype the A40 service editor with preview and publish states.
+
+### 2. Backend implementation tasks
+
+- [ ] **SERVICE-03** — Store service offer details and publication state. Permit authorized managers to create and update offers.
+- [ ] **SERVICE-04** — **Decision needed · SCOPE-02.** Implement the agreed lead action and its validation for an active offer.
+- [ ] **SERVICE-05** — **Decision needed · SCOPE-03.** Record the qualifying lead event and expose its deduplicated count by reporting period.
+
+### 3. Integration tasks
+
+- [ ] **SERVICE-06** — Connect the A40 service editor to real create, update, and publication actions.
+- [ ] **SERVICE-07** — **Decision needed · SCOPE-02.** Render the published promotion in the agreed placement and connect its lead action and outcome feedback.
+- [ ] **SERVICE-08** — **Decision needed · SCOPE-03.** Bind the lead count to A49.
+
+### 4. Testing tasks
+
+- [ ] **SERVICE-09** — Test manager authorization, publication visibility, and rejection of lead actions for inactive offers.
+- [ ] **SERVICE-10** — Test the agreed lead action and its deduplication and reporting behavior.
+
+## 22. Subscriptions — SUB
+
+Conditional. Screens S21 and A41, with results in A49. PRD §§17, 21. SCOPE-04 defines the lifecycle and how it affects ACCESS.
+
+### 1. Prototype tasks
+
+- [ ] **SUB-01** — Prototype S21 with fixture terms and active, inactive, and unavailable access states.
+- [ ] **SUB-02** — Prototype A41 with plan terms and eligible content selection.
+
+### 2. Backend implementation tasks
+
+- [ ] **SUB-03** — **Decision needed · SCOPE-04.** Persist plan terms, enabled state, and eligible content. Validate manager writes.
+- [ ] **SUB-04** — **Decision needed · SCOPE-04.** Map verified subscription state to an ACCESS entitlement and handle repeated lifecycle events safely.
+- [ ] **SUB-05** — **Decision needed · SCOPE-03 and SCOPE-04.** Record the agreed subscription conversion event once per qualifying activation.
+
+### 3. Integration tasks
+
+- [ ] **SUB-06** — Connect A41 to saved plans and eligible content associations.
+- [ ] **SUB-07** — Connect S21 to eligible plans, current status, and the agreed subscription entry point.
+- [ ] **SUB-08** — Connect subscription conversion reporting to A49 when event recording is active.
+
+### 4. Testing tasks
+
+- [ ] **SUB-09** — Test disabled plans, invalid content associations, and access transitions from verified lifecycle events.
+- [ ] **SUB-10** — Test repeat lifecycle delivery and conversion deduplication.
+
+## 23. Advertising and promotional rewards — ADS
+
+Conditional. Screen A42, point rule links in A34, configured learner placements, and results in A49. PRD §§16–17, 21.
+
+### 1. Prototype tasks
+
+- [ ] **ADS-01** — Prototype A42 with fixture placement settings, enabled state, and an optional points rule selector.
+- [ ] **ADS-02** — Prototype one learner placement with clear promotion labeling and optional reward outcome feedback.
+
+### 2. Backend implementation tasks
+
+- [ ] **ADS-03** — **Decision needed · SCOPE-05.** Persist and validate the supported placement settings and manager authorization.
+- [ ] **ADS-04** — **Decision needed · SCOPE-05.** Add a placement eligibility query for the agreed audience and destination.
+- [ ] **ADS-05** — **Decision needed · SCOPE-03 and SCOPE-05.** Record verified promotion engagement with a stable event identifier for reporting.
+- [ ] **ADS-06** — **Decision needed · SCOPE-05.** Pass a verified qualifying action to the existing points ledger with replay protection.
+
+### 3. Integration tasks
+
+- [ ] **ADS-07** — Connect A42 to saved settings and the supported points rule association.
+- [ ] **ADS-08** — Render an enabled promotion in the configured learner placement and show the confirmed reward outcome when applicable.
+- [ ] **ADS-09** — Bind the advertising engagement count to A49 when a verified event source is configured.
+
+### 4. Testing tasks
+
+- [ ] **ADS-10** — Test disabled placement, audience eligibility, and manager authorization.
+- [ ] **ADS-11** — Test rejection of forged actions and verify repeated events cannot duplicate credit or report counts.
+
+## 24. Daily rewards — DAILY
+
+Conditional. Daily reward action in S16 and settings in A37. PRD §16.
+
+### 1. Prototype tasks
+
+- [ ] **DAILY-01** — Prototype the S16 claim control with eligible, already claimed, and unavailable fixtures.
+- [ ] **DAILY-02** — Prototype the A37 daily reward settings section.
+
+### 2. Backend implementation tasks
+
+- [ ] **DAILY-03** — **Decision needed · SCOPE-06.** Persist the validated reward amount and enabled state under management authorization.
+- [ ] **DAILY-04** — **Decision needed · SCOPE-06.** Implement one atomic claim per eligible student and reward day using the REWARD ledger.
+
+### 3. Integration tasks
+
+- [ ] **DAILY-05** — Bind daily reward settings to A37 and show the claim control in S16 when enabled.
+- [ ] **DAILY-06** — Connect claim submission and refresh the resulting eligibility and point balance.
+
+### 4. Testing tasks
+
+- [ ] **DAILY-07** — Test the configured day boundary, disabled setting, and duplicate or concurrent claims.
+
+## 25. Leaderboards — RANK
+
+Conditional. Screens S19 and the leaderboard settings in A37. PRD §16.
+
+### 1. Prototype tasks
+
+- [ ] **RANK-01** — Prototype S19 standings with fixture ties, the student's position, and an empty state.
+- [ ] **RANK-02** — Prototype the A37 leaderboard settings section.
+
+### 2. Backend implementation tasks
+
+- [ ] **RANK-03** — **Decision needed · SCOPE-07.** Persist enabled leaderboard settings and validate the supported audience and period.
+- [ ] **RANK-04** — **Decision needed · SCOPE-07.** Query eligible standings and the viewer's position with deterministic ties and only the agreed public identity fields.
+
+### 3. Integration tasks
+
+- [ ] **RANK-05** — Connect leaderboard settings in A37 to saved configuration.
+- [ ] **RANK-06** — Bind S19 to standings and expose its navigation entry to eligible users when enabled.
+
+### 4. Testing tasks
+
+- [ ] **RANK-07** — Test disabled access, audience boundaries, ties, and the absence of private account details in standings.
+
+## Product decisions
+
+Record each decision before starting the dependent live tasks. Split any agreed provider-specific work into separate tasks once the integration contract is known.
 
 - [ ] **SCOPE-01** — Define paid-content/paid-lesson fulfillment: entitlement source, purchase process, provider if any, access duration, failure/reversal behavior, and administrative responsibility. Output: agreed scope for S20/A40 and an implementable entitlement-grant contract.
 - [ ] **SCOPE-02** — Define teacher-service promotion and lead capture: published offer information, student action, destination, and measurable lead event. Output: agreed scope for A40 and business conversion events.
 - [ ] **SCOPE-03** — Define acquisition/business measurement requirements, including consent/retention decisions where applicable and what constitutes paid conversion or service lead. Output: approved event definitions and bounded follow-up tasks for A45/A49.
 
-Subscription screens S21/A41, leaderboard S19, daily-reward portions of A37, and advertising configuration A42 remain conditional post-MVP scope. Do not generate implementation work for them until explicitly requested. General recovery/verification/account-deletion flows remain unspecified, as noted in the inventory.
+- [ ] **SCOPE-04** — Decide whether subscriptions are enabled. If enabled, specify the entitlement source, plan periods, lifecycle transitions, and access changes.
+- [ ] **SCOPE-05** — Define the supported promotion placement, source, qualifying action, and evidence required to award points or count engagement.
+- [ ] **SCOPE-06** — Confirm daily reward eligibility, day boundary, and allowed reward amounts.
+- [ ] **SCOPE-07** — Confirm leaderboard metric, reporting period, eligible audience, tie handling, and displayed student identity.
 
-## MVP completion boundary
+## Release completion
 
-The learning MVP is ready when its included feature tasks and relevant verification pass and each included PRD flow has real persistence, authorization, and usable feedback. Optional/decision-gated work must remain visibly unresolved. Passing this backlog's learning checks does not by itself satisfy the PRD's complete paid-content, teacher-service, or advertising business requirements.
+Use PRD §24 and the selected release scope to verify each required flow through its real entry point, with persisted data, correct permissions, and user feedback. Record the state of each conditional module and each unresolved decision in the release report. Add new task IDs for future question formats or video providers when their requirements are defined.

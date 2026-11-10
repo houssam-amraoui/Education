@@ -73,14 +73,21 @@ return [
     |--------------------------------------------------------------------------
     |
     | The application locale determines the default locale that will be used
-    | by Laravel's translation / localization methods. This option can be
-    | set to any locale for which you plan to have translation strings.
+    | by Laravel's translation / localization methods. Set it to one of the
+    | supported locale codes below. Unsupported defaults use
+    | the configured fallback, or English when the fallback is unsupported.
     |
     */
 
     'locale' => env('APP_LOCALE', 'en'),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+
+    'supported_locales' => [
+        'ar' => ['direction' => 'rtl'],
+        'fr' => ['direction' => 'ltr'],
+        'en' => ['direction' => 'ltr'],
+    ],
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 

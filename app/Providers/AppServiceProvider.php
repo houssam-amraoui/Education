@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\Locale;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +12,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app['config']->set([
+            'app.locale' => Locale::resolve($this->app->getLocale()),
+            'app.fallback_locale' => Locale::fallback(),
+        ]);
     }
 
     /**

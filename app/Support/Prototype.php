@@ -107,6 +107,11 @@ class Prototype
         return $screens;
     }
 
+    public static function routeName(string $id): string
+    {
+        return 'prototype.'.$id;
+    }
+
     public static function url(string $id, array $parameters = []): string
     {
         // Carry the student preview into shared browsing pages without a session.
@@ -115,6 +120,6 @@ class Prototype
             $parameters['preview'] = 'student';
         }
 
-        return route('prototype.'.$id, $parameters);
+        return route(self::routeName($id), $parameters);
     }
 }

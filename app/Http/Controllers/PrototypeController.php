@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Support\Prototype;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\View;
 
 class PrototypeController extends Controller
@@ -19,7 +20,9 @@ class PrototypeController extends Controller
         $breadcrumbs = [];
         $ancestor = $screen['parent'];
         while ($ancestor !== null) {
-            array_unshift($breadcrumbs, $screens[$ancestor]);
+            if (Route::has(Prototype::routeName($ancestor))) {
+                array_unshift($breadcrumbs, $screens[$ancestor]);
+            }
             $ancestor = $screens[$ancestor]['parent'];
         }
 
