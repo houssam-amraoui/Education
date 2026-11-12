@@ -59,6 +59,41 @@ class VisualPrototypeTest extends TestCase
         }
     }
 
+    public function test_login_preview_uses_known_return_destinations_and_defaults_to_the_dashboard(): void
+    {
+        $this->get('/exercises/passive-voice')->assertSee('/login?return=exercise', false);
+        $this->get('/exams/unit-one')->assertSee('/login?return=exam', false);
+
+        $this->get('/login?return=exercise')->assertSee('/exercises/passive-voice/attempt', false);
+        $this->get('/login?return=exam')->assertSee('/exams/unit-one/attempt', false);
+
+        foreach (['/login', '/login?return=unknown', '/login?return=https%3A%2F%2Fexample.test', '/login?return[]=exam'] as $url) {
+            $this->get($url)->assertOk()->assertSee('Explore sample dashboard');
+        }
+    }
+
+    public function test_component_fixture_paginates_sample_lessons_without_a_database(): void
+    {
+        config(['database.default' => 'prototype-database-is-forbidden', 'session.driver' => 'database']);
+
+        $this->get(route('prototype.primitives'))
+            ->assertOk()
+            ->assertSee('Showing 1–3 of 7')
+            ->assertSee('The passive voice')
+            ->assertDontSee('Gifts of youth');
+
+        $this->get(route('prototype.primitives', ['page' => 2]))
+            ->assertOk()
+            ->assertSee('Showing 4–6 of 7')
+            ->assertSee('Gifts of youth')
+            ->assertDontSee('The passive voice');
+
+        $this->get(route('prototype.primitives', ['page' => 99]))
+            ->assertOk()
+            ->assertSee('Showing 7–7 of 7')
+            ->assertSee('Expressing agreement');
+    }
+
     public function test_student_navigation_is_retained_on_shared_learning_pages(): void
     {
         $this->get('/dashboard')->assertSee('/lessons/passive-voice?preview=student', false);

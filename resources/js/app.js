@@ -2,27 +2,33 @@ const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 // Native dialogs contain focus, support Escape, and restore focus on close.
-let dialogTrigger;
+const dialogTriggers = new WeakMap();
 function openDialog(id, trigger) {
-    dialogTrigger = trigger;
-    $(id).showModal();
+    const dialog = document.getElementById(id);
+    dialogTriggers.set(dialog, trigger);
+    dialog.showModal();
 }
 $$("[data-open-directory]").forEach((button) =>
     button.addEventListener("click", (event) => {
         event.preventDefault();
-        openDialog("#screen-directory", button);
+        openDialog("screen-directory", button);
     }),
 );
 $$("[data-open-nav]").forEach((button) =>
     button.addEventListener("click", () =>
-        openDialog("#mobile-navigation", button),
+        openDialog("mobile-navigation", button),
+    ),
+);
+$$("[data-open-dialog]").forEach((button) =>
+    button.addEventListener("click", () =>
+        openDialog(button.dataset.openDialog, button),
     ),
 );
 $$("[data-close-dialog]").forEach((button) =>
     button.addEventListener("click", () => button.closest("dialog").close()),
 );
 $$("dialog").forEach((dialog) =>
-    dialog.addEventListener("close", () => dialogTrigger?.focus()),
+    dialog.addEventListener("close", () => dialogTriggers.get(dialog)?.focus()),
 );
 $("[data-directory-filter]")?.addEventListener("input", (event) => {
     const query = event.target.value.toLocaleLowerCase();
@@ -40,17 +46,28 @@ function feedback(container, message, tone = "success") {
 }
 $$("[data-simulate]").forEach((button) =>
     button.addEventListener("click", () => {
+        const container =
+            button.closest("form,article,section,.video-stage") || document;
+        if (button.hasAttribute("data-login-error")) {
+            $("[data-success-actions]", container).hidden = true;
+        }
         feedback(
-            button.closest("form,article,section,.video-stage") || document,
+            container,
             button.dataset.simulate,
             button.dataset.tone || "success",
         );
     }),
 );
 $$("[data-prototype-form]").forEach((form) => {
+    const loginError = $("[data-login-error]", form);
+    const actions = $("[data-success-actions]", form);
     form.noValidate = true;
     form.addEventListener("submit", (event) => {
         event.preventDefault();
+        if (loginError) {
+            actions.hidden = true;
+            $("[data-feedback]", form).hidden = true;
+        }
         $(".validation-summary", form)?.remove();
         $$("[aria-invalid]", form).forEach((field) => {
             field.removeAttribute("aria-invalid");
@@ -113,6 +130,7 @@ $$("[data-prototype-form]").forEach((form) => {
             button.textContent = "Previewing…";
             button.setAttribute("aria-busy", "true");
         }
+        if (loginError) loginError.disabled = true;
         window.setTimeout(() => {
             feedback(form, form.dataset.success);
             if (button) {
@@ -120,7 +138,7 @@ $$("[data-prototype-form]").forEach((form) => {
                 button.textContent = original;
                 button.removeAttribute("aria-busy");
             }
-            const actions = $("[data-success-actions]", form);
+            if (loginError) loginError.disabled = false;
             if (actions) actions.hidden = false;
         }, 350);
     });
@@ -258,4 +276,37 @@ $("[data-insufficient]")?.addEventListener("click", (event) => {
 
 $("[data-language]")?.addEventListener("change", (event) => {
     event.target.form.requestSubmit();
+});
+
+$("[data-live-errors]")?.focus();
+$$("[data-live-form]").forEach((form) => {
+    let pendingButton;
+    let label;
+
+    form.addEventListener("submit", (event) => {
+        if (pendingButton) {
+            event.preventDefault();
+            return;
+        }
+
+        pendingButton = event.submitter || $("[data-pending]", form);
+        if (!pendingButton) return;
+
+        label = pendingButton.textContent;
+        pendingButton.style.minInlineSize = `${pendingButton.offsetWidth}px`;
+        pendingButton.textContent = pendingButton.dataset.pending;
+        pendingButton.disabled = true;
+        pendingButton.setAttribute("aria-busy", "true");
+        form.setAttribute("aria-busy", "true");
+    });
+
+    window.addEventListener("pageshow", () => {
+        if (!pendingButton) return;
+        pendingButton.disabled = false;
+        pendingButton.removeAttribute("aria-busy");
+        pendingButton.style.removeProperty("min-inline-size");
+        pendingButton.textContent = label;
+        pendingButton = null;
+        form.removeAttribute("aria-busy");
+    });
 });

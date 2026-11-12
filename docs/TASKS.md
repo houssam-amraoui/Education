@@ -54,10 +54,10 @@ Screens: shared rules for all included screens; navigation entry points G01, S01
 
 ### 1. Prototype tasks
 
-- [ ] **BASE-01** — Define design-system color, typography, spacing, and breakpoint tokens in the existing styling setup; demonstrate their use in an isolated fixture view.
+- [x] **BASE-01** — Define design-system color, typography, spacing, and breakpoint tokens in the existing styling setup; demonstrate their use in an isolated fixture view.
 - [x] **BASE-02** — Prototype reusable button, link, badge, and feedback components with focus/disabled/loading variants.
 - [x] **BASE-03** — Prototype reusable labeled field, checkbox/radio group, and validation-summary components.
-- [ ] **BASE-04** — Prototype reusable card, paginated table, and modal/drawer primitives with keyboard interactions.
+- [x] **BASE-04** — Prototype reusable card, paginated table, and modal/drawer primitives with keyboard interactions.
 - [x] **BASE-05** — Prototype the public navigation shell with language selection and mobile menu.
 - [x] **BASE-06** — Prototype the student navigation shell with every included PRD destination reachable.
 - [x] **BASE-07** — Prototype the administration navigation shell with links to included management modules.
@@ -84,23 +84,23 @@ Screens: G21–G22, A02–A06. PRD §§3, 18–19. Do not add social login or un
 ### 1. Prototype tasks
 
 - [x] **AUTH-01** — Prototype registration with labeled fields, validation, and a simulated success state.
-- [ ] **AUTH-02** — Prototype login with validation, failed-login feedback, and return-destination behavior.
+- [x] **AUTH-02** — Prototype login with validation, failed-login feedback, and return-destination behavior.
 - [x] **AUTH-03** — Prototype the user list and reusable create/edit user form using fixtures.
 - [x] **AUTH-04** — Prototype the role list and reusable create/edit role form for the PRD roles.
 
 ### 2. Backend implementation tasks
 
-- [ ] **AUTH-05** — Implement student registration with validated unique identity, hashed password, and safe student-role assignment.
-- [ ] **AUTH-06** — Implement session login/logout with session regeneration, invalidation, and login throttling.
-- [ ] **AUTH-07** — Persist role membership and define management authorization; public requests cannot grant management roles.
-- [ ] **AUTH-08** — Implement authorized paginated user listing and validated account creation/update actions.
-- [ ] **AUTH-09** — Implement authorized role definition/update and membership assignment without allowing unauthorized privilege changes.
+- [x] **AUTH-05** — Implement student registration with validated unique identity, hashed password, and safe student-role assignment.
+- [x] **AUTH-06** — Implement session login/logout with session regeneration, invalidation, and login throttling.
+- [x] **AUTH-07** — Persist role membership and define management authorization; public requests cannot grant management roles.
+- [x] **AUTH-08** — Implement authorized paginated user listing and validated account creation/update actions.
+- [x] **AUTH-09** — Implement authorized role definition/update and membership assignment without allowing unauthorized privilege changes.
 
 ### 3. Integration tasks
 
-- [ ] **AUTH-10** — Connect registration/login/logout UI to real session behavior and safe intended redirects.
-- [ ] **AUTH-11** — Connect user management list/form to persisted accounts and role assignment.
-- [ ] **AUTH-12** — Connect role list/form to role management; display authorization and validation failures.
+- [x] **AUTH-10** — Connect registration/login/logout UI to real session behavior and safe intended redirects.
+- [x] **AUTH-11** — Connect user management list/form to persisted accounts and role assignment.
+- [x] **AUTH-12** — Connect role list/form to role management; display authorization and validation failures.
 
 ### 4. Testing tasks
 
@@ -613,8 +613,7 @@ The earlier screen catalogue review covered 89 inventory IDs. The modules below 
 
 The following prototype tasks have partial coverage and remain open.
 
-- **BASE-01, BASE-04** need an isolated token fixture and a table with working pagination. The current table shows one sample page with disabled controls.
-- **AUTH-02, ACCESS-01** need destination-specific previews. Login offers a fixed dashboard link, and the access screen presents a shared set of examples.
+- **ACCESS-01** needs destination-specific previews. The access screen presents a shared set of examples.
 - **STRUCT-03, RECOMMEND-02** need dedicated empty states for a category with no lessons and a learner with no recommendations.
 - **LESSON-01, RES-03, EXAM-01, EXAM-02** still need lesson media and Arabic reading fixtures, file error feedback, distinct exam and correction downloads, or an untimed attempt preview, respectively.
 - **QUESTION-01–03, QUESTION-05–06, QUESTION-08** still need question-specific authoring or error states and a remove action on the question list. Matching and ordering use native selects for learners and text mapping in the shared editor.

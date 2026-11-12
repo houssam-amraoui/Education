@@ -4,11 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Support\Prototype;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\View;
 
 class PrototypeController extends Controller
 {
+    public function primitives(): View
+    {
+        $lessons = collect([
+            ['The passive voice', 'Grammar', 15],
+            ['Reported speech', 'Grammar', 20],
+            ['Making suggestions', 'Functions', 10],
+            ['Gifts of youth', 'Reading', 18],
+            ['Writing an opinion paragraph', 'Writing', 25],
+            ['Words for personal qualities', 'Vocabulary', 12],
+            ['Expressing agreement', 'Functions', 14],
+        ]);
+
+        $perPage = 3;
+        $page = min(LengthAwarePaginator::resolveCurrentPage(), (int) ceil($lessons->count() / $perPage));
+        $paginator = new LengthAwarePaginator($lessons->forPage($page, $perPage), $lessons->count(), $perPage, $page, [
+            'path' => route('prototype.primitives'),
+        ]);
+
+        return view('prototype.fixtures.primitives', compact('paginator'));
+    }
+
     public function show(Request $request): View
     {
         $screens = Prototype::screens();

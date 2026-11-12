@@ -122,6 +122,35 @@ const fs = require("node:fs");
             /No account was created/,
         );
 
+        for (const [width, origin, destination] of [
+            [1440, "/exercises/passive-voice", "/exercises/passive-voice/attempt"],
+            [320, "/exams/unit-one", "/exams/unit-one/attempt"],
+        ]) {
+            await page.setViewportSize({ width, height: 1000 });
+            await page.goto(base + origin);
+            await page.getByRole("link", { name: "Preview sign in" }).click();
+            const submit = page.getByRole("button", { name: "Preview signing in" });
+            const failure = page.getByRole("button", { name: "Preview sign-in error" });
+            const feedback = page.locator("[data-feedback]");
+            const actions = page.locator("[data-success-actions]");
+            await submit.click();
+            assert(await page.locator(".validation-summary").isVisible());
+            await page.locator(".validation-summary a").first().click();
+            assert.equal(await page.locator(":focus").getAttribute("id"), "email");
+            await page.locator("#email").fill("sample@example.test");
+            await page.locator("#password").fill("sample-only");
+            await failure.click();
+            assert.match(await feedback.innerText(), /These details could not be matched/);
+            assert(await actions.isHidden());
+            await submit.click();
+            await actions.waitFor({ state: "visible" });
+            await failure.click();
+            assert(await actions.isHidden());
+            await submit.click();
+            await actions.getByRole("link").click();
+            await page.waitForURL(base + destination);
+        }
+
         await page.goto(base + "/exercises/passive-voice/attempt");
         await page.getByRole("button", { name: /Finish preview/ }).click();
         await page.waitForURL("**/exercises/passive-voice/results");
