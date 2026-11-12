@@ -40,6 +40,11 @@ class Lesson extends Model
         return $this->belongsToMany(Resource::class);
     }
 
+    public function videos(): BelongsToMany
+    {
+        return $this->belongsToMany(Video::class);
+    }
+
     #[Scope]
     protected function visibleToPublic(Builder $query): void
     {

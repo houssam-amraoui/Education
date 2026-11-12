@@ -14,7 +14,7 @@
                 ['Exercises', 'Practice what you have learned.', 'Grammar, vocabulary, and more', null],
                 ['Exams', 'Prepare with confidence.', 'Documents and interactive practice', null],
                 ['Resources', 'Keep useful study material close.', 'Guides and worksheets', route('library.resources.index', ['level_id' => $level->id])],
-                ['Videos', 'See the explanation in action.', 'Teacher-led lessons', null],
+                ['Videos', 'See the explanation in action.', 'Teacher-led lessons', route('library.videos.index', ['level_id' => $level->id])],
                 ['Topic index', 'Find a concept quickly.', 'Browse by topic', null],
             ] as [$title, $copy, $meta, $target])
                 <x-prototype.card>

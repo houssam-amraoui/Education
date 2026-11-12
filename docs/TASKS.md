@@ -235,14 +235,14 @@ Screens: G19–G20, A27–A28. PRD §11.
 
 ### 2. Backend implementation tasks
 
-- [ ] **VIDEO-03** — Add video metadata/source persistence, lesson relationships, and validated YouTube URL normalization; reject arbitrary iframe HTML.
-- [ ] **VIDEO-04** — Add authorized video create/update and publish/unpublish/archive/reorder actions.
-- [ ] **VIDEO-05** — Add visibility-scoped video listing/detail/search/filter queries.
+- [x] **VIDEO-03** — Add video metadata/source persistence, lesson relationships, and validated YouTube URL normalization; reject arbitrary iframe HTML.
+- [x] **VIDEO-04** — Add authorized video create/update and publish/unpublish/archive/reorder actions.
+- [x] **VIDEO-05** — Add visibility-scoped video listing/detail/search/filter queries.
 
 ### 3. Integration tasks
 
-- [ ] **VIDEO-06** — Bind learner video views and related links to authorized records and safe embeds.
-- [ ] **VIDEO-07** — Connect video management forms, lifecycle actions, and lesson video selection to real data.
+- [x] **VIDEO-06** — Bind learner video views and related links to authorized records and safe embeds.
+- [x] **VIDEO-07** — Connect video management forms, lifecycle actions, and lesson video selection to real data.
 
 ### 4. Testing tasks
 

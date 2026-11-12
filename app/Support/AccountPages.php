@@ -6,6 +6,7 @@ use App\Models\Level;
 use App\Models\Resource;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,8 @@ class AccountPages
         'admin.curriculum.lessons.relationships', 'admin.curriculum.lessons.preview',
         'library.resources.index', 'library.resources.show', 'library.resources.document', 'library.lessons.resources.document',
         'admin.library.resources.index', 'admin.library.resources.create', 'admin.library.resources.edit',
+        'library.videos.index', 'library.videos.show',
+        'admin.library.videos.index', 'admin.library.videos.create', 'admin.library.videos.edit',
     ];
 
     public static function html(Request $request): bool
@@ -91,11 +94,15 @@ class AccountPages
         if ($actor && Gate::allows('manage', Resource::class)) {
             $destinations['A25'] = route('admin.library.resources.index');
         }
+        if ($actor && Gate::allows('manage', Video::class)) {
+            $destinations['A27'] = route('admin.library.videos.index');
+        }
 
         $destinations['G01'] = route('curriculum.home');
         $destinations['G02'] = route('curriculum.paths');
         $destinations['G04'] = route('curriculum.units');
         $destinations['G16'] = route('library.resources.index');
+        $destinations['G19'] = route('library.videos.index');
         $destinations['A01'] = $destinations['A02'] ?? $destinations['A05'] ?? $destinations['A07'] ?? $destinations['G01'];
         $links = $data['links'] ?? [];
         $crumbs = $data['crumbs'] ?? (isset($data['parent']) ? [$data['parent']] : []);

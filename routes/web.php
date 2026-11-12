@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserRoleController;
+use App\Http\Controllers\Admin\VideoController;
 use App\Http\Controllers\Auth\AccountPageController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PrototypeController;
 use App\Http\Controllers\ResourceFileController;
 use App\Http\Controllers\ResourcePageController;
+use App\Http\Controllers\VideoPageController;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\StartPreviewSession;
 use App\Support\Ability;
@@ -105,6 +107,13 @@ Route::prefix('admin/library')->name('admin.library.')
         Route::put('resources/{resource}', [ResourceController::class, 'update'])->whereNumber('resource')->name('resources.update');
         Route::put('resources/{resource}/links', [ResourceController::class, 'links'])->whereNumber('resource')->name('resources.links');
         Route::patch('resources/{resource}/status', [ResourceController::class, 'status'])->whereNumber('resource')->name('resources.status');
+        Route::get('videos', [VideoController::class, 'index'])->name('videos.index');
+        Route::get('videos/create', [VideoController::class, 'create'])->name('videos.create');
+        Route::get('videos/{video}/edit', [VideoController::class, 'edit'])->whereNumber('video')->name('videos.edit');
+        Route::post('videos', [VideoController::class, 'store'])->name('videos.store');
+        Route::put('videos/{video}', [VideoController::class, 'update'])->whereNumber('video')->name('videos.update');
+        Route::patch('videos/{video}/status', [VideoController::class, 'status'])->whereNumber('video')->name('videos.status');
+        Route::patch('videos/{video}/position', [VideoController::class, 'reorder'])->whereNumber('video')->name('videos.reorder');
     });
 
 Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): void {
@@ -122,6 +131,8 @@ Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): voi
 });
 
 Route::middleware(SetLocale::class)->name('library.')->scopeBindings()->group(function (): void {
+    Route::get('/learn/videos', [VideoPageController::class, 'index'])->name('videos.index');
+    Route::get('/learn/videos/{video}', [VideoPageController::class, 'show'])->whereNumber('video')->name('videos.show');
     Route::get('/learn/resources', [ResourcePageController::class, 'index'])->name('resources.index');
     Route::get('/learn/resources/{resource}', [ResourcePageController::class, 'show'])->whereNumber('resource')->name('resources.show');
     Route::get('/learn/resources/{resource}/document', [ResourcePageController::class, 'document'])->whereNumber('resource')->name('resources.document');

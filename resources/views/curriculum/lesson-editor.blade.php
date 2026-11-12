@@ -32,7 +32,18 @@
                         <small>Save this lesson to attach resources.</small>
                     @endif
                 </div>
-                <x-prototype.field label="Embedded video URL" name="lesson-video" type="url" disabled help="Embedded videos are unavailable."/>
+                <div class="field">
+                    <label for="video_ids">Embedded videos</label>
+                    <input type="hidden" name="video_ids" value="">
+                    @php($videoIds = array_map('strval', array_filter((array) old('video_ids', $selectedVideos), 'is_scalar')))
+                    <select id="video_ids" name="video_ids[]" multiple size="3" aria-describedby="lesson-videos-help" @disabled($videos->isEmpty()) @if($errors->hasAny(['video_ids', 'video_ids.*'])) aria-invalid="true" @endif>
+                        @foreach($videos as $video)
+                            <option value="{{ $video->id }}" @selected(in_array((string) $video->id, $videoIds, true))>{{ $video->title }} · {{ ucfirst($video->status->value) }}</option>
+                        @endforeach
+                    </select>
+                    <small id="lesson-videos-help">{{ $videos->isEmpty() ? 'No videos are available to link.' : 'Only videos the learner can access appear in the lesson.' }}</small>
+                    @if($errors->hasAny(['video_ids', 'video_ids.*']))<small class="field-error">{{ $errors->first('video_ids') ?: $errors->first('video_ids.*') }}</small>@endif
+                </div>
             </x-prototype.card>
             <div class="actions">
                 <button class="button button-primary" data-pending="Saving…">Save lesson</button>

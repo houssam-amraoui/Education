@@ -9,6 +9,7 @@ use App\Models\Lesson;
 use App\Models\Level;
 use App\Models\Resource;
 use App\Models\Unit;
+use App\Models\Video;
 use App\Support\AccountPages;
 use App\Support\CurriculumStatus;
 use Illuminate\Database\Eloquent\Builder;
@@ -88,6 +89,11 @@ class CurriculumPageController extends Controller
 
     private function lessonPage(Category $category, Lesson $lesson, string $id, string $panel, string $view, array $data = []): View
     {
+        if ($id === 'A14') {
+            $data['videos'] = Video::ordered()->get(['id', 'title', 'status']);
+            $data['selectedVideos'] = $lesson->exists ? $lesson->videos()->pluck('videos.id')->all() : [];
+        }
+
         $category->loadMissing('unit.level');
         $links = $this->links($category);
         if ($lesson->exists) {

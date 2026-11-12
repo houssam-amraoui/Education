@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\Curriculum\ChangeCurriculumStatus;
 use App\Actions\Curriculum\ReorderCurriculum;
+use App\Actions\Lessons\SaveLesson;
 use App\Actions\Lessons\SaveNextLessons;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ChangeCurriculumStatusRequest;
@@ -20,18 +21,18 @@ use Illuminate\Http\Response;
 
 class LessonController extends Controller
 {
-    public function store(SaveLessonRequest $request, Category $category): JsonResponse|RedirectResponse
+    public function store(SaveLessonRequest $request, Category $category, SaveLesson $save): JsonResponse|RedirectResponse
     {
-        $lesson = $category->lessons()->create($request->validated());
+        $lesson = $save->handle($category, new Lesson, $request->safe()->only(['title', 'body']), $request->validated('video_ids'));
 
         return AccountPages::html($request)
             ? $this->backToList($category, 'Lesson created.')
             : response()->json($lesson, 201);
     }
 
-    public function update(SaveLessonRequest $request, Category $category, Lesson $lesson): JsonResponse|RedirectResponse
+    public function update(SaveLessonRequest $request, Category $category, Lesson $lesson, SaveLesson $save): JsonResponse|RedirectResponse
     {
-        $lesson->update($request->validated());
+        $lesson = $save->handle($category, $lesson, $request->safe()->only(['title', 'body']), $request->validated('video_ids'));
 
         return AccountPages::html($request)
             ? $this->backToList($category, 'Lesson updated.')

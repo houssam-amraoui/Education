@@ -24,6 +24,14 @@
                 <p dir="auto">{{ $lesson->title }}</p>
                 <small dir="auto">{{ $lesson->category->unit->title }}</small>
             </x-prototype.card>
+            @if($lesson->relationLoaded('videos') && $lesson->videos->isNotEmpty())
+                <x-prototype.card>
+                    <h3>Videos</h3>
+                    @foreach($lesson->videos as $video)
+                        <x-prototype.link :href="route('library.videos.show', $video)"><bdi>{{ $video->title }}</bdi></x-prototype.link>
+                    @endforeach
+                </x-prototype.card>
+            @endif
             @if($lesson->relationLoaded('resources') && $lesson->resources->isNotEmpty())
                 <x-prototype.card>
                     <h3>Documents and resources</h3>
