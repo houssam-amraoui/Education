@@ -13,7 +13,8 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 class AccountPages
 {
     private const DESTINATIONS = [
-        'account.home', 'admin.accounts.users.index', 'admin.accounts.users.create',
+        'account.home', 'account.profile.show', 'account.preferences.show',
+        'admin.accounts.users.index', 'admin.accounts.users.create',
         'admin.accounts.users.edit', 'admin.accounts.roles.index', 'admin.accounts.roles.create',
         'admin.accounts.roles.edit',
     ];
@@ -57,6 +58,10 @@ class AccountPages
         $destinations = $actor
             ? ['S01' => route('account.home')]
             : ['G21' => route('account.register.show'), 'G22' => route('account.login.show')];
+        if ($actor && Gate::allows('manageLearningProfile', $actor)) {
+            $destinations['S22'] = route('account.profile.show');
+            $destinations['S23'] = route('account.preferences.show');
+        }
         if ($actor && Gate::allows('viewAny', User::class)) {
             $destinations['A02'] = route('admin.accounts.users.index');
         }

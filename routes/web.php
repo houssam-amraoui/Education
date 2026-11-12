@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\Auth\AccountPageController;
+use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\LocaleController;
@@ -17,6 +18,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('account')->name('account.')->middleware(SetLocale::class)->group(function (): void {
     Route::get('/', [AccountPageController::class, 'home'])->middleware('auth:web')->name('home');
+    Route::get('profile', [ProfileController::class, 'show'])->middleware('auth:web')->name('profile.show');
+    Route::put('profile', [ProfileController::class, 'update'])->middleware('auth:web')->name('profile.update');
+    Route::get('preferences', [ProfileController::class, 'preferences'])->middleware('auth:web')->name('preferences.show');
+    Route::put('preferences', [ProfileController::class, 'updatePreferences'])->middleware('auth:web')->name('preferences.update');
     Route::post('locale', [AccountPageController::class, 'locale'])->name('locale');
     Route::middleware('guest:web')->group(function (): void {
         Route::get('register', [AccountPageController::class, 'register'])->name('register.show');

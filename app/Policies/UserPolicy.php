@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Collection;
 
 class UserPolicy
 {
+    public function manageLearningProfile(User $actor, User $user): bool
+    {
+        return $actor->is($user) && $actor->roles()->where('key', Role::STUDENT)->exists();
+    }
+
     public function viewAny(User $actor): bool
     {
         return $actor->hasAbility(Ability::EnterAdministration) && $actor->hasAbility(Ability::ManageUsers);

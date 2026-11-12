@@ -118,13 +118,13 @@ Screens: S02, S22–S23. PRD §§18, 22.
 
 ### 2. Backend implementation tasks
 
-- [ ] **PROFILE-03** — Implement validated self-profile updates; submitted IDs cannot modify another account.
+- [x] **PROFILE-03** — Implement validated self-profile updates; submitted IDs cannot modify another account.
 - [ ] **PROFILE-04** — Persist selected levels/goals with valid level relationships and no duplicate selections.
-- [ ] **PROFILE-05** — Persist supported language and learning preferences for the authenticated student.
+- [x] **PROFILE-05** — Persist supported language and learning preferences for the authenticated student.
 
 ### 3. Integration tasks
 
-- [ ] **PROFILE-06** — Bind profile/settings forms to the authenticated user's persisted data.
+- [x] **PROFILE-06** — Bind profile/settings forms to the authenticated user's persisted data.
 - [ ] **PROFILE-07** — Connect level selection from path discovery, settings, and dashboard; saved selections survive a new session.
 
 ### 4. Testing tasks

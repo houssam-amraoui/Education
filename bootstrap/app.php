@@ -29,5 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($exception->getStatusCode() === 403 && $request->routeIs('admin.accounts.*') && AccountPages::html($request)) {
                 return response(AccountPages::view('A01', 'restricted'), 403);
             }
+            if ($exception->getStatusCode() === 403 && $request->routeIs('account.profile.*', 'account.preferences.*') && AccountPages::html($request)) {
+                return response(AccountPages::view('S22', 'restricted'), 403);
+            }
         });
     })->create();
