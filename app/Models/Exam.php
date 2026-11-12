@@ -46,6 +46,11 @@ class Exam extends Model
         return $this->hasMany(Question::class);
     }
 
+    public function attempts(): HasMany
+    {
+        return $this->hasMany(ExamAttempt::class);
+    }
+
     public function examFile(): BelongsTo
     {
         return $this->belongsTo(StoredFile::class);

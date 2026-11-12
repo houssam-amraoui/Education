@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AccountLocaleRequest;
 use App\Support\AccountPages;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AccountPageController extends Controller
@@ -15,8 +16,13 @@ class AccountPageController extends Controller
         return AccountPages::view('G21', 'auth');
     }
 
-    public function login(): View
+    public function login(Request $request): View
     {
+        $destination = AccountPages::destination($request, $request->query('return_to'));
+        if ($destination !== null) {
+            $request->session()->put('url.intended', $destination);
+        }
+
         return AccountPages::view('G22', 'auth');
     }
 

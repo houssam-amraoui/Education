@@ -22,6 +22,8 @@ class AccountPages
         'admin.accounts.roles.edit',
         'curriculum.home', 'curriculum.paths', 'curriculum.level', 'curriculum.units',
         'curriculum.level.units', 'curriculum.unit', 'curriculum.category', 'curriculum.lesson',
+        'curriculum.exercises.instructions', 'curriculum.exercises.attempts.show',
+        'curriculum.exams.instructions', 'curriculum.exams.attempts.show',
         'admin.curriculum.levels.index', 'admin.curriculum.levels.create', 'admin.curriculum.levels.edit',
         'admin.curriculum.units.index', 'admin.curriculum.units.create', 'admin.curriculum.units.edit',
         'admin.curriculum.categories.index', 'admin.curriculum.categories.create', 'admin.curriculum.categories.edit',

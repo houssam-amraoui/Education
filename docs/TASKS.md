@@ -287,15 +287,13 @@ Blanks map each `___` marker to its slot in display order and require a configur
 - [x] **QUESTION-21** — Connect matching authoring to its validated definition.
 - [x] **QUESTION-22** — Connect blanks and short-answer authoring to explicit accepted-answer definitions.
 - [x] **QUESTION-23** — Connect ordering authoring to its validated definition.
-- [ ] **QUESTION-24** — Connect the shared learner question renderer and single-choice control to the attempt payload. Check that the response omits answer keys before submission.
-- [ ] **QUESTION-30** — Connect multiple-selection rendering and answer serialization to the learner renderer from QUESTION-24.
-- [ ] **QUESTION-31** — Connect true/false rendering and answer serialization to the learner renderer.
-- [ ] **QUESTION-32** — Connect matching rendering and pair-ID serialization to the learner renderer.
-- [ ] **QUESTION-33** — Connect fill-in-the-blanks rendering and slot answer serialization to the learner renderer.
-- [ ] **QUESTION-34** — Connect short-answer rendering and text answer serialization to the learner renderer.
-- [ ] **QUESTION-35** — Connect ordering rendering and ordered-ID serialization to the learner renderer.
-
-The shared learner controls and answer serializer are available. Live attempt wiring depends on owned exercise and exam attempt creation and submission (EXERCISE-07–08, EXAM-09–10).
+- [x] **QUESTION-24** — Connect the shared learner question renderer and single-choice control to the attempt payload. Check that the response omits answer keys before submission.
+- [x] **QUESTION-30** — Connect multiple-selection rendering and answer serialization to the learner renderer from QUESTION-24.
+- [x] **QUESTION-31** — Connect true/false rendering and answer serialization to the learner renderer.
+- [x] **QUESTION-32** — Connect matching rendering and pair-ID serialization to the learner renderer.
+- [x] **QUESTION-33** — Connect fill-in-the-blanks rendering and slot answer serialization to the learner renderer.
+- [x] **QUESTION-34** — Connect short-answer rendering and text answer serialization to the learner renderer.
+- [x] **QUESTION-35** — Connect ordering rendering and ordered-ID serialization to the learner renderer.
 
 ### 4. Testing tasks
 
@@ -315,16 +313,16 @@ Screens: G11–G12, S04–S06, A16–A17. PRD §8.
 
 - [x] **EXERCISE-01** — Prototype exercise catalog and instructions with prerequisites/access feedback.
 - [x] **EXERCISE-02** — Prototype exercise attempt submission using fixture questions and simulated results.
-- [ ] **EXERCISE-03** — Prototype results/corrections and attempt history with retry navigation.
+- [x] **EXERCISE-03** — Prototype results/corrections and attempt history with retry navigation.
 - [x] **EXERCISE-04** — Prototype exercise management list and create/edit instructions/placement form.
 
 ### 2. Backend implementation tasks
 
-- [ ] **EXERCISE-05** — Add exercise ownership schema and validated management create/update with learning placement and instructions.
-- [ ] **EXERCISE-06** — Add exercise publish/unpublish/archive/reorder actions and visibility-scoped catalog/detail queries.
-- [ ] **EXERCISE-07** — Add authenticated attempt creation with immutable question/scoring snapshots and per-student ownership.
-- [ ] **EXERCISE-08** — Implement atomic submit/grade/finalize with server-computed totals; duplicate submissions cannot create duplicate outcomes.
-- [ ] **EXERCISE-09** — Add owned attempt-history/result queries with saved answers, explanations, and a retry creating a separate attempt.
+- [x] **EXERCISE-05** — Add exercise ownership schema and validated management create/update with learning placement and instructions.
+- [x] **EXERCISE-06** — Add exercise publish/unpublish/archive/reorder actions and visibility-scoped catalog/detail queries.
+- [x] **EXERCISE-07** — Add authenticated attempt creation with immutable question/scoring snapshots and per-student ownership.
+- [x] **EXERCISE-08** — Implement atomic submit/grade/finalize with server-computed totals; duplicate submissions cannot create duplicate outcomes.
+- [x] **EXERCISE-09** — Add owned attempt-history/result queries with saved answers, explanations, and a retry creating a separate attempt.
 
 ### 3. Integration tasks
 
@@ -343,20 +341,20 @@ Screens: G13–G15, S07–S09, A20–A24. PRD §9.
 
 ### 1. Prototype tasks
 
-- [ ] **EXAM-01** — Prototype exam catalog and document-exam detail with exam/correction file links.
-- [ ] **EXAM-02** — Prototype interactive-exam instructions and timed/untimed attempt states.
-- [ ] **EXAM-03** — Prototype exam results/corrections and attempt history.
+- [x] **EXAM-01** — Prototype exam catalog and document-exam detail with exam/correction file links.
+- [x] **EXAM-02** — Prototype interactive-exam instructions and timed/untimed attempt states.
+- [x] **EXAM-03** — Prototype exam results/corrections and attempt history.
 - [x] **EXAM-04** — Prototype document-exam management list and create/edit form.
 - [x] **EXAM-05** — Prototype interactive-exam create/edit form with timing, availability, and question-management entry.
 
 ### 2. Backend implementation tasks
 
 - [x] **EXAM-06** — Add exam ownership/type schema, learning placement, availability, and authorized document-exam create/update with protected PDF references.
-- [ ] **EXAM-07** — Add validated interactive-exam create/update with timing configuration and question ownership.
+- [x] **EXAM-07** — Add validated interactive-exam create/update with timing configuration and question ownership.
 - [x] **EXAM-08** — Add exam publish/unpublish/archive/reorder actions and availability-aware catalog/detail queries.
-- [ ] **EXAM-09** — Add owned exam attempt creation with server start/deadline and immutable question/scoring snapshots.
-- [ ] **EXAM-10** — Implement atomic exam submission/grading with server-enforced deadline and duplicate-finalization protection; document expiration behavior.
-- [ ] **EXAM-11** — Add owned exam result/history queries returning stored answers, scores, corrections, and completion state.
+- [x] **EXAM-09** — Add owned exam attempt creation with server start/deadline and immutable question/scoring snapshots.
+- [x] **EXAM-10** — Implement atomic exam submission/grading with server-enforced deadline and duplicate-finalization protection; document expiration behavior.
+- [x] **EXAM-11** — Add owned exam result/history queries returning stored answers, scores, corrections, and completion state.
 
 ### 3. Integration tasks
 
@@ -621,9 +619,8 @@ The following prototype tasks have partial coverage and remain open.
 
 - **ACCESS-01** needs destination-specific previews. The access screen presents a shared set of examples.
 - **RECOMMEND-02** needs a dedicated empty state for a learner with no recommendations.
-- **RES-03, EXAM-01, EXAM-02** still need file error feedback, distinct exam and correction downloads, or an untimed attempt preview, respectively.
+- **RES-03** still needs file error feedback.
 - Matching and ordering use native selects for learners and text mapping in the shared editor.
-- **EXERCISE-03, EXAM-03** need histories scoped to the relevant exercise or exam. Both currently show the same mixed activity table.
 
 The broader keyboard, text zoom, reduced motion, and multilingual checks remain open under **BASE-13** and **RELEASE-08**.
 

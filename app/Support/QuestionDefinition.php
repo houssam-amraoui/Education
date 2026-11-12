@@ -7,6 +7,27 @@ use Illuminate\Validation\Validator;
 
 class QuestionDefinition
 {
+    public static function publicContent(QuestionType $type, array $content): array
+    {
+        $groups = match ($type) {
+            QuestionType::SingleChoice, QuestionType::MultipleSelection => ['options'],
+            QuestionType::Matching => ['left', 'right'],
+            QuestionType::FillInTheBlanks => ['slots'],
+            QuestionType::Ordering => ['items'],
+            QuestionType::TrueFalse, QuestionType::ShortAnswer => [],
+        };
+
+        $visible = [];
+        foreach ($groups as $group) {
+            $visible[$group] = array_map(
+                fn (array $item): array => ['id' => $item['id'], 'label' => $item['label']],
+                $content[$group],
+            );
+        }
+
+        return $visible;
+    }
+
     public static function rules(mixed $type): array
     {
         $type = is_string($type) ? QuestionType::tryFrom($type) : null;

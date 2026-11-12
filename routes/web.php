@@ -18,7 +18,9 @@ use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\CurriculumController;
+use App\Http\Controllers\ExamAttemptController;
 use App\Http\Controllers\ExamFileController;
+use App\Http\Controllers\ExerciseAttemptController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PrototypeController;
 use App\Http\Controllers\ResourceFileController;
@@ -186,6 +188,36 @@ Route::middleware(SetLocale::class)->name('library.')->scopeBindings()->group(fu
     Route::get('/learn/lessons/{lesson}/resources/{resource}/file/{disposition}', [ResourceFileController::class, 'lesson'])
         ->whereNumber(['lesson', 'resource'])->whereIn('disposition', ['inline', 'attachment'])->name('lessons.resources.file');
 });
+
+Route::middleware(SetLocale::class)->group(function (): void {
+    Route::get('learn/exercises/{exercise}', [ExerciseAttemptController::class, 'instructions'])
+        ->whereNumber('exercise')->name('curriculum.exercises.instructions');
+    Route::get('learn/exams/{exam}', [ExamAttemptController::class, 'instructions'])
+        ->whereNumber('exam')->name('curriculum.exams.instructions');
+});
+
+Route::prefix('learn/exercises/{exercise}/attempts')->name('curriculum.exercises.attempts.')
+    ->middleware([SetLocale::class, 'auth:web', 'cache.headers:private;no_store'])
+    ->scopeBindings()
+    ->where(['exercise' => '[0-9]+'])
+    ->group(function (): void {
+        Route::get('/', [ExerciseAttemptController::class, 'index'])->name('index');
+        Route::post('/', [ExerciseAttemptController::class, 'store'])->name('store');
+        Route::get('{attempt}', [ExerciseAttemptController::class, 'show'])->whereNumber('attempt')->name('show');
+        Route::post('{attempt}/submit', [ExerciseAttemptController::class, 'submit'])->whereNumber('attempt')->name('submit');
+        Route::post('{attempt}/retry', [ExerciseAttemptController::class, 'retry'])->whereNumber('attempt')->name('retry');
+    });
+
+Route::prefix('learn/exams/{exam}/attempts')->name('curriculum.exams.attempts.')
+    ->middleware([SetLocale::class, 'auth:web', 'cache.headers:private;no_store'])
+    ->scopeBindings()
+    ->where(['exam' => '[0-9]+'])
+    ->group(function (): void {
+        Route::post('/', [ExamAttemptController::class, 'store'])->name('store');
+        Route::get('/', [ExamAttemptController::class, 'index'])->name('index');
+        Route::get('{attempt}', [ExamAttemptController::class, 'show'])->whereNumber('attempt')->name('show');
+        Route::post('{attempt}/submit', [ExamAttemptController::class, 'submit'])->whereNumber('attempt')->name('submit');
+    });
 
 // Keep the fixture catalogue separate from live routes.
 if (app()->environment(['local', 'testing'])) {

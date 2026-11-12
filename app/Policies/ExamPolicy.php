@@ -3,11 +3,21 @@
 namespace App\Policies;
 
 use App\Models\Exam;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
 class ExamPolicy extends CurriculumPolicy
 {
+    public function attempt(User $user, Exam $exam): Response
+    {
+        if (! $user->roles()->where('key', Role::STUDENT)->exists()) {
+            return Response::deny();
+        }
+
+        return $exam->type === Exam::INTERACTIVE ? $this->view($user, $exam) : Response::denyAsNotFound();
+    }
+
     public function manageQuestions(User $user, Exam $exam): Response
     {
         if (! $this->manage($user)) {

@@ -5,7 +5,7 @@ namespace App\Queries;
 use App\Models\Exam;
 use App\Models\Question;
 use App\Models\User;
-use App\Support\QuestionType;
+use App\Support\QuestionDefinition;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -32,28 +32,7 @@ class VisibleQuestions
                 'prompt' => $question->prompt,
                 'points' => $question->points,
                 'position' => $question->position,
-                'content' => $this->publicContent($question),
+                'content' => QuestionDefinition::publicContent($question->type, $question->content),
             ]);
-    }
-
-    private function publicContent(Question $question): array
-    {
-        $groups = match ($question->type) {
-            QuestionType::SingleChoice, QuestionType::MultipleSelection => ['options'],
-            QuestionType::Matching => ['left', 'right'],
-            QuestionType::FillInTheBlanks => ['slots'],
-            QuestionType::Ordering => ['items'],
-            QuestionType::TrueFalse, QuestionType::ShortAnswer => [],
-        };
-
-        $content = [];
-        foreach ($groups as $group) {
-            $content[$group] = array_map(
-                fn (array $item): array => ['id' => $item['id'], 'label' => $item['label']],
-                $question->content[$group],
-            );
-        }
-
-        return $content;
     }
 }

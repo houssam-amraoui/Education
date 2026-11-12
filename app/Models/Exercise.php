@@ -33,6 +33,11 @@ class Exercise extends Model
         return $this->hasMany(Question::class);
     }
 
+    public function attempts(): HasMany
+    {
+        return $this->hasMany(ExerciseAttempt::class);
+    }
+
     #[Scope]
     protected function visibleToPublic(Builder $query): void
     {

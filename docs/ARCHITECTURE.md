@@ -80,7 +80,12 @@ Keep simple CRUD in resource controllers, using policies, Form Requests, and Elo
 
 Use deterministic PHP grading shared by exercise and exam actions. Put reusable read logic in Eloquent scopes or focused query classes for search, progress, recommendations, and reports. Build database search incrementally by content type. Rank recommendations from explicit next-lesson links, prerequisites, selected levels, completion, performance, and recent activity as those tasks land. Document ranking and progress/report denominators, including empty datasets, in the owning implementation tasks. Calculate reports from recorded activity with explicit event definitions, period boundaries, and deduplication.
 
+### Exam expiration (EXAM-10)
+
+The server captures start time in UTC at second precision. Timed attempts keep the deadline calculated from the duration at start. Untimed attempts have no deadline. Submission checks current exam access, then evaluates the server clock under the attempt lock. An eligible submission at or after the deadline records an expired outcome with the deadline as its expiration time. It stores no answers, points, or corrections. The first eligible late submission records the outcome, so an abandoned attempt has no finalized history entry. Completed or expired submissions replay their saved outcome while the student retains access. Exam publication, ancestry, availability, and student ownership continue to govern submission and review.
+
 ## Laravel folder organization
+
 
 ```text
 app/

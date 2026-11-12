@@ -13,7 +13,7 @@
         $errorId = 'answer-error-'.$id;
     @endphp
     <x-prototype.card>
-        <fieldset data-learner-question="{{ $id }}" data-answer-type="{{ $type->value }}" @if($questionErrors) aria-describedby="{{ $errorId }}" @endif>
+        <fieldset id="answer-{{ $id }}" tabindex="-1" data-learner-question="{{ $id }}" data-answer-type="{{ $type->value }}" aria-describedby="{{ $errorId }}">
             <legend dir="auto">{{ $number }}. {{ $question['prompt'] }}</legend>
             @switch($type)
                 @case(App\Support\QuestionType::SingleChoice)
@@ -80,9 +80,7 @@
                     @endforeach
                     @break
             @endswitch
-            @if ($questionErrors)
-                <p class="notice danger" id="{{ $errorId }}">{{ implode(' ', $questionErrors) }}</p>
-            @endif
+            <p class="notice danger" id="{{ $errorId }}" data-question-error @if(!$questionErrors) hidden @endif>{{ implode(' ', $questionErrors) }}</p>
         </fieldset>
     </x-prototype.card>
 @empty
