@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Lessons\RecordLessonProgress;
 use App\Http\Requests\CurriculumFiltersRequest;
 use App\Models\Category;
+use App\Models\Lesson;
+use App\Models\LessonProgress;
 use App\Models\Level;
 use App\Models\Unit;
 use App\Queries\VisibleLessonDetail;
 use App\Support\AccountPages;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class CurriculumController extends Controller
@@ -73,12 +78,17 @@ class CurriculumController extends Controller
         );
     }
 
-    public function lesson(string $level, string $unit, string $category, string $lesson, VisibleLessonDetail $detail): View
+    public function lesson(string $level, string $unit, string $category, string $lesson, VisibleLessonDetail $detail, RecordLessonProgress $progress): View
     {
         $record = Level::visibleToPublic()->findOrFail($level);
         $unitRecord = $record->units()->visibleToPublic()->findOrFail($unit);
         $categoryRecord = $unitRecord->categories()->visibleToPublic()->findOrFail($category);
         $lessonRecord = $detail->findOrFail($categoryRecord, (int) $lesson);
+        $student = request()->user();
+        $canTrack = $student && Gate::allows('manageLearningProfile', $student);
+        if ($canTrack && request()->isMethod('GET')) {
+            $progress->view($student, $lessonRecord);
+        }
         $lessonRecord->load([
             'resources' => fn ($resources) => $resources->visibleTo(request()->user())->matching([]),
             'videos' => fn ($videos) => $videos->visibleTo(request()->user())->ordered(),
@@ -89,7 +99,21 @@ class CurriculumController extends Controller
             'crumbs' => ['G01', 'G02', 'G03', 'G04', 'G05', 'G06'],
             'links' => $this->context($record, $unitRecord, $categoryRecord),
             'lesson' => $lessonRecord,
+            'canTrack' => $canTrack,
+            'completed' => $canTrack && LessonProgress::where('student_id', $student->id)
+                ->where('lesson_id', $lessonRecord->id)->whereNotNull('completed_at')->exists(),
         ], 'curriculum.lesson');
+    }
+
+    public function completeLesson(string $level, string $unit, string $category, string $lesson, RecordLessonProgress $progress): RedirectResponse
+    {
+        $record = Lesson::visibleToPublic()->whereRelation('category', 'id', $category)
+            ->whereRelation('category.unit', 'id', $unit)
+            ->whereRelation('category.unit.level', 'id', $level)->findOrFail($lesson);
+        $progress->complete(request()->user(), $record);
+
+        return redirect()->route('curriculum.lesson', [$level, $unit, $category, $lesson], 303)
+            ->with('status', 'Lesson marked as complete.');
     }
 
     private function levelsQuery(): Builder

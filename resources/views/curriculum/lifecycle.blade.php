@@ -2,7 +2,7 @@
     $archived = $record->status === App\Support\CurriculumStatus::Archived;
     $published = $record->status === App\Support\CurriculumStatus::Published;
     $parameters = match ($kind) {
-        'level', 'resource', 'video' => [$record],
+        'level', 'resource', 'video', 'topic' => [$record],
         'unit' => [$record->level_id, $record],
         'lesson' => [$record->category_id, $record],
         default => [$record->unit_id, $record],

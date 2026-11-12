@@ -84,6 +84,18 @@ Use deterministic PHP grading shared by exercise and exam actions. Put reusable 
 
 The server captures start time in UTC at second precision. Timed attempts keep the deadline calculated from the duration at start. Untimed attempts have no deadline. Submission checks current exam access, then evaluates the server clock under the attempt lock. An eligible submission at or after the deadline records an expired outcome with the deadline as its expiration time. It stores no answers, points, or corrections. The first eligible late submission records the outcome, so an abandoned attempt has no finalized history entry. Completed or expired submissions replay their saved outcome while the student retains access. Exam publication, ancestry, availability, and student ownership continue to govern submission and review.
 
+### Learning progress (PROGRESS-04–08, PROGRESS-14)
+
+Overall completion divides the student's explicitly completed, currently visible lessons by all currently visible lessons across published levels. Per-level completion uses the same counts within one level. Percentages round to the nearest whole number. A scope with no eligible lessons returns zero completed, zero total, and 0%. Exercises and exams contribute score and activity history independently.
+
+Activity is ordered newest first and filtered for current visibility before pagination. Each lesson contributes its latest view and first completion when present. Each submitted exercise attempt contributes its saved score. Each interactive exam attempt contributes a start and, when recorded, a completion with its saved score or an expiration without a score.
+
+The dashboard reads the student's saved level selections from `level_user` and uses published selections for resume and recent lessons. Continue learning returns the most recently viewed incomplete lesson. An empty selection returns no recent lessons or resume target.
+
+The dashboard and progress overview average percentages across visible submitted attempts with positive possible points. Each scored attempt counts equally. The weekly chart counts the recorded activity entries by UTC date from Monday through Sunday.
+
+The manager policy requires administration entry and user management permissions for student drill-down. Attempt review also applies the selected student's existing ownership, finalization, and current assessment access rules.
+
 ## Laravel folder organization
 
 

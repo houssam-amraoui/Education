@@ -1,9 +1,9 @@
 @extends('prototype.layout')
 
 @section('content')
-    @include('curriculum.heading', ['description' => $resource->title])
+    @include('curriculum.heading', ['description' => ($documentTitle ?? $resource->title)])
     <div class="document-toolbar row between wrap">
-        <x-prototype.link :href="$back">← Back to {{ $lesson ? 'lesson' : 'resource' }}</x-prototype.link>
+        <x-prototype.link :href="$back">← Back to {{ $backLabel ?? ($lesson ? 'lesson' : 'resource') }}</x-prototype.link>
         <span>PDF document</span>
         @if($available)
             <div class="actions">
@@ -15,7 +15,7 @@
     @if($available)
         <p class="notice info">If the PDF does not display, use Download PDF.</p>
         <article class="document-sheet reading">
-            <object data="{{ $inline }}" type="application/pdf" width="100%" height="700" aria-label="{{ $resource->title }}">
+            <object data="{{ $inline }}" type="application/pdf" width="100%" height="700" aria-label="{{ ($documentTitle ?? $resource->title) }}">
                 <p>Inline viewing is unavailable. <a href="{{ $download }}">Download the PDF</a>.</p>
             </object>
         </article>

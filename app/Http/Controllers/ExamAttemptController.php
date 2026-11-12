@@ -17,11 +17,6 @@ use Illuminate\View\View;
 
 class ExamAttemptController extends Controller
 {
-    public function instructions(Exam $exam): View
-    {
-        return AttemptPages::instructions($exam);
-    }
-
     public function store(Request $request, Exam $exam, StartExamAttempt $start): JsonResponse|RedirectResponse
     {
         $attempt = $start->handle($request->user(), $exam);
@@ -40,17 +35,37 @@ class ExamAttemptController extends Controller
         return response()->json($submit->handle($request->user(), $attempt, $request->validated('answers'))->summary());
     }
 
-    public function index(Request $request, Exam $exam, ExamAttemptHistory $history): JsonResponse
+    public function index(Request $request, Exam $exam, ExamAttemptHistory $history): JsonResponse|View
     {
-        return response()->json($history->paginate($request->user(), $exam));
+        $records = $history->paginate($request->user(), $exam);
+        if (! AccountPages::html($request)) {
+            return response()->json($records);
+        }
+
+        return AccountPages::view('S09', 'history', compact('exam', 'records') + $this->reviewNavigation($exam), 'exams.history');
     }
 
     public function show(Request $request, Exam $exam, ExamAttempt $attempt, ExamAttemptHistory $history): JsonResponse|View
     {
         if (AccountPages::html($request)) {
-            return AttemptPages::show($exam, $attempt);
+            if ($attempt->submitted_at === null && $attempt->expired_at === null) {
+                return AttemptPages::show($exam, $attempt);
+            }
+
+            $result = $history->result($request->user(), $attempt);
+
+            return AccountPages::view('S08', 'results', compact('exam', 'result') + $this->reviewNavigation($exam), 'exams.result');
         }
 
         return response()->json($history->result($request->user(), $attempt));
+    }
+
+    private function reviewNavigation(Exam $exam): array
+    {
+        return [
+            'description' => $exam->title,
+            'crumbs' => ['G13', 'G15'],
+            'links' => ['G15' => ['url' => route('curriculum.exams.instructions', $exam), 'title' => $exam->title]],
+        ];
     }
 }

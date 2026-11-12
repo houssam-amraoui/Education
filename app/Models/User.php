@@ -21,6 +21,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class);
     }
 
+    public function selectedLevels(): BelongsToMany
+    {
+        return $this->belongsToMany(Level::class);
+    }
+
     public function isAdministrator(): bool
     {
         return $this->roles()->where('key', Role::ADMINISTRATOR)->exists();

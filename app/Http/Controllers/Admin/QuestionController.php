@@ -75,12 +75,22 @@ class QuestionController extends Controller
         $listId = $exam ? 'A23' : 'A18';
         $prefix = $this->prefix($owner);
 
+        $crumbs = [$ownerId];
+        $links = [$listId => ['url' => route($prefix.'.index', $owner)]];
+        if ($exam) {
+            $crumbs[] = 'A22';
+            $links['A22'] = ['url' => route('admin.curriculum.exams.edit', $owner), 'title' => $owner->title];
+        }
+        if ($panel !== 'list') {
+            $crumbs[] = $listId;
+        }
+
         return AccountPages::view($panel === 'list' ? $listId : ($exam ? 'A24' : 'A19'), $panel, $data + [
             'owner' => $owner,
             'prefix' => $prefix,
             'description' => $owner->title,
-            'crumbs' => $panel === 'list' ? [$ownerId] : [$ownerId, $listId],
-            'links' => [$listId => ['url' => route($prefix.'.index', $owner)]],
+            'crumbs' => $crumbs,
+            'links' => $links,
         ], 'questions.'.$panel);
     }
 

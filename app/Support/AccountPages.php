@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Level;
 use App\Models\Resource;
 use App\Models\Role;
+use App\Models\Topic;
 use App\Models\User;
 use App\Models\Video;
 use Illuminate\Http\Request;
@@ -17,25 +18,33 @@ class AccountPages
 {
     private const DESTINATIONS = [
         'account.home', 'account.profile.show', 'account.preferences.show',
+        'account.learning-goals.show', 'account.progress.show', 'account.progress.level', 'account.progress.history',
         'admin.accounts.users.index', 'admin.accounts.users.create',
+        'admin.accounts.users.progress', 'admin.accounts.users.progress.review',
         'admin.accounts.users.edit', 'admin.accounts.roles.index', 'admin.accounts.roles.create',
         'admin.accounts.roles.edit',
         'curriculum.home', 'curriculum.paths', 'curriculum.level', 'curriculum.units',
+        'curriculum.search', 'curriculum.topics.index', 'curriculum.topics.show',
         'curriculum.level.units', 'curriculum.unit', 'curriculum.category', 'curriculum.lesson',
-        'curriculum.exercises.instructions', 'curriculum.exercises.attempts.show',
-        'curriculum.exams.instructions', 'curriculum.exams.attempts.show',
+        'curriculum.exercises.index', 'curriculum.exercises.instructions', 'curriculum.exercises.attempts.show',
+        'curriculum.exercises.attempts.index',
+        'curriculum.exams.index', 'curriculum.exams.instructions', 'curriculum.exams.document',
+        'curriculum.exams.attempts.show', 'curriculum.exams.attempts.index',
         'admin.curriculum.levels.index', 'admin.curriculum.levels.create', 'admin.curriculum.levels.edit',
         'admin.curriculum.units.index', 'admin.curriculum.units.create', 'admin.curriculum.units.edit',
         'admin.curriculum.categories.index', 'admin.curriculum.categories.create', 'admin.curriculum.categories.edit',
         'admin.curriculum.lessons.index', 'admin.curriculum.lessons.create', 'admin.curriculum.lessons.edit',
         'admin.curriculum.lessons.relationships', 'admin.curriculum.lessons.preview',
+        'admin.curriculum.exercises.index', 'admin.curriculum.exercises.create', 'admin.curriculum.exercises.edit',
         'admin.curriculum.exercises.questions.owners', 'admin.curriculum.exercises.questions.index',
         'admin.curriculum.exercises.questions.create', 'admin.curriculum.exercises.questions.edit',
+        'admin.curriculum.exams.index', 'admin.curriculum.exams.create', 'admin.curriculum.exams.edit',
         'admin.curriculum.exams.questions.owners', 'admin.curriculum.exams.questions.index',
         'admin.curriculum.exams.questions.create', 'admin.curriculum.exams.questions.edit',
         'library.resources.index', 'library.resources.show', 'library.resources.document', 'library.lessons.resources.document',
         'admin.library.resources.index', 'admin.library.resources.create', 'admin.library.resources.edit',
         'library.videos.index', 'library.videos.show',
+        'admin.library.topics.index', 'admin.library.topics.create', 'admin.library.topics.edit', 'admin.library.topics.relationships',
         'admin.library.videos.index', 'admin.library.videos.create', 'admin.library.videos.edit',
     ];
 
@@ -81,6 +90,9 @@ class AccountPages
         if ($actor && Gate::allows('manageLearningProfile', $actor)) {
             $destinations['S22'] = route('account.profile.show');
             $destinations['S23'] = route('account.preferences.show');
+            $destinations['S02'] = route('account.learning-goals.show');
+            $destinations['S10'] = route('account.progress.show');
+            $destinations['S12'] = route('account.progress.history');
         }
         if ($actor && Gate::allows('viewAny', User::class)) {
             $destinations['A02'] = route('admin.accounts.users.index');
@@ -95,8 +107,8 @@ class AccountPages
                 'A09' => route('admin.curriculum.units.index'),
                 'A11' => route('admin.curriculum.categories.index'),
                 'A13' => route('admin.curriculum.lessons.index'),
-                'A16' => route('admin.curriculum.exercises.questions.owners'),
-                'A20' => route('admin.curriculum.exams.questions.owners'),
+                'A16' => route('admin.curriculum.exercises.index'),
+                'A20' => route('admin.curriculum.exams.index'),
             ];
         }
         if ($actor && Gate::allows('manage', Resource::class)) {
@@ -106,9 +118,17 @@ class AccountPages
             $destinations['A27'] = route('admin.library.videos.index');
         }
 
+        if ($actor && Gate::allows('manage', Topic::class)) {
+            $destinations['A29'] = route('admin.library.topics.index');
+        }
+
+        $destinations['G08'] = route('curriculum.search');
+        $destinations['G09'] = route('curriculum.topics.index');
         $destinations['G01'] = route('curriculum.home');
         $destinations['G02'] = route('curriculum.paths');
         $destinations['G04'] = route('curriculum.units');
+        $destinations['G11'] = route('curriculum.exercises.index');
+        $destinations['G13'] = route('curriculum.exams.index');
         $destinations['G16'] = route('library.resources.index');
         $destinations['G19'] = route('library.videos.index');
         $destinations['A01'] = $destinations['A02'] ?? $destinations['A05'] ?? $destinations['A07'] ?? $destinations['G01'];

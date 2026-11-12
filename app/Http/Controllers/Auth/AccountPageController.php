@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AccountLocaleRequest;
+use App\Queries\ContinueLearning;
+use App\Queries\StudentProgress;
 use App\Support\AccountPages;
+use App\Support\ProgressPages;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class AccountPageController extends Controller
@@ -26,9 +30,27 @@ class AccountPageController extends Controller
         return AccountPages::view('G22', 'auth');
     }
 
-    public function home(): View
+    public function home(Request $request, StudentProgress $progress, ContinueLearning $learning): View
     {
-        return AccountPages::view('S01', 'home');
+        $student = $request->user();
+        if (Gate::denies('manageLearningProfile', $student)) {
+            return AccountPages::view('S01', 'home');
+        }
+
+        $levels = $student->selectedLevels()->visibleToPublic()->ordered()->get();
+        $selected = $levels->modelKeys();
+
+        return AccountPages::view('S01', 'dashboard', [
+            'student' => $student,
+            'completion' => $progress->completion($student),
+            'stats' => $progress->assessmentStats($student),
+            'paths' => $levels->map(fn ($level): array => [
+                'level' => $level, 'completion' => $progress->completion($student, $level->id),
+            ]),
+            'resume' => $learning->resume($student, $selected),
+            'recent' => $learning->recentLessons($student, $selected),
+            'history' => ProgressPages::activity($progress->history($student, perPage: 5, scoresOnly: true), $student),
+        ], 'progress.dashboard');
     }
 
     public function locale(AccountLocaleRequest $request): RedirectResponse

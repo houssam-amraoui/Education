@@ -18,6 +18,8 @@ class Exam extends Model
 
     public const INTERACTIVE = 'interactive';
 
+    public const TYPES = [self::DOCUMENT, self::INTERACTIVE];
+
     public const ACCESS = ['public', 'registered'];
 
     protected $fillable = ['unit_id', 'type', 'title', 'instructions', 'access', 'available_from', 'available_until', 'duration_minutes'];

@@ -197,6 +197,85 @@ class ExamBackendTest extends TestCase
         $this->interactiveExam($unit, ['position' => 1]);
     }
 
+    public function test_document_exam_browser_forms_and_viewer_use_the_persisted_files(): void
+    {
+        $this->withoutVite();
+        $disk = Storage::fake(StoredFile::DISK);
+        $unit = $this->unit();
+        $html = ['Accept' => 'text/html'];
+        $index = route('admin.curriculum.exams.index');
+        $create = route('admin.curriculum.exams.create', Exam::DOCUMENT);
+        $store = route('admin.curriculum.exams.store');
+
+        $this->get($index)->assertRedirect(route('account.login.show'));
+        $this->actingAs(User::factory()->create())->get($create)->assertForbidden();
+        $this->signInAsTeacher();
+        $this->get($index)->assertOk()->assertSee('No exams yet')->assertSee($create);
+        $this->get($create)->assertOk()->assertSee('multipart/form-data')->assertSee('Correction document');
+        $data = ['unit_id' => $unit->id, 'type' => Exam::DOCUMENT, 'title' => 'Published paper', 'access' => 'registered'];
+        $this->from($create)->post($store, $data, $html)->assertRedirect($create)->assertSessionHasErrors(['exam_file', 'correction_file']);
+        $created = $this->post($store, $data + ['exam_file' => $this->pdf(), 'correction_file' => $this->pdf()], $html)->assertStatus(303);
+        $exam = Exam::sole();
+        $edit = route('admin.curriculum.exams.edit', $exam);
+        $created->assertRedirect($edit);
+        $this->get($edit)->assertOk()->assertSee('PDF on file');
+        $this->patch(route('admin.curriculum.exams.status', [$unit, $exam]), ['status' => 'published'], $html)
+            ->assertRedirect($index);
+
+        $detail = route('curriculum.exams.instructions', $exam);
+        $catalogue = route('curriculum.exams.index', ['level_id' => $unit->level_id, 'type' => 'document']);
+        $paper = route('curriculum.exams.document', [$exam, 'paper']);
+        $correction = route('curriculum.exams.document', [$exam, 'correction']);
+        $this->get($catalogue)->assertOk()->assertSee($detail);
+        $this->get($detail)->assertOk()->assertSee($paper)->assertSee($correction);
+        $this->get($paper)->assertOk()->assertSee(route('curriculum.exams.file', [$exam, 'paper', 'inline']));
+        $this->get($correction)->assertOk()->assertSee(route('curriculum.exams.file', [$exam, 'correction', 'attachment']));
+        $disk->delete($exam->correctionFile->path);
+        $this->get($correction)->assertOk()->assertSee('This file is currently unavailable.');
+        $this->get($detail)->assertOk()->assertSee('File unavailable')->assertDontSee($correction);
+
+        auth()->logout();
+        $this->get($catalogue)->assertOk()->assertDontSee($detail);
+        $this->get($detail)->assertNotFound();
+        $this->get($paper)->assertNotFound();
+    }
+
+    public function test_interactive_exam_editor_saves_timing_and_links_to_question_authoring(): void
+    {
+        $this->withoutVite();
+        $this->signInAsTeacher();
+        $html = ['Accept' => 'text/html'];
+        $create = route('admin.curriculum.exams.create', Exam::INTERACTIVE);
+        $store = route('admin.curriculum.exams.store');
+        $data = [
+            'unit_id' => $this->unit()->id,
+            'type' => Exam::INTERACTIVE,
+            'title' => 'Scheduled exam',
+            'instructions' => 'Answer each question.',
+            'timing_mode' => 'timed',
+            'available_from' => '2026-11-12T09:00',
+        ];
+        $this->get($create)->assertOk()->assertSee('Duration (minutes)')->assertSee('Available from (UTC)');
+        $this->from($create)->post($store, $data, $html)->assertRedirect($create)->assertSessionHasErrors('duration_minutes');
+        $this->from($create)->post($store, $data + ['duration_minutes' => 12, 'available_until' => '2026-11-12T08:59:59'], $html)
+            ->assertRedirect($create)->assertSessionHasErrors('available_until');
+        $created = $this->post($store, $data + ['duration_minutes' => 12, 'available_until' => '2026-11-12T10:00:45'], $html)
+            ->assertStatus(303);
+        $exam = Exam::sole();
+        $edit = route('admin.curriculum.exams.edit', $exam);
+        $questions = route('admin.curriculum.exams.questions.index', $exam);
+        $created->assertRedirect($edit);
+        $this->assertSame(12, $exam->duration_minutes);
+        $this->assertSame('2026-11-12 09:00:00', $exam->available_from->toDateTimeString());
+        $this->assertSame('2026-11-12 10:00:45', $exam->available_until->toDateTimeString());
+        $this->get($edit)->assertOk()->assertSee($questions)->assertSee('2026-11-12T10:00:45');
+        $this->get($questions)->assertOk()->assertSee($edit);
+        $this->put(route('admin.curriculum.exams.update', $exam), ['timing_mode' => 'untimed', 'duration_minutes' => 12] + $data, $html)
+            ->assertStatus(303)->assertRedirect($edit);
+        $this->assertNull($exam->refresh()->duration_minutes);
+        $this->assertNull($exam->available_until);
+    }
+
     private function interactiveExam(Unit $unit, array $attributes = []): Exam
     {
         $exam = $unit->exams()->make([

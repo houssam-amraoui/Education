@@ -43,6 +43,10 @@ class LearnerQuestionPagesTest extends TestCase
 
         $student = $this->student();
         $this->actingAs($student)->get($instructions)->assertOk()->assertSee('Start '.($exam ? 'exam' : 'exercise'));
+        $history = route($prefix.'.attempts.index', $assessment);
+        $this->get($history, $headers)->assertOk()->assertSee($exam
+            ? 'Finalized attempts for this exam will appear here.'
+            : 'Completed attempts and scores will appear here.');
         $started = $this->post($start, [], $headers)->assertStatus(303);
         $attempt = $assessment->attempts()->sole();
         $item = $attempt->items()->sole();
@@ -66,8 +70,19 @@ class LearnerQuestionPagesTest extends TestCase
             ->assertUnprocessable()->assertJsonValidationErrors('answers.'.$item->id);
         $this->postJson($submit, ['answers' => [$item->id => 'two']])
             ->assertOk()->assertJsonPath('awarded_points', 3);
-        $this->get($show, $headers)->assertOk()->assertSee('Completed attempt')->assertSee('Your score')
-            ->assertDontSee('data-learner-attempt')->assertDontSee('Private correction explanation');
+        $completed = $this->get($show, $headers)->assertOk()->assertSee('Completed attempt')->assertSee('Your score')
+            ->assertDontSee('data-learner-attempt');
+        $completed->assertSee('Private correction explanation')->assertSee('Correct answer:')
+            ->assertSee($history)->assertSee('Try again');
+        $this->get($history, $headers)->assertOk()->assertSee('Review attempt 1')->assertSee($show);
+        $retryUrl = $exam ? $start : route($prefix.'.attempts.retry', [$assessment, $attempt]);
+        $this->post($retryUrl, [], $headers)->assertStatus(303);
+        $retry = $assessment->attempts()->latest('id')->firstOrFail();
+        $this->assertNotSame($attempt->id, $retry->id);
+        $this->get(route($prefix.'.attempts.show', [$assessment, $retry]), $headers)
+            ->assertSee('Edited after start')->assertDontSee('Private correction explanation');
+        $this->actingAs($this->student())->get($history, $headers)->assertDontSee('Review attempt 1');
+        $this->actingAs($student);
         $assessment->forceFill(['status' => 'draft'])->save();
         $this->get($show, $headers)->assertNotFound();
     }
@@ -87,6 +102,8 @@ class LearnerQuestionPagesTest extends TestCase
             ->assertOk()->assertJsonPath('status', 'expired');
         $this->get(route('curriculum.exams.attempts.show', [$exam, $attempt]), ['Accept' => 'text/html'])
             ->assertOk()->assertSee('This exam attempt has expired.')->assertDontSee('A statement');
+        $this->get(route('curriculum.exams.attempts.index', $exam), ['Accept' => 'text/html'])
+            ->assertOk()->assertSee('Expired')->assertSee('Review attempt 1');
     }
 
     public static function assessments(): array

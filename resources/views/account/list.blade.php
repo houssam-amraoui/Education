@@ -50,6 +50,11 @@
                 @else
                     <span class="muted">Read only</span>
                 @endcan
+                @if($users && $record->roles->contains('key', App\Models\Role::STUDENT))
+                    @can('viewStudentProgress', $record)
+                        <a class="table-action" href="{{ route('admin.accounts.users.progress', $record) }}">Activity <span class="sr-only">{{ $record->name }}</span></a>
+                    @endcan
+                @endif
             </td>
         </tr>
     @endforeach

@@ -26,6 +26,7 @@ class AttemptPages
             'questionCount' => $assessment->questions()->count(),
             'canStart' => Gate::allows('attempt', $assessment),
             'startUrl' => route(self::prefix($exam).'.attempts.store', $assessment),
+            'crumbs' => $exam ? ['G13'] : ['G11'],
         ], 'attempts.instructions');
     }
 
@@ -43,6 +44,7 @@ class AttemptPages
             'description' => $exam ? 'Interactive exam' : 'Practice exercise',
             'headingBadge' => $assessment->unit->level->title,
             'parent' => $instructions,
+            'crumbs' => $exam ? ['G13', $instructions] : ['G11', $instructions],
             'links' => [$instructions => ['url' => route($prefix.'.instructions', $assessment), 'title' => 'Instructions']],
             'exam' => $exam,
             'questions' => $questions,

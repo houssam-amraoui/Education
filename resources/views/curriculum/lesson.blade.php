@@ -17,12 +17,28 @@
             @else
                 <div class="empty-state"><h2>No lesson content yet</h2></div>
             @endif
+            @if($canTrack ?? false)
+                <div class="actions">
+                    @if($completed)
+                        <x-prototype.badge tone="success"><x-prototype.icon name="check"/> Completed</x-prototype.badge>
+                    @else
+                        <form method="post" action="{{ route('curriculum.lesson.complete', [$lesson->category->unit->level_id, $lesson->category->unit_id, $lesson->category_id, $lesson]) }}" data-live-form>
+                            @csrf
+                            <button class="button button-primary" data-pending="Saving…"><x-prototype.icon name="check"/> Mark as complete</button>
+                        </form>
+                    @endif
+                </div>
+                @include('curriculum.feedback')
+            @endif
         </article>
         <aside class="stack">
             <x-prototype.card>
                 <h3>In this lesson</h3>
                 <p dir="auto">{{ $lesson->title }}</p>
                 <small dir="auto">{{ $lesson->category->unit->title }}</small>
+                @if($canTrack ?? false)
+                    <x-prototype.progress :value="$completed ? 100 : 0" label="Lesson completion"/>
+                @endif
             </x-prototype.card>
             @if($lesson->relationLoaded('videos') && $lesson->videos->isNotEmpty())
                 <x-prototype.card>

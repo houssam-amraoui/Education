@@ -35,7 +35,7 @@
     @else
         <nav class="role-switch" aria-label="Prototype preview"><a href="{{ route('prototype.G01') }}" @if($area === 'public') aria-current="true" @endif>Explore</a><a href="{{ $url('S01') }}" @if($area === 'student') aria-current="true" @endif>Student</a><a href="{{ $url('A01') }}" @if($area === 'admin') aria-current="true" @endif>Admin</a></nav>
     @endif
-    <div class="row header-tools">@unless($live)<a class="icon-button" href="{{ $url('G08') }}" aria-label="Search learning content"><x-prototype.icon name="search"/></a>@endunless<form method="post" action="{{ route($live ? 'account.locale' : 'locale.update') }}" class="language-label">
+    <div class="row header-tools"><a class="icon-button" href="{{ $url('G08') }}" aria-label="Search learning content"><x-prototype.icon name="search"/></a><form method="post" action="{{ route($live ? 'account.locale' : 'locale.update') }}" class="language-label">
         @if($live)
             @csrf
             <input type="hidden" name="return_to" value="{{ request()->getRequestUri() }}">

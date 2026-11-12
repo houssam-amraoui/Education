@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\ResourceController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\StudentProgressController as AdminStudentProgressController;
+use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserRoleController;
@@ -18,13 +20,17 @@ use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\CurriculumController;
+use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ExamAttemptController;
 use App\Http\Controllers\ExamFileController;
+use App\Http\Controllers\ExamPageController;
 use App\Http\Controllers\ExerciseAttemptController;
+use App\Http\Controllers\LearningPathSelectionController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PrototypeController;
 use App\Http\Controllers\ResourceFileController;
 use App\Http\Controllers\ResourcePageController;
+use App\Http\Controllers\StudentProgressController;
 use App\Http\Controllers\VideoPageController;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\StartPreviewSession;
@@ -37,6 +43,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('account')->name('account.')->middleware(SetLocale::class)->group(function (): void {
     Route::get('/', [AccountPageController::class, 'home'])->middleware('auth:web')->name('home');
+    Route::middleware('auth:web')->group(function (): void {
+        Route::get('learning-goals', [LearningPathSelectionController::class, 'show'])->name('learning-goals.show');
+        Route::put('learning-goals', [LearningPathSelectionController::class, 'update'])->name('learning-goals.update');
+        Route::get('progress', [StudentProgressController::class, 'show'])->name('progress.show');
+        Route::get('progress/activity', [StudentProgressController::class, 'history'])->name('progress.history');
+        Route::get('progress/{level}', [StudentProgressController::class, 'show'])->whereNumber('level')->name('progress.level');
+    });
     Route::get('profile', [ProfileController::class, 'show'])->middleware('auth:web')->name('profile.show');
     Route::put('profile', [ProfileController::class, 'update'])->middleware('auth:web')->name('profile.update');
     Route::get('preferences', [ProfileController::class, 'preferences'])->middleware('auth:web')->name('preferences.show');
@@ -58,6 +71,9 @@ Route::prefix('admin/accounts')->name('admin.accounts.')
         Route::post('users', [UserController::class, 'store'])->name('users.store');
         Route::get('users/create', [UserController::class, 'create'])->name('users.create');
         Route::get('users/{user}/edit', [UserController::class, 'edit'])->whereNumber('user')->name('users.edit');
+        Route::get('users/{user}/progress', [AdminStudentProgressController::class, 'show'])->whereNumber('user')->name('users.progress');
+        Route::get('users/{user}/progress/{type}/{attempt}', [AdminStudentProgressController::class, 'review'])
+            ->whereNumber(['user', 'attempt'])->whereIn('type', ['exercise', 'exam'])->name('users.progress.review');
         Route::put('users/{user}', [UserController::class, 'update'])->whereNumber('user')->name('users.update');
         Route::put('users/{user}/roles', UserRoleController::class)->whereNumber('user')->name('users.roles.update');
         Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
@@ -107,6 +123,12 @@ Route::prefix('admin/curriculum')->name('admin.curriculum.')
         Route::get('categories/create', [CurriculumPageController::class, 'createCategory'])->name('categories.create');
         Route::get('categories/{category}/edit', [CurriculumPageController::class, 'editCategory'])->whereNumber('category')->name('categories.edit');
         Route::post('exercises', [ExerciseController::class, 'store'])->name('exercises.store');
+        Route::get('exercises', [ExerciseController::class, 'index'])->name('exercises.index');
+        Route::get('exercises/create', [ExerciseController::class, 'create'])->name('exercises.create');
+        Route::get('exercises/{exercise}/edit', [ExerciseController::class, 'edit'])->whereNumber('exercise')->name('exercises.edit');
+        Route::get('exams', [ExamController::class, 'index'])->name('exams.index');
+        Route::get('exams/create/{type}', [ExamController::class, 'create'])->whereIn('type', Exam::TYPES)->name('exams.create');
+        Route::get('exams/{exam}/edit', [ExamController::class, 'edit'])->whereNumber('exam')->name('exams.edit');
         Route::post('exams', [ExamController::class, 'store'])->name('exams.store');
         Route::put('exams/{exam}', [ExamController::class, 'update'])->whereNumber('exam')->name('exams.update');
         Route::patch('units/{unit}/exams/{exam}/status', [ExamController::class, 'status'])->whereNumber(['unit', 'exam'])->name('exams.status');
@@ -142,6 +164,15 @@ Route::prefix('admin/curriculum')->name('admin.curriculum.')
 Route::prefix('admin/library')->name('admin.library.')
     ->middleware([SetLocale::class, 'auth:web', 'can:'.Ability::EnterAdministration->value])
     ->group(function (): void {
+        Route::get('topics', [TopicController::class, 'index'])->name('topics.index');
+        Route::get('topics/create', [TopicController::class, 'create'])->name('topics.create');
+        Route::get('topics/{topic}/edit', [TopicController::class, 'edit'])->whereNumber('topic')->name('topics.edit');
+        Route::get('topics/{topic}/relationships', [TopicController::class, 'relationships'])->whereNumber('topic')->name('topics.relationships');
+        Route::put('topics/{topic}/relationships', [TopicController::class, 'updateRelationships'])->whereNumber('topic')->name('topics.relationships.update');
+        Route::post('topics', [TopicController::class, 'store'])->name('topics.store');
+        Route::put('topics/{topic}', [TopicController::class, 'update'])->whereNumber('topic')->name('topics.update');
+        Route::patch('topics/{topic}/status', [TopicController::class, 'status'])->whereNumber('topic')->name('topics.status');
+
         Route::get('resources', [ResourceController::class, 'index'])->name('resources.index');
         Route::post('resources', [ResourceController::class, 'store'])->name('resources.store');
         Route::get('resources/create', [ResourceController::class, 'create'])->name('resources.create');
@@ -162,6 +193,9 @@ Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): voi
     Route::get('/learn/exams/{exam}/files/{document}/{disposition}', ExamFileController::class)
         ->whereNumber('exam')->whereIn('document', ['paper', 'correction'])
         ->whereIn('disposition', ['inline', 'attachment'])->name('exams.file');
+    Route::get('/learn/search', [DiscoveryController::class, 'search'])->name('search');
+    Route::get('/learn/topics', [DiscoveryController::class, 'topics'])->name('topics.index');
+    Route::get('/learn/topics/{topic}', [DiscoveryController::class, 'topic'])->whereNumber('topic')->name('topics.show');
     Route::get('/home', [CurriculumController::class, 'home'])->name('home');
     Route::get('/learn/paths', [CurriculumController::class, 'paths'])->name('paths');
     Route::get('/learn/units', [CurriculumController::class, 'units'])->name('units');
@@ -173,6 +207,8 @@ Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): voi
         ->whereNumber(['level', 'unit', 'category'])->name('category');
     Route::get('/learn/paths/{level}/units/{unit}/categories/{category}/lessons/{lesson}', [CurriculumController::class, 'lesson'])
         ->whereNumber(['level', 'unit', 'category', 'lesson'])->name('lesson');
+    Route::post('/learn/paths/{level}/units/{unit}/categories/{category}/lessons/{lesson}/complete', [CurriculumController::class, 'completeLesson'])
+        ->middleware('auth:web')->whereNumber(['level', 'unit', 'category', 'lesson'])->name('lesson.complete');
 });
 
 Route::middleware(SetLocale::class)->name('library.')->scopeBindings()->group(function (): void {
@@ -190,9 +226,13 @@ Route::middleware(SetLocale::class)->name('library.')->scopeBindings()->group(fu
 });
 
 Route::middleware(SetLocale::class)->group(function (): void {
+    Route::get('learn/exercises', [ExerciseAttemptController::class, 'catalogue'])->name('curriculum.exercises.index');
     Route::get('learn/exercises/{exercise}', [ExerciseAttemptController::class, 'instructions'])
         ->whereNumber('exercise')->name('curriculum.exercises.instructions');
-    Route::get('learn/exams/{exam}', [ExamAttemptController::class, 'instructions'])
+    Route::get('learn/exams', [ExamPageController::class, 'index'])->name('curriculum.exams.index');
+    Route::get('learn/exams/{exam}/document/{document}', [ExamPageController::class, 'document'])
+        ->whereNumber('exam')->whereIn('document', ['paper', 'correction'])->name('curriculum.exams.document');
+    Route::get('learn/exams/{exam}', [ExamPageController::class, 'show'])
         ->whereNumber('exam')->name('curriculum.exams.instructions');
 });
 

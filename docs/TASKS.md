@@ -326,9 +326,9 @@ Screens: G11–G12, S04–S06, A16–A17. PRD §8.
 
 ### 3. Integration tasks
 
-- [ ] **EXERCISE-10** — Connect exercise management forms and lifecycle controls, linking to question authoring.
-- [ ] **EXERCISE-11** — Bind learner catalog/instructions to live records and authorized attempt creation.
-- [ ] **EXERCISE-12** — Connect answer submission, correction review, history, and retry to owned persisted attempts.
+- [x] **EXERCISE-10** — Connect exercise management forms and lifecycle controls, linking to question authoring.
+- [x] **EXERCISE-11** — Bind learner catalog/instructions to live records and authorized attempt creation.
+- [x] **EXERCISE-12** — Connect answer submission, correction review, history, and retry to owned persisted attempts.
 
 ### 4. Testing tasks
 
@@ -358,10 +358,10 @@ Screens: G13–G15, S07–S09, A20–A24. PRD §9.
 
 ### 3. Integration tasks
 
-- [ ] **EXAM-12** — Connect document-exam management and learner detail to real authorized exam/correction files.
-- [ ] **EXAM-13** — Connect interactive-exam management to timing/availability actions and shared question authoring.
-- [ ] **EXAM-14** — Connect instructions, attempt start, timer, answer submission, and server expiration feedback.
-- [ ] **EXAM-15** — Bind results/corrections/history to the student's persisted attempts.
+- [x] **EXAM-12** — Connect document-exam management and learner detail to real authorized exam/correction files.
+- [x] **EXAM-13** — Connect interactive-exam management to timing/availability actions and shared question authoring.
+- [x] **EXAM-14** — Connect instructions, attempt start, timer, answer submission, and server expiration feedback.
+- [x] **EXAM-15** — Bind results/corrections/history to the student's persisted attempts.
 
 ### 4. Testing tasks
 
@@ -379,19 +379,19 @@ Screens: G08–G10, A29–A30. PRD §12.
 
 ### 2. Backend implementation tasks
 
-- [ ] **SEARCH-03** — Add topic persistence, validated management actions, archive behavior, and learning-content associations.
-- [ ] **SEARCH-04** — Add global/level topic queries returning only visible related content.
-- [ ] **SEARCH-05** — Implement the paginated global search query with lessons as the first result type. Include title, type, context, canonical destination, and the existing visibility scope.
-- [ ] **SEARCH-10** — Add authorized exercise results to the shared query from SEARCH-05.
-- [ ] **SEARCH-11** — Add authorized document and interactive exam results to the shared query.
-- [ ] **SEARCH-12** — Add authorized resource results to the shared query.
-- [ ] **SEARCH-13** — Add authorized video results to the shared query.
-- [ ] **SEARCH-14** — Add visible topic results to the shared query.
+- [x] **SEARCH-03** — Add topic persistence, validated management actions, archive behavior, and learning-content associations.
+- [x] **SEARCH-04** — Add global/level topic queries returning only visible related content.
+- [x] **SEARCH-05** — Implement the paginated global search query with lessons as the first result type. Include title, type, context, canonical destination, and the existing visibility scope.
+- [x] **SEARCH-10** — Add authorized exercise results to the shared query from SEARCH-05.
+- [x] **SEARCH-11** — Add authorized document and interactive exam results to the shared query.
+- [x] **SEARCH-12** — Add authorized resource results to the shared query.
+- [x] **SEARCH-13** — Add authorized video results to the shared query.
+- [x] **SEARCH-14** — Add visible topic results to the shared query.
 
 ### 3. Integration tasks
 
-- [ ] **SEARCH-06** — Bind topic management, relationship selection, and learner topic navigation to live records.
-- [ ] **SEARCH-07** — Connect global search form/results and canonical destination links; preserve the query during pagination.
+- [x] **SEARCH-06** — Bind topic management, relationship selection, and learner topic navigation to live records.
+- [x] **SEARCH-07** — Connect global search form/results and canonical destination links; preserve the query during pagination.
 
 ### 4. Testing tasks
 
@@ -410,18 +410,18 @@ Screens: S01, S10–S12, A04. PRD §§6, 13.
 
 ### 2. Backend implementation tasks
 
-- [ ] **PROGRESS-04** — Persist lesson views and explicit completion per student; repeating completion does not duplicate completed records.
-- [ ] **PROGRESS-05** — Expose finalized exercise activity from persisted attempts while keeping the attempt as the source of score and completion.
-- [ ] **PROGRESS-14** — Expose exam attempt and completion activity from persisted exam attempts while keeping the attempt as the source of score and completion.
-- [ ] **PROGRESS-06** — Add overall/per-level completion and history queries with documented denominators and zero-content behavior.
-- [ ] **PROGRESS-07** — Add continue-learning/recent-content queries scoped to current visibility and selected levels.
-- [ ] **PROGRESS-08** — Add authorized manager queries for a student's progress, activity, and owned attempt review.
+- [x] **PROGRESS-04** — Persist lesson views and explicit completion per student; repeating completion does not duplicate completed records.
+- [x] **PROGRESS-05** — Expose finalized exercise activity from persisted attempts while keeping the attempt as the source of score and completion.
+- [x] **PROGRESS-14** — Expose exam attempt and completion activity from persisted exam attempts while keeping the attempt as the source of score and completion.
+- [x] **PROGRESS-06** — Add overall/per-level completion and history queries with documented denominators and zero-content behavior.
+- [x] **PROGRESS-07** — Add continue-learning/recent-content queries scoped to current visibility and selected levels.
+- [x] **PROGRESS-08** — Add authorized manager queries for a student's progress, activity, and owned attempt review.
 
 ### 3. Integration tasks
 
-- [ ] **PROGRESS-09** — Connect lesson viewed/completed behavior and progress/history views to persisted activity.
-- [ ] **PROGRESS-10** — Bind the dashboard's selected levels, continue-learning, progress, recent lessons, and scores to live queries.
-- [ ] **PROGRESS-11** — Connect administrator student detail to authorized progress/history and attempt review.
+- [x] **PROGRESS-09** — Connect lesson viewed/completed behavior and progress/history views to persisted activity.
+- [x] **PROGRESS-10** — Bind the dashboard's selected levels, continue-learning, progress, recent lessons, and scores to live queries.
+- [x] **PROGRESS-11** — Connect administrator student detail to authorized progress/history and attempt review.
 
 ### 4. Testing tasks
 

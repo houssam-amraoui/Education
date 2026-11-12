@@ -26,7 +26,7 @@ class UserController extends Controller
         $membership = $request->validated('membership');
         $users = User::query()
             ->select('id', 'name', 'email')
-            ->with('roles:id,name')
+            ->with('roles:id,name,key')
             ->when($search !== null, fn (Builder $users) => $users->where(
                 fn (Builder $matches) => $matches->whereLike('name', '%'.$search.'%')->orWhereLike('email', '%'.$search.'%')
             ))

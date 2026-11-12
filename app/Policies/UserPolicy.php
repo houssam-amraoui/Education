@@ -19,6 +19,12 @@ class UserPolicy
         return $actor->hasAbility(Ability::EnterAdministration) && $actor->hasAbility(Ability::ManageUsers);
     }
 
+    public function viewStudentProgress(User $actor, User $student): bool
+    {
+        return $this->viewAny($actor)
+            && $student->roles()->where('key', Role::STUDENT)->exists();
+    }
+
     public function create(User $actor): bool
     {
         return $this->viewAny($actor);

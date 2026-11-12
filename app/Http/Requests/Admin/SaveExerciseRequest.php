@@ -22,4 +22,11 @@ class SaveExerciseRequest extends FormRequest
             'instructions' => ['required', 'string', 'max:10000'],
         ];
     }
+
+    protected function getRedirectUrl(): string
+    {
+        $exercise = $this->route('exercise');
+
+        return $exercise ? route('admin.curriculum.exercises.edit', $exercise) : route('admin.curriculum.exercises.create');
+    }
 }
