@@ -6,6 +6,7 @@ use App\Actions\Curriculum\ChangeCurriculumStatus;
 use App\Actions\Curriculum\ReorderCurriculum;
 use App\Actions\Lessons\SaveLesson;
 use App\Actions\Lessons\SaveNextLessons;
+use App\Actions\Lessons\SavePrerequisiteLessons;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ChangeCurriculumStatusRequest;
 use App\Http\Requests\Admin\ReorderCurriculumRequest;
@@ -18,6 +19,7 @@ use App\Support\CurriculumStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class LessonController extends Controller
 {
@@ -39,9 +41,14 @@ class LessonController extends Controller
             : response()->json($lesson);
     }
 
-    public function nextLessons(SaveNextLessonsRequest $request, Category $category, Lesson $lesson, SaveNextLessons $save): Response|RedirectResponse
+    public function nextLessons(SaveNextLessonsRequest $request, Category $category, Lesson $lesson, SaveNextLessons $save, SavePrerequisiteLessons $prerequisites): Response|RedirectResponse
     {
-        $save->handle($lesson, $request->validated('next_lesson_ids'), $request->validated('resource_ids'));
+        DB::transaction(function () use ($request, $lesson, $save, $prerequisites): void {
+            if ($request->validated('prerequisite_lesson_ids') !== null) {
+                $prerequisites->handle($lesson, $request->validated('prerequisite_lesson_ids'));
+            }
+            $save->handle($lesson, $request->validated('next_lesson_ids'), $request->validated('resource_ids'));
+        }, 3);
 
         return AccountPages::html($request)
             ? redirect()->route('admin.curriculum.lessons.relationships', [$category, $lesson], status: 303)->with('status', 'Relationships saved.')

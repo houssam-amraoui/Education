@@ -58,9 +58,15 @@ class Resource extends Model
     #[Scope]
     protected function visibleTo(Builder $query, ?User $user): void
     {
+        $query->publishedForDelivery()
+            ->whereIn($this->qualifyColumn('access'), $user ? ['public', 'registered'] : ['public']);
+    }
+
+    #[Scope]
+    protected function publishedForDelivery(Builder $query): void
+    {
         $query->where($this->qualifyColumn('status'), CurriculumStatus::Published)
             ->whereNotNull($this->qualifyColumn('stored_file_id'))
-            ->whereIn($this->qualifyColumn('access'), $user ? ['public', 'registered'] : ['public'])
             ->where(fn (Builder $placements) => $placements->doesntHave('levels')
                 ->orWhereHas('levels', fn (Builder $levels) => $levels->visibleToPublic()));
     }

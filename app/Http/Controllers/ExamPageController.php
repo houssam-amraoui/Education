@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CurriculumFiltersRequest;
 use App\Models\Exam;
 use App\Models\Level;
+use App\Queries\PrerequisiteCompletion;
 use App\Queries\VisibleExams;
 use App\Support\AccountPages;
 use App\Support\AttemptPages;
@@ -24,7 +25,7 @@ class ExamPageController extends Controller
         return AccountPages::view('G13', 'list', compact('filters', 'level', 'records') + ['crumbs' => ['G01']], 'exams.catalogue');
     }
 
-    public function show(Exam $exam, DocumentResponse $documents): View
+    public function show(Exam $exam, DocumentResponse $documents, PrerequisiteCompletion $preparation): View
     {
         if ($exam->type === Exam::INTERACTIVE) {
             return AttemptPages::instructions($exam);
@@ -35,6 +36,7 @@ class ExamPageController extends Controller
         return AccountPages::view('G14', 'document-exam', [
             'title' => $exam->title,
             'exam' => $exam,
+            'prerequisites' => $preparation->guidance(request()->user(), $exam),
             'paperAvailable' => $documents->available($exam->examFile),
             'correctionAvailable' => $documents->available($exam->correctionFile),
             'crumbs' => ['G13'],

@@ -2,6 +2,8 @@
 
 namespace App\Actions\Lessons;
 
+use App\Actions\Rewards\AwardLearningRewards;
+use App\Actions\Rewards\LockPointAccount;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\User;
@@ -10,6 +12,8 @@ use Illuminate\Support\Facades\Gate;
 
 class RecordLessonProgress
 {
+    public function __construct(private LockPointAccount $lock, private AwardLearningRewards $rewards) {}
+
     public function view(User $student, Lesson $lesson): void
     {
         $key = $this->authorizedKey($student, $lesson);
@@ -23,13 +27,17 @@ class RecordLessonProgress
 
     public function complete(User $student, Lesson $lesson): void
     {
-        $key = $this->authorizedKey($student, $lesson);
-        $time = now()->utc()->toDateTimeString();
-        DB::transaction(function () use ($key, $time): void {
-            // Lock or insert the unique row without overwriting any existing timestamps.
-            LessonProgress::upsert($key + ['completed_at' => $time], ['student_id', 'lesson_id'], ['lesson_id']);
-            LessonProgress::where($key)->whereNull('completed_at')->update(['completed_at' => $time]);
-        });
+        DB::transaction(function () use ($student, $lesson): void {
+            $this->lock->handle($student);
+            $key = $this->authorizedKey($student, $lesson);
+            LessonProgress::upsert($key, ['student_id', 'lesson_id'], ['lesson_id']);
+            $completed = LessonProgress::where($key)->whereNull('completed_at')
+                ->update(['completed_at' => now()->utc()->toDateTimeString()]);
+
+            if ($completed) {
+                $this->rewards->handle($student, LessonProgress::where($key)->firstOrFail());
+            }
+        }, 3);
     }
 
     private function authorizedKey(User $student, Lesson $lesson): array

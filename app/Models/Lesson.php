@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Lesson extends Model
 {
@@ -33,6 +34,16 @@ class Lesson extends Model
     public function nextLessons(): BelongsToMany
     {
         return $this->belongsToMany(self::class, 'lesson_next_lesson', 'lesson_id', 'next_lesson_id');
+    }
+
+    public function prerequisiteLessons(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'lesson_prerequisite_lesson', 'lesson_id', 'prerequisite_lesson_id');
+    }
+
+    public function progress(): HasMany
+    {
+        return $this->hasMany(LessonProgress::class);
     }
 
     public function resources(): BelongsToMany

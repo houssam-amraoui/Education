@@ -96,6 +96,16 @@ The dashboard and progress overview average percentages across visible submitted
 
 The manager policy requires administration entry and user management permissions for student drill-down. Attempt review also applies the selected student's existing ownership, finalization, and current assessment access rules.
 
+### Reward eligibility (REWARD-05–10)
+
+Enabled earning rules evaluate on the first lesson completion or a newly finalized exercise or interactive exam submission. An assessment rule with retries disabled considers only the first submitted attempt per student and assessment. Expired exams never count as submissions. Exercise score thresholds compare the exact saved score ratio. Multiple matching rules can award points for the same event, once per rule.
+
+A learning day starts at midnight UTC. Lesson completions and submitted assessments count once per date. The current streak includes consecutive learning dates through today or yesterday, and a missed day resets it. An enabled milestone rule credits once per student, streak start date, and configured milestone length when a new finalization reaches that length.
+
+Achievement criteria count distinct completed lessons, exercises, or exams, or consecutive learning days. Exercise achievements can require a minimum score. A new qualifying event can count prior activity toward a threshold. Each achievement and its optional point credit are awarded once per student.
+
+Administrators manage earning rules, achievements, and target costs. A cost identifies a single exercise, exam, points-classified resource, or the Ask Teacher feature. The spending action saves the debit and unlock together. Replaying a purchase returns its saved unlock at the original cost. Access enforcement and the confirmation screen are covered by the access and reward integration tasks.
+
 ## Laravel folder organization
 
 

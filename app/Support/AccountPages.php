@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Conversation;
 use App\Models\Level;
 use App\Models\Resource;
 use App\Models\Role;
@@ -19,6 +20,12 @@ class AccountPages
     private const DESTINATIONS = [
         'account.home', 'account.profile.show', 'account.preferences.show',
         'account.learning-goals.show', 'account.progress.show', 'account.progress.level', 'account.progress.history',
+        'account.messages.index', 'account.messages.create', 'account.messages.source', 'account.messages.show',
+        'account.rewards.index', 'account.rewards.show',
+        'admin.rewards.points', 'admin.rewards.rules.create', 'admin.rewards.rules.edit',
+        'admin.rewards.costs.create', 'admin.rewards.costs.edit', 'admin.rewards.streak.index', 'admin.rewards.streak.edit',
+        'admin.rewards.achievements.index', 'admin.rewards.achievements.create', 'admin.rewards.achievements.edit',
+        'admin.messages.index', 'admin.messages.show',
         'admin.accounts.users.index', 'admin.accounts.users.create',
         'admin.accounts.users.progress', 'admin.accounts.users.progress.review',
         'admin.accounts.users.edit', 'admin.accounts.roles.index', 'admin.accounts.roles.create',
@@ -93,9 +100,26 @@ class AccountPages
             $destinations['S02'] = route('account.learning-goals.show');
             $destinations['S10'] = route('account.progress.show');
             $destinations['S12'] = route('account.progress.history');
+            $destinations['S16'] = route('account.rewards.index');
+        }
+        if ($actor && Gate::allows('rewards.manage')) {
+            $destinations += [
+                'A33' => route('admin.rewards.points'),
+                'A34' => route('admin.rewards.rules.create'),
+                'A35' => route('admin.rewards.achievements.index'),
+                'A36' => route('admin.rewards.achievements.create'),
+                'A37' => route('admin.rewards.streak.index'),
+            ];
         }
         if ($actor && Gate::allows('viewAny', User::class)) {
             $destinations['A02'] = route('admin.accounts.users.index');
+        }
+        if ($actor && Gate::allows('create', Conversation::class)) {
+            $destinations['S13'] = route('account.messages.index');
+            $destinations['S14'] = route('account.messages.create');
+        }
+        if ($actor && Gate::allows('manage', Conversation::class)) {
+            $destinations['A31'] = route('admin.messages.index');
         }
         if ($actor && Gate::allows('viewAny', Role::class)) {
             $destinations['A05'] = route('admin.accounts.roles.index');

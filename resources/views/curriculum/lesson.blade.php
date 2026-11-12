@@ -56,17 +56,29 @@
                     @endforeach
                 </x-prototype.card>
             @endif
-            @if($lesson->nextLessons->isNotEmpty())
+            @if(isset($prerequisites) && $prerequisites->isNotEmpty())
+                <x-prototype.card>
+                    @include('curriculum.prerequisite-guidance')
+                </x-prototype.card>
+            @endif
+            @php($recommendedLessons = $nextLessons ?? $lesson->nextLessons)
+            @if(($canTrack ?? false) || $recommendedLessons->isNotEmpty())
                 <x-prototype.card>
                     <h3>Next lessons</h3>
-                    @foreach($lesson->nextLessons as $next)
-                        <a href="{{ route('curriculum.lesson', [$next->category->unit->level, $next->category->unit, $next->category, $next]) }}" dir="auto">{{ $next->title }}</a>
-                    @endforeach
+                    @include('progress.recommended-lessons')
                 </x-prototype.card>
             @endif
             @isset($preview)
                 <x-prototype.link :href="$url('A14')">Back to lesson editor</x-prototype.link>
             @else
+                @if(auth()->guest() || isset($destinations['S14']))
+                    <x-prototype.card class="soft-card">
+                        <x-prototype.icon name="message"/>
+                        <h3>Something not clicking?</h3>
+                        <p>Ask a question with this lesson attached.</p>
+                        <x-prototype.link :href="URL::signedRoute('account.messages.source', ['type' => 'lesson', 'source' => $lesson->id])">Ask your teacher</x-prototype.link>
+                    </x-prototype.card>
+                @endif
                 <x-prototype.link :href="$url('G06')">Browse next lessons <x-prototype.icon name="arrow"/></x-prototype.link>
             @endisset
         </aside>

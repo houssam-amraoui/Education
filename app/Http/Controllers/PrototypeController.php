@@ -38,6 +38,7 @@ class PrototypeController extends Controller
         $untimedExam = in_array($screen['id'], ['G15', 'S07', 'S08', 'S09'], true)
             && $request->query('timing') === 'untimed';
         $examTiming = $untimedExam ? ['timing' => 'untimed'] : [];
+        $emptyRecommendations = $request->query('recommendations') === 'empty';
         $exerciseAttempts = $screen['id'] === 'S06' ? Prototype::EXERCISE_ATTEMPTS : [];
         $exerciseResult = null;
         if ($screen['id'] === 'S05') {
@@ -79,7 +80,7 @@ class PrototypeController extends Controller
         $url = fn (string $id, array $parameters = []): string => Prototype::url($id, $parameters);
 
         return view('prototype.page', compact(
-            'screens', 'screen', 'area', 'breadcrumbs', 'url', 'emptyCategory',
+            'screens', 'screen', 'area', 'breadcrumbs', 'url', 'emptyCategory', 'emptyRecommendations',
             'exerciseAttempts', 'exerciseResult', 'examAttempts', 'examResult', 'untimedExam', 'examTiming',
         ));
     }

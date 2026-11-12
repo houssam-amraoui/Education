@@ -34,6 +34,7 @@
         <aside class="stack">
             <x-prototype.card>
                 <h3>A quick refresher?</h3>
+                @include('curriculum.prerequisite-guidance')
                 <p>Review the lessons in <bdi>{{ $assessment->unit->title }}</bdi>.</p>
                 <x-prototype.link :href="route('curriculum.unit', [$assessment->unit->level_id, $assessment->unit])">Open the unit</x-prototype.link>
             </x-prototype.card>

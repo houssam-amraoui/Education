@@ -96,16 +96,19 @@
                     </label>
                 @endif
             </x-prototype.card>
-            @unless($document)
+            @if(!$document || $editing)
                 <x-prototype.card>
                     <h3>Connected content</h3>
-                    @if($editing)
+                    @if($editing && !$document)
                         <x-prototype.link :href="route($prefix.'.questions.index', $exam)">Manage questions</x-prototype.link>
-                    @else
+                    @elseif(!$editing)
                         <p>Save the exam to add questions.</p>
                     @endif
+                    @if($editing)
+                        @include('curriculum.prerequisite-form', ['prerequisiteAction' => route($prefix.'.prerequisites.update', $exam)])
+                    @endif
                 </x-prototype.card>
-            @endunless
+            @endif
         </aside>
     </div>
 @endsection

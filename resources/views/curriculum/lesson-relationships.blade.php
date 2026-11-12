@@ -13,7 +13,7 @@
         <input type="hidden" name="next_lesson_ids" value="">
         <h2 dir="auto">{{ $lesson->title }}</h2>
         <p>Choose related content and recommended preparation.</p>
-        <fieldset><legend>Prerequisite lessons</legend><small class="muted">Unavailable</small></fieldset>
+        @include('curriculum.prerequisite-fields')
         <fieldset id="resource_ids">
             <legend>Related learning content</legend>
             <input type="hidden" name="resource_ids" value="">

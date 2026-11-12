@@ -12,6 +12,7 @@ use App\Http\Requests\Admin\SaveExamRequest;
 use App\Http\Requests\CurriculumFiltersRequest;
 use App\Models\Exam;
 use App\Models\Unit;
+use App\Queries\PrerequisiteLessonChoices;
 use App\Support\AccountPages;
 use App\Support\CurriculumStatus;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +23,8 @@ use Illuminate\View\View;
 
 class ExamController extends Controller
 {
+    public function __construct(private PrerequisiteLessonChoices $prerequisites) {}
+
     public function index(CurriculumFiltersRequest $request): View
     {
         Gate::authorize('manage', Exam::class);
@@ -56,7 +59,7 @@ class ExamController extends Controller
 
         return AccountPages::view($document ? 'A21' : 'A22', 'editor', compact('exam', 'units', 'document') + [
             'crumbs' => ['A01', 'A20'],
-        ], 'exams.admin-editor');
+        ] + ($exam->exists ? $this->prerequisites->forContent($exam) : []), 'exams.admin-editor');
     }
 
     public function store(SaveExamRequest $request, SaveExam $save): JsonResponse|RedirectResponse

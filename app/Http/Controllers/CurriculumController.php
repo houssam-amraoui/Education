@@ -9,6 +9,8 @@ use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\Level;
 use App\Models\Unit;
+use App\Queries\LearningRecommendations;
+use App\Queries\PrerequisiteCompletion;
 use App\Queries\VisibleLessonDetail;
 use App\Support\AccountPages;
 use Illuminate\Database\Eloquent\Builder;
@@ -78,8 +80,16 @@ class CurriculumController extends Controller
         );
     }
 
-    public function lesson(string $level, string $unit, string $category, string $lesson, VisibleLessonDetail $detail, RecordLessonProgress $progress): View
-    {
+    public function lesson(
+        string $level,
+        string $unit,
+        string $category,
+        string $lesson,
+        VisibleLessonDetail $detail,
+        RecordLessonProgress $progress,
+        PrerequisiteCompletion $preparation,
+        LearningRecommendations $recommendations,
+    ): View {
         $record = Level::visibleToPublic()->findOrFail($level);
         $unitRecord = $record->units()->visibleToPublic()->findOrFail($unit);
         $categoryRecord = $unitRecord->categories()->visibleToPublic()->findOrFail($category);
@@ -99,6 +109,8 @@ class CurriculumController extends Controller
             'crumbs' => ['G01', 'G02', 'G03', 'G04', 'G05', 'G06'],
             'links' => $this->context($record, $unitRecord, $categoryRecord),
             'lesson' => $lessonRecord,
+            'prerequisites' => $preparation->guidance($student, $lessonRecord),
+            'nextLessons' => $canTrack ? $recommendations->nextLessons($student, $lessonRecord) : $lessonRecord->nextLessons,
             'canTrack' => $canTrack,
             'completed' => $canTrack && LessonProgress::where('student_id', $student->id)
                 ->where('lesson_id', $lessonRecord->id)->whereNotNull('completed_at')->exists(),

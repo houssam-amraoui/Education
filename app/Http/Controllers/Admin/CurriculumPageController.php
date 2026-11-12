@@ -10,6 +10,7 @@ use App\Models\Level;
 use App\Models\Resource;
 use App\Models\Unit;
 use App\Models\Video;
+use App\Queries\PrerequisiteLessonChoices;
 use App\Support\AccountPages;
 use App\Support\CurriculumStatus;
 use Illuminate\Database\Eloquent\Builder;
@@ -66,7 +67,7 @@ class CurriculumPageController extends Controller
         return $this->lessonPage($category, $lesson, 'A14', 'editor', 'curriculum.lesson-editor');
     }
 
-    public function lessonRelationships(Category $category, Lesson $lesson): View
+    public function lessonRelationships(Category $category, Lesson $lesson, PrerequisiteLessonChoices $prerequisites): View
     {
         Gate::authorize('manage', $lesson);
         $selected = $lesson->nextLessons()->pluck('lessons.id');
@@ -76,7 +77,8 @@ class CurriculumPageController extends Controller
         $attached = $lesson->resources()->pluck('resources.id');
         $resources = Resource::matching([])->get();
 
-        return $this->lessonPage($category, $lesson, 'A15', 'relationships', 'curriculum.lesson-relationships', compact('selected', 'candidates', 'attached', 'resources'));
+        return $this->lessonPage($category, $lesson, 'A15', 'editor', 'curriculum.lesson-relationships',
+            compact('selected', 'candidates', 'attached', 'resources') + $prerequisites->forContent($lesson));
     }
 
     public function previewLesson(Category $category, Lesson $lesson): View

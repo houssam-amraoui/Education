@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Exercise extends Model
@@ -31,6 +32,11 @@ class Exercise extends Model
     public function questions(): HasMany
     {
         return $this->hasMany(Question::class);
+    }
+
+    public function prerequisiteLessons(): BelongsToMany
+    {
+        return $this->belongsToMany(Lesson::class, 'exercise_prerequisite_lesson', 'exercise_id', 'prerequisite_lesson_id');
     }
 
     public function attempts(): HasMany

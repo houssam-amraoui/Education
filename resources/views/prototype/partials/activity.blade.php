@@ -22,7 +22,15 @@
             <p>{{ $explanation }}</p>
         </x-prototype.card>
     @endforeach
-</div><div class="stack"><x-prototype.card><h3>Where to next?</h3><p>A quick review of past participles could help.</p><x-prototype.link to="S03">Review preparation</x-prototype.link><x-prototype.link to="G06">Continue learning</x-prototype.link><x-prototype.link :href="$url($screen['id'] === 'S08' ? 'S09' : 'S06', $examTiming)" variant="tertiary">View attempt history →</x-prototype.link></x-prototype.card><x-prototype.card><h3>Talk it through</h3><p>Your teacher can help explain a correction.</p><x-prototype.link to="S14">Ask your teacher</x-prototype.link></x-prototype.card></div></div>
+</div><div class="stack"><x-prototype.card><h3>Where to next?</h3>
+@if($emptyRecommendations)
+    @include('prototype.partials.recommendations-empty')
+@else
+    <p>A quick review of past participles could help.</p>
+    <x-prototype.link to="S03">Review preparation</x-prototype.link>
+    <x-prototype.link to="G06">Continue learning</x-prototype.link>
+@endif
+<x-prototype.link :href="$url($screen['id'] === 'S08' ? 'S09' : 'S06', $examTiming)" variant="tertiary">View attempt history →</x-prototype.link></x-prototype.card><x-prototype.card><h3>Talk it through</h3><p>Your teacher can help explain a correction.</p><x-prototype.link to="S14">Ask your teacher</x-prototype.link></x-prototype.card></div></div>
 @elseif($template === 'history')
 @php($examHistory = $screen['id'] === 'S09')
 <div class="actions history-actions"><button class="button button-secondary" data-history-toggle>Preview empty history</button><x-prototype.link :href="$url($examHistory ? 'G15' : 'G12', $examTiming)" variant="primary">{{ $examHistory ? 'Back to exam instructions' : 'Start another practice' }}</x-prototype.link></div><div data-history-table>@include('prototype.partials.history-table', ['exerciseAttempts' => $exerciseAttempts])</div><div class="empty-state" data-history-empty hidden><x-prototype.icon name="chart"/><h2>Your next step starts here.</h2><p>{{ $examHistory ? 'Completed attempts for this exam will appear here.' : 'Completed learning and scores will appear here.' }}</p><x-prototype.link :to="$examHistory ? 'G13' : 'G11'" variant="primary">{{ $examHistory ? 'Explore exams' : 'Explore exercises' }}</x-prototype.link></div>

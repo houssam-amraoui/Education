@@ -68,6 +68,7 @@
                 <h3>Connected content</h3>
                 @if($editing)
                     <x-prototype.link :href="route($prefix.'.questions.index', $exercise)">Manage questions</x-prototype.link>
+                    @include('curriculum.prerequisite-form', ['prerequisiteAction' => route($prefix.'.prerequisites.update', $exercise)])
                 @else
                     <p>Save the exercise to add questions.</p>
                 @endif

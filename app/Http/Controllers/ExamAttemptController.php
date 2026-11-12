@@ -8,6 +8,7 @@ use App\Http\Requests\SubmitExamAttemptRequest;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Queries\ExamAttemptHistory;
+use App\Queries\LearningRecommendations;
 use App\Support\AccountPages;
 use App\Support\AttemptPages;
 use Illuminate\Http\JsonResponse;
@@ -45,7 +46,7 @@ class ExamAttemptController extends Controller
         return AccountPages::view('S09', 'history', compact('exam', 'records') + $this->reviewNavigation($exam), 'exams.history');
     }
 
-    public function show(Request $request, Exam $exam, ExamAttempt $attempt, ExamAttemptHistory $history): JsonResponse|View
+    public function show(Request $request, Exam $exam, ExamAttempt $attempt, ExamAttemptHistory $history, LearningRecommendations $recommendations): JsonResponse|View
     {
         if (AccountPages::html($request)) {
             if ($attempt->submitted_at === null && $attempt->expired_at === null) {
@@ -54,7 +55,11 @@ class ExamAttemptController extends Controller
 
             $result = $history->result($request->user(), $attempt);
 
-            return AccountPages::view('S08', 'results', compact('exam', 'result') + $this->reviewNavigation($exam), 'exams.result');
+            return AccountPages::view('S08', 'results', [
+                'exam' => $exam,
+                'result' => $result,
+                'recommendedLessons' => $recommendations->examReview($request->user(), $attempt),
+            ] + $this->reviewNavigation($exam), 'exams.result');
         }
 
         return response()->json($history->result($request->user(), $attempt));

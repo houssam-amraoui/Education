@@ -435,21 +435,29 @@ Screens: S03, A15; sections within G07/G12/G15/S01. PRD §14.
 ### 1. Prototype tasks
 
 - [x] **RECOMMEND-01** — Prototype prerequisite guidance and its editor with incomplete/complete preparation states.
-- [ ] **RECOMMEND-02** — Prototype recommended-next-content sections with fixture reasons and an empty state.
+- [x] **RECOMMEND-02** — Prototype recommended-next-content sections with fixture reasons and an empty state. Append `?recommendations=empty` to the dashboard, lesson, exercise result, or exam result preview to inspect the empty state.
 
 ### 2. Backend implementation tasks
 
-- [ ] **RECOMMEND-03** — Persist lesson prerequisite links for lessons/exercises/exams; reject self-links, invalid targets, and cycles.
-- [ ] **RECOMMEND-04** — Add student-specific prerequisite completion queries; distinguish recommendation from configured access restriction.
-- [ ] **RECOMMEND-05** — Select accessible next lessons using selected levels, completion, and configured next-lesson relationships. Document the ranking and fallback.
-- [ ] **RECOMMEND-09** — Add recent activity as a documented tie-breaker for next-lesson ordering.
-- [ ] **RECOMMEND-10** — Add pending or recommended exercises based on the learner's saved exercise performance.
-- [ ] **RECOMMEND-11** — Use exam performance to surface accessible review content related to the exam.
+- [x] **RECOMMEND-03** — Persist lesson prerequisite links for lessons/exercises/exams; reject self-links, invalid targets, and cycles.
+- [x] **RECOMMEND-04** — Add student-specific prerequisite completion queries; distinguish recommendation from configured access restriction.
+- [x] **RECOMMEND-05** — Select accessible next lessons using selected levels, completion, and configured next-lesson relationships. Document the ranking and fallback.
+- [x] **RECOMMEND-09** — Add recent activity as a documented tie-breaker for next-lesson ordering.
+- [x] **RECOMMEND-10** — Add pending or recommended exercises based on the learner's saved exercise performance.
+- [x] **RECOMMEND-11** — Use exam performance to surface accessible review content related to the exam.
+
+Prerequisite links are advisory by default. If the caller supplies an explicit prerequisite access requirement, it is satisfied only when at least one lesson is configured and every linked lesson is currently visible and explicitly completed by the student. Hidden prerequisites are omitted from guidance. This result covers the prerequisite requirement alone. Content access-rule persistence and enforcement belong to ACCESS.
+
+Next lessons come from the student's published selected levels and exclude completed lessons and the source lesson. Eligible configured links from the source rank first, followed by other eligible lessons. With no explicit source, the most recent view or completion in the selected levels supplies the source, with the progress ID breaking timestamp ties. Within each tier, most recently viewed lessons come first, then curriculum position and lesson ID. With no eligible source, the catalogue supplies all candidates. An empty level selection or candidate set returns no recommendations.
+
+Exercise suggestions require visible exercises with questions in selected levels. The latest scored submission is selected by submission time and attempt ID, using saved awarded points divided by positive possible points. Scores below 70% produce retry suggestions ordered by lowest percentage. Exercises with no scored submission follow as pending, with unit ID and curriculum order breaking ties. Scores of 70% or higher omit the exercise.
+
+Exam review uses the requested owned, currently accessible, submitted interactive attempt. For a saved score below 70%, visible configured prerequisite lessons rank first, followed by visible lessons from the exam's unit, using curriculum order within each tier. The exam defines the scope, including for students with no selected levels. An unscored or expired attempt, a score of at least 70%, or an empty set of review lessons returns no suggestions.
 
 ### 3. Integration tasks
 
-- [ ] **RECOMMEND-06** — Connect prerequisite editing and learner preparation guidance to live relationships/progress.
-- [ ] **RECOMMEND-07** — Bind dashboard/lesson/result next-learning sections to the shared recommendation query.
+- [x] **RECOMMEND-06** — Connect prerequisite editing and learner preparation guidance to live relationships/progress.
+- [x] **RECOMMEND-07** — Bind dashboard/lesson/result next-learning sections to the shared recommendation query.
 
 ### 4. Testing tasks
 
@@ -467,18 +475,18 @@ Screens: S13–S15, A31–A32; entry from G07. PRD §15.
 
 ### 2. Backend implementation tasks
 
-- [ ] **MESSAGE-04** — Add conversation/message persistence and participant policies; students cannot address or read other students' conversations.
-- [ ] **MESSAGE-05** — Implement validated student conversation creation and follow-ups with authorized content context attached from the source.
-- [ ] **MESSAGE-06** — Implement authorized teacher conversation queries, filtering, and reply actions.
-- [ ] **MESSAGE-07** — Add student conversation/reply queries and recent-teacher-reply dashboard data.
+- [x] **MESSAGE-04** — Add conversation/message persistence and participant policies; students cannot address or read other students' conversations.
+- [x] **MESSAGE-05** — Implement validated student conversation creation and follow-ups with authorized content context attached from the source.
+- [x] **MESSAGE-06** — Implement authorized teacher conversation queries, filtering, and reply actions.
+- [x] **MESSAGE-07** — Add student conversation/reply queries and recent-teacher-reply dashboard data.
 
 ### 3. Integration tasks
 
-- [ ] **MESSAGE-08** — Connect Ask Teacher entry and new-message submission to saved conversations with source context.
-- [ ] **MESSAGE-13** — Bind the student inbox to owned conversations and their latest replies.
-- [ ] **MESSAGE-14** — Bind the conversation detail and follow-up form to the owned thread.
-- [ ] **MESSAGE-09** — Connect teacher list/filter/reply actions and valid source-content links.
-- [ ] **MESSAGE-10** — Bind recent teacher replies on the dashboard to authorized conversations.
+- [x] **MESSAGE-08** — Connect Ask Teacher entry and new-message submission to saved conversations with source context.
+- [x] **MESSAGE-13** — Bind the student inbox to owned conversations and their latest replies.
+- [x] **MESSAGE-14** — Bind the conversation detail and follow-up form to the owned thread.
+- [x] **MESSAGE-09** — Connect teacher list/filter/reply actions and valid source-content links.
+- [x] **MESSAGE-10** — Bind recent teacher replies on the dashboard to authorized conversations.
 
 ### 4. Testing tasks
 
@@ -499,17 +507,17 @@ Screens: S16–S18, A33–A37 excluding optional daily rewards/leaderboards. PRD
 ### 2. Backend implementation tasks
 
 - [ ] **REWARD-05** — Add immutable point-ledger persistence and balance queries with source-event deduplication.
-- [ ] **REWARD-06** — Add validated management of earning rules for lesson completion, exercise results, exam completion, and streak milestones.
-- [ ] **REWARD-07** — Award configured points from finalized learning events exactly once; replays and retries follow explicit rule eligibility.
-- [ ] **REWARD-08** — Add learning-day/streak calculation and configurable streak rules using an explicit timezone/day-boundary policy.
-- [ ] **REWARD-09** — Add achievement definitions, criteria management, and unique student achievement awards from qualifying events.
+- [x] **REWARD-06** — Add validated management of earning rules for lesson completion, exercise results, exam completion, and streak milestones.
+- [x] **REWARD-07** — Award configured points from finalized learning events exactly once; replays and retries follow explicit rule eligibility.
+- [x] **REWARD-08** — Add learning-day/streak calculation and configurable streak rules using an explicit timezone/day-boundary policy.
+- [x] **REWARD-09** — Add achievement definitions, criteria management, and unique student achievement awards from qualifying events.
 - [ ] **REWARD-10** — Add configured spending costs and atomic point debit/unlock records; concurrent requests cannot overspend or charge twice for one unlock.
 
 ### 3. Integration tasks
 
-- [ ] **REWARD-11** — Connect points-rule management and streak settings forms to persisted configuration.
-- [ ] **REWARD-12** — Connect achievement management and student reward/detail views to live awards and criteria.
-- [ ] **REWARD-13** — Bind dashboard points/streak/achievement summaries to real balances and awards.
+- [x] **REWARD-11** — Connect points-rule management and streak settings forms to persisted configuration.
+- [x] **REWARD-12** — Connect achievement management and student reward/detail views to live awards and criteria.
+- [x] **REWARD-13** — Bind dashboard points/streak/achievement summaries to real balances and awards.
 - [ ] **REWARD-14** — Connect unlock confirmation to atomic spending and the resulting access entitlement.
 
 ### 4. Testing tasks
@@ -618,7 +626,6 @@ The earlier screen catalogue review covered 89 inventory IDs. The modules below 
 The following prototype tasks have partial coverage and remain open.
 
 - **ACCESS-01** needs destination-specific previews. The access screen presents a shared set of examples.
-- **RECOMMEND-02** needs a dedicated empty state for a learner with no recommendations.
 - **RES-03** still needs file error feedback.
 - Matching and ordering use native selects for learners and text mapping in the shared editor.
 

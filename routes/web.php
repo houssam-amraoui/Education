@@ -1,13 +1,19 @@
 <?php
 
+use App\Http\Controllers\Admin\AchievementController;
+use App\Http\Controllers\Admin\AssessmentPrerequisiteController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ConversationController as AdminConversationController;
 use App\Http\Controllers\Admin\CurriculumPageController;
 use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\Admin\ExerciseController;
 use App\Http\Controllers\Admin\LessonController;
 use App\Http\Controllers\Admin\LevelController;
+use App\Http\Controllers\Admin\PointCostController;
+use App\Http\Controllers\Admin\PointRuleController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\ResourceController;
+use App\Http\Controllers\Admin\RewardPageController as AdminRewardPageController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\StudentProgressController as AdminStudentProgressController;
 use App\Http\Controllers\Admin\TopicController;
@@ -19,6 +25,7 @@ use App\Http\Controllers\Auth\AccountPageController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SessionController;
+use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ExamAttemptController;
@@ -30,10 +37,12 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PrototypeController;
 use App\Http\Controllers\ResourceFileController;
 use App\Http\Controllers\ResourcePageController;
+use App\Http\Controllers\RewardPageController;
 use App\Http\Controllers\StudentProgressController;
 use App\Http\Controllers\VideoPageController;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\StartPreviewSession;
+use App\Models\Conversation;
 use App\Models\Exam;
 use App\Models\Exercise;
 use App\Support\Ability;
@@ -63,6 +72,62 @@ Route::prefix('account')->name('account.')->middleware(SetLocale::class)->group(
     });
     Route::post('logout', [SessionController::class, 'destroy'])->middleware('auth:web')->name('logout');
 });
+
+Route::prefix('account/messages')->name('account.messages.')
+    ->middleware([SetLocale::class, 'auth:web', 'can:create,'.Conversation::class])
+    ->controller(ConversationController::class)->group(function (): void {
+        Route::get('/', 'index')->name('index');
+        Route::get('new', 'create')->name('create');
+        Route::post('new', 'store')->name('store');
+        Route::prefix('new/{type}/{source}')->where([
+            'type' => implode('|', array_keys(Conversation::SOURCE_TYPES)), 'source' => '[0-9]+',
+        ])->middleware('signed')->group(function (): void {
+            Route::get('/', 'create')->name('source');
+            Route::post('/', 'store')->name('source.store');
+        });
+        Route::get('{conversation}', 'show')->whereNumber('conversation')->name('show');
+        Route::post('{conversation}', 'reply')->whereNumber('conversation')->name('reply');
+    });
+
+Route::prefix('admin/inbox')->name('admin.messages.')
+    ->middleware([SetLocale::class, 'auth:web', 'can:manage,'.Conversation::class])
+    ->controller(AdminConversationController::class)->group(function (): void {
+        Route::get('/', 'index')->name('index');
+        Route::get('{conversation}', 'show')->whereNumber('conversation')->name('show');
+        Route::post('{conversation}', 'reply')->whereNumber('conversation')->name('reply');
+    });
+
+Route::prefix('admin/reward-configuration')->name('admin.reward-configuration.')
+    ->middleware([SetLocale::class, 'auth:web', 'can:rewards.manage'])
+    ->group(function (): void {
+        Route::resource('point-rules', PointRuleController::class)
+            ->parameters(['point-rules' => 'pointRule'])->only(['index', 'store', 'update']);
+        Route::resource('achievements', AchievementController::class)->only(['index', 'store', 'update']);
+        Route::resource('point-costs', PointCostController::class)
+            ->parameters(['point-costs' => 'pointCost'])->only(['index', 'store', 'update']);
+    });
+
+Route::prefix('admin/rewards')->name('admin.rewards.')
+    ->middleware([SetLocale::class, 'auth:web', 'can:rewards.manage'])
+    ->controller(AdminRewardPageController::class)->group(function (): void {
+        Route::get('/', 'points')->name('points');
+        Route::get('rules/create', 'rule')->name('rules.create');
+        Route::get('rules/{pointRule}/edit', 'rule')->whereNumber('pointRule')->name('rules.edit');
+        Route::get('costs/create', 'cost')->name('costs.create');
+        Route::get('costs/{pointCost}/edit', 'cost')->whereNumber('pointCost')->name('costs.edit');
+        Route::get('streak', 'streak')->name('streak.index');
+        Route::get('streak/{pointRule}/edit', 'streak')->whereNumber('pointRule')->name('streak.edit');
+        Route::get('achievements', 'achievements')->name('achievements.index');
+        Route::get('achievements/create', 'achievement')->name('achievements.create');
+        Route::get('achievements/{achievement}/edit', 'achievement')->whereNumber('achievement')->name('achievements.edit');
+    });
+
+Route::prefix('account/rewards')->name('account.rewards.')
+    ->middleware([SetLocale::class, 'auth:web'])
+    ->controller(RewardPageController::class)->group(function (): void {
+        Route::get('/', 'index')->name('index');
+        Route::get('achievements/{achievement}', 'show')->whereNumber('achievement')->name('show');
+    });
 
 Route::prefix('admin/accounts')->name('admin.accounts.')
     ->middleware([SetLocale::class, 'auth:web', 'can:'.Ability::EnterAdministration->value])
@@ -131,9 +196,11 @@ Route::prefix('admin/curriculum')->name('admin.curriculum.')
         Route::get('exams/{exam}/edit', [ExamController::class, 'edit'])->whereNumber('exam')->name('exams.edit');
         Route::post('exams', [ExamController::class, 'store'])->name('exams.store');
         Route::put('exams/{exam}', [ExamController::class, 'update'])->whereNumber('exam')->name('exams.update');
+        Route::put('exams/{exam}/prerequisites', [AssessmentPrerequisiteController::class, 'exam'])->whereNumber('exam')->name('exams.prerequisites.update');
         Route::patch('units/{unit}/exams/{exam}/status', [ExamController::class, 'status'])->whereNumber(['unit', 'exam'])->name('exams.status');
         Route::patch('units/{unit}/exams/{exam}/position', [ExamController::class, 'reorder'])->whereNumber(['unit', 'exam'])->name('exams.reorder');
         Route::put('exercises/{exercise}', [ExerciseController::class, 'update'])->whereNumber('exercise')->name('exercises.update');
+        Route::put('exercises/{exercise}/prerequisites', [AssessmentPrerequisiteController::class, 'exercise'])->whereNumber('exercise')->name('exercises.prerequisites.update');
         Route::patch('units/{unit}/exercises/{exercise}/status', [ExerciseController::class, 'status'])->whereNumber(['unit', 'exercise'])->name('exercises.status');
         Route::patch('units/{unit}/exercises/{exercise}/position', [ExerciseController::class, 'reorder'])->whereNumber(['unit', 'exercise'])->name('exercises.reorder');
         Route::post('levels', [LevelController::class, 'store'])->name('levels.store');

@@ -3,6 +3,8 @@
 namespace App\Actions\Exams;
 
 use App\Actions\Questions\GradeQuestion;
+use App\Actions\Rewards\AwardLearningRewards;
+use App\Actions\Rewards\LockPointAccount;
 use App\Models\ExamAttempt;
 use App\Models\User;
 use App\Support\AttemptAnswers;
@@ -11,11 +13,16 @@ use Illuminate\Support\Facades\Gate;
 
 class SubmitExamAttempt
 {
-    public function __construct(private GradeQuestion $grade) {}
+    public function __construct(
+        private GradeQuestion $grade,
+        private LockPointAccount $lock,
+        private AwardLearningRewards $rewards,
+    ) {}
 
     public function handle(User $student, ExamAttempt $attempt, array $answers): ExamAttempt
     {
         return DB::transaction(function () use ($student, $attempt, $answers): ExamAttempt {
+            $this->lock->handle($student);
             $attempt = ExamAttempt::query()->lockForUpdate()->findOrFail($attempt->getKey());
             Gate::forUser($student)->authorize('access', $attempt);
 
@@ -46,6 +53,7 @@ class SubmitExamAttempt
             }
 
             $attempt->forceFill(['submitted_at' => $now, 'awarded_points' => $total])->save();
+            $this->rewards->handle($student, $attempt);
 
             return $attempt;
         }, 3);

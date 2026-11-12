@@ -10,6 +10,7 @@ use App\Models\Exercise;
 use App\Models\ExerciseAttempt;
 use App\Models\Level;
 use App\Queries\ExerciseAttemptHistory;
+use App\Queries\LearningRecommendations;
 use App\Queries\VisibleExercises;
 use App\Support\AccountPages;
 use App\Support\AttemptPages;
@@ -67,7 +68,7 @@ class ExerciseAttemptController extends Controller
         ], 'exercises.history');
     }
 
-    public function show(Request $request, Exercise $exercise, ExerciseAttempt $attempt, ExerciseAttemptHistory $history): JsonResponse|View
+    public function show(Request $request, Exercise $exercise, ExerciseAttempt $attempt, ExerciseAttemptHistory $history, LearningRecommendations $recommendations): JsonResponse|View
     {
         if (AccountPages::html($request)) {
             if ($attempt->submitted_at !== null) {
@@ -76,6 +77,7 @@ class ExerciseAttemptController extends Controller
                     'result' => $history->result($request->user(), $attempt),
                     'exercise' => $exercise->load('unit.level'),
                     'attempt' => $attempt,
+                    'recommendedLessons' => $recommendations->nextLessons($request->user()),
                     'crumbs' => ['G11', 'G12'],
                     'links' => ['G12' => ['url' => route('curriculum.exercises.instructions', $exercise), 'title' => $exercise->title]],
                 ], 'exercises.result');

@@ -482,6 +482,23 @@ $("[data-language]")?.addEventListener("change", (event) => {
 });
 
 $("[data-live-errors]")?.focus();
+const rewardDirection = $("[data-reward-direction]");
+rewardDirection?.addEventListener("change", () => window.location.assign(rewardDirection.value));
+
+const rewardEvent = $("[data-reward-event]");
+if (rewardEvent) {
+    const eventFields = $$("[data-reward-events]", rewardEvent.form);
+    const updateRewardFields = () => {
+        eventFields.forEach((group) => {
+            const visible = group.dataset.rewardEvents.split(" ").includes(rewardEvent.value);
+            group.hidden = !visible;
+            $$("input, select", group).forEach((field) => { field.disabled = !visible; });
+        });
+    };
+    rewardEvent.addEventListener("change", updateRewardFields);
+    window.addEventListener("pageshow", updateRewardFields);
+    updateRewardFields();
+}
 const curriculumUnit = $("[data-curriculum-unit]");
 curriculumUnit?.addEventListener("change", () => {
     const group = curriculumUnit.selectedOptions[0]?.closest("optgroup");

@@ -50,6 +50,7 @@
         <aside class="stack">
             <x-prototype.card>
                 <h3>Where to next?</h3>
+                @include('progress.recommended-lessons')
                 <x-prototype.link :href="$url('G15')">Return to instructions</x-prototype.link>
                 <x-prototype.link :href="$unit">Continue learning</x-prototype.link>
                 <x-prototype.link :href="$history" variant="tertiary">View attempt history →</x-prototype.link>

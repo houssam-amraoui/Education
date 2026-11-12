@@ -6,6 +6,7 @@ use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\Exercise;
 use App\Models\ExerciseAttempt;
+use App\Queries\PrerequisiteCompletion;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -22,6 +23,7 @@ class AttemptPages
             'description' => $exam ? 'Interactive exam' : 'Practice exercise',
             'headingBadge' => auth()->check() ? $assessment->unit->level->title : null,
             'assessment' => $assessment,
+            'prerequisites' => app(PrerequisiteCompletion::class)->guidance(request()->user(), $assessment),
             'exam' => $exam,
             'questionCount' => $assessment->questions()->count(),
             'canStart' => Gate::allows('attempt', $assessment),

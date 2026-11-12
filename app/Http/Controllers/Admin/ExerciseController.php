@@ -12,6 +12,7 @@ use App\Http\Requests\Admin\SaveExerciseRequest;
 use App\Http\Requests\CurriculumFiltersRequest;
 use App\Models\Exercise;
 use App\Models\Unit;
+use App\Queries\PrerequisiteLessonChoices;
 use App\Support\AccountPages;
 use App\Support\CurriculumStatus;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +23,8 @@ use Illuminate\View\View;
 
 class ExerciseController extends Controller
 {
+    public function __construct(private PrerequisiteLessonChoices $prerequisites) {}
+
     public function index(CurriculumFiltersRequest $request): View
     {
         Gate::authorize('manage', Exercise::class);
@@ -93,6 +96,7 @@ class ExerciseController extends Controller
         Gate::authorize('manage', $exercise);
         $units = Unit::with('level')->orderBy('level_id')->ordered()->get()->groupBy('level_id');
 
-        return AccountPages::view('A17', 'editor', compact('exercise', 'units') + ['crumbs' => ['A01', 'A16']], 'exercises.admin-editor');
+        return AccountPages::view('A17', 'editor', compact('exercise', 'units') + ['crumbs' => ['A01', 'A16']]
+            + ($exercise->exists ? $this->prerequisites->forContent($exercise) : []), 'exercises.admin-editor');
     }
 }

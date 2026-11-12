@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Category;
+use App\Models\Conversation;
 use App\Models\Lesson;
 use App\Models\Level;
 use App\Models\Unit;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Policies\CurriculumPolicy;
 use App\Support\Ability;
 use App\Support\Locale;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -31,7 +33,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Relation::morphMap(Conversation::SOURCE_TYPES);
         Gate::define(Ability::EnterAdministration->value, fn (User $user): bool => $user->hasAbility(Ability::EnterAdministration));
+        Gate::define('rewards.manage', fn (User $user): bool => $user->isAdministrator()
+            && $user->hasAbility(Ability::EnterAdministration));
         Gate::policy(Level::class, CurriculumPolicy::class);
         Gate::policy(Unit::class, CurriculumPolicy::class);
         Gate::policy(Category::class, CurriculumPolicy::class);

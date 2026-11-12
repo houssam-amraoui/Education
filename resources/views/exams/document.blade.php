@@ -24,6 +24,9 @@
                 <span class="muted">File unavailable</span>
             @endif
         </div>
+        @if($prerequisites->isNotEmpty())
+            @include('curriculum.prerequisite-guidance')
+        @endif
         <x-prototype.link :href="route('library.resources.index', ['level_id' => $exam->unit->level_id])" variant="tertiary">Related resources →</x-prototype.link>
     </x-prototype.card>
 @endsection

@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AccountLocaleRequest;
+use App\Queries\AchievementProgress;
 use App\Queries\ContinueLearning;
+use App\Queries\Conversations;
+use App\Queries\LearningRecommendations;
+use App\Queries\LearningStreak;
+use App\Queries\PointBalance;
 use App\Queries\StudentProgress;
 use App\Support\AccountPages;
 use App\Support\ProgressPages;
@@ -30,8 +35,16 @@ class AccountPageController extends Controller
         return AccountPages::view('G22', 'auth');
     }
 
-    public function home(Request $request, StudentProgress $progress, ContinueLearning $learning): View
-    {
+    public function home(
+        Request $request,
+        StudentProgress $progress,
+        ContinueLearning $learning,
+        LearningRecommendations $recommendations,
+        Conversations $conversations,
+        PointBalance $points,
+        LearningStreak $streaks,
+        AchievementProgress $achievements,
+    ): View {
         $student = $request->user();
         if (Gate::denies('manageLearningProfile', $student)) {
             return AccountPages::view('S01', 'home');
@@ -49,6 +62,15 @@ class AccountPageController extends Controller
             ]),
             'resume' => $learning->resume($student, $selected),
             'recent' => $learning->recentLessons($student, $selected),
+            'recommendedExercises' => $recommendations->exercises($student, 1),
+            'recommendedLessons' => $recommendations->nextLessons($student, limit: 1),
+            'recentTeacherReplies' => $conversations->recentTeacherReplies($student),
+            'pointBalance' => $points->for($student),
+            'pointsThisWeek' => (int) $points->transactions($student)->where('amount', '>', 0)
+                ->whereBetween('recorded_at', [now()->utc()->startOfWeek(), now()->utc()])->sum('amount'),
+            'streakDays' => $streaks->current($student)['days'],
+            'recentAchievement' => $achievements->awards($student)->with('achievement')
+                ->orderByDesc('awarded_at')->orderByDesc('id')->first(),
             'history' => ProgressPages::activity($progress->history($student, perPage: 5, scoresOnly: true), $student),
         ], 'progress.dashboard');
     }

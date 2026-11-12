@@ -50,6 +50,27 @@ class VisualPrototypeTest extends TestCase
         $this->get('/admin/analytics/business')->assertSee('Business metrics aren’t available yet.');
     }
 
+    public function test_next_learning_previews_show_fixture_reasons_and_an_empty_state(): void
+    {
+        foreach ([
+            'S01' => 'A short exercise to reinforce today’s lesson.',
+            'G07' => 'The passive in different tenses builds on the sentence structure in this lesson.',
+            'S05' => 'A quick review of past participles could help.',
+            'S08' => 'A quick review of past participles could help.',
+        ] as $screen => $reason) {
+            $this->get(Prototype::url($screen))
+                ->assertOk()
+                ->assertSee($reason)
+                ->assertDontSee('No recommendations right now');
+
+            $this->get(Prototype::url($screen, ['recommendations' => 'empty']))
+                ->assertOk()
+                ->assertSee('No recommendations right now')
+                ->assertSee('Browse units')
+                ->assertDontSee($reason);
+        }
+    }
+
     public function test_exam_catalogue_and_document_links_use_distinct_sample_files(): void
     {
         $this->get('/exams')->assertSee('/exams/national-document', false)->assertSee('/exams/unit-one', false);
