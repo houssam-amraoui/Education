@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Category;
+use App\Models\Lesson;
 use App\Models\Level;
 use App\Models\Unit;
 use App\Models\User;
@@ -34,5 +35,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Level::class, CurriculumPolicy::class);
         Gate::policy(Unit::class, CurriculumPolicy::class);
         Gate::policy(Category::class, CurriculumPolicy::class);
+        Gate::policy(Lesson::class, CurriculumPolicy::class);
     }
 }

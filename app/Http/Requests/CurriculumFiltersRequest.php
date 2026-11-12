@@ -30,6 +30,10 @@ class CurriculumFiltersRequest extends FormRequest
             $rules['unit_id'] = ['nullable', 'integer', 'exists:units,id'];
         }
 
+        if ($this->routeIs('admin.curriculum.lessons.index')) {
+            $rules['category_id'] = ['nullable', 'integer', 'exists:categories,id'];
+        }
+
         return $rules;
     }
 

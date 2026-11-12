@@ -3,8 +3,7 @@
 @section('content')
     @include('curriculum.heading', ['description' => match ($panel) {
         'level' => $level->description,
-        'category' => $category->description,
-        default => $unit->description ?? null,
+        default => isset($category) ? $category->description : ($unit->description ?? null),
     }])
 
     @if($panel === 'level')
@@ -26,16 +25,9 @@
                 </x-prototype.card>
             @endforeach
         </div>
-    @elseif($panel === 'category')
-        <div class="empty-state">
-            <x-prototype.icon name="book"/>
-            <h2>No lessons yet</h2>
-            <p>Explore another category in this unit.</p>
-            <x-prototype.link :href="$url('G05')">Back to unit categories</x-prototype.link>
-        </div>
     @else
         @php
-            $kind = match ($screen['id']) {'G02' => 'path', 'G04' => 'unit', default => 'category'};
+            $kind = match ($screen['id']) {'G02' => 'path', 'G04' => 'unit', 'G06' => 'lesson', default => 'category'};
             $plural = $kind === 'category' ? 'categories' : $kind.'s';
             $listUrl = url()->current();
             $hasSearch = $search !== null;
@@ -59,6 +51,9 @@
                 <h2>{{ $records->total() ? 'No results on this page' : ($hasSearch ? 'No matching content' : 'No '.$plural.' yet') }}</h2>
                 @if($hasSearch || $records->currentPage() > 1)
                     <x-prototype.link :href="$listUrl">Reset filters</x-prototype.link>
+                @elseif($kind === 'lesson')
+                    <p>Explore another category in this unit.</p>
+                    <x-prototype.link :href="$url('G05')">Back to unit categories</x-prototype.link>
                 @elseif($level)
                     <x-prototype.link :href="$kind === 'unit' ? $url('G03') : $url('G04')">Back to {{ $kind === 'unit' ? 'learning path' : 'units' }}</x-prototype.link>
                 @endif
@@ -70,6 +65,7 @@
                         [$target, $meta] = match ($kind) {
                             'path' => [route('curriculum.level', $record), trans_choice('{1} :count unit|[0,*] :count units', $record->units_count)],
                             'unit' => [route('curriculum.unit', [$record->level, $record]), $record->level->title.' · '.trans_choice('{1} :count category|[0,*] :count categories', $record->categories_count)],
+                            'lesson' => [route('curriculum.lesson', [$level, $unit, $category, $record]), $category->title],
                             default => [route('curriculum.category', [$level, $unit, $record]), $unit->title],
                         };
                     @endphp
@@ -77,9 +73,9 @@
                         <span class="tile-icon"><x-prototype.icon name="book"/></span>
                         <x-prototype.badge>Free</x-prototype.badge>
                         <h2 class="card-title" dir="auto">{{ $record->title }}</h2>
-                        @if($record->description)<p dir="auto">{{ $record->description }}</p>@endif
+                        @if($kind !== 'lesson' && $record->description)<p dir="auto">{{ $record->description }}</p>@endif
                         <small dir="auto">{{ $meta }}</small>
-                        <x-prototype.link :href="$target">Explore <x-prototype.icon name="arrow"/></x-prototype.link>
+                        <x-prototype.link :href="$target">{{ $kind === 'lesson' ? 'Open lesson' : 'Explore' }} <x-prototype.icon name="arrow"/></x-prototype.link>
                     </x-prototype.card>
                 @endforeach
             </div>

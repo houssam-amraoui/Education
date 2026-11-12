@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CurriculumPageController;
+use App\Http\Controllers\Admin\LessonController;
 use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UnitController;
@@ -79,6 +80,16 @@ Route::prefix('admin/curriculum')->name('admin.curriculum.')
         Route::patch('units/{unit}/categories/{category}/archive', [CategoryController::class, 'archive'])
             ->whereNumber(['unit', 'category'])->can('manage', 'category')->name('categories.archive');
         Route::patch('units/{unit}/categories/{category}/position', [CategoryController::class, 'reorder'])->whereNumber(['unit', 'category'])->name('categories.reorder');
+        Route::get('lessons', [CurriculumPageController::class, 'lessons'])->name('lessons.index');
+        Route::get('categories/{category}/lessons/create', [CurriculumPageController::class, 'createLesson'])->whereNumber('category')->name('lessons.create');
+        Route::get('categories/{category}/lessons/{lesson}/edit', [CurriculumPageController::class, 'editLesson'])->whereNumber(['category', 'lesson'])->name('lessons.edit');
+        Route::get('categories/{category}/lessons/{lesson}/relationships', [CurriculumPageController::class, 'lessonRelationships'])->whereNumber(['category', 'lesson'])->name('lessons.relationships');
+        Route::get('categories/{category}/lessons/{lesson}/preview', [CurriculumPageController::class, 'previewLesson'])->whereNumber(['category', 'lesson'])->name('lessons.preview');
+        Route::post('categories/{category}/lessons', [LessonController::class, 'store'])->whereNumber('category')->name('lessons.store');
+        Route::put('categories/{category}/lessons/{lesson}', [LessonController::class, 'update'])->whereNumber(['category', 'lesson'])->name('lessons.update');
+        Route::put('categories/{category}/lessons/{lesson}/next-lessons', [LessonController::class, 'nextLessons'])->whereNumber(['category', 'lesson'])->name('lessons.next-lessons.update');
+        Route::patch('categories/{category}/lessons/{lesson}/status', [LessonController::class, 'status'])->whereNumber(['category', 'lesson'])->name('lessons.status');
+        Route::patch('categories/{category}/lessons/{lesson}/position', [LessonController::class, 'reorder'])->whereNumber(['category', 'lesson'])->name('lessons.reorder');
     });
 
 Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): void {
@@ -91,6 +102,8 @@ Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): voi
         ->whereNumber(['level', 'unit'])->name('unit');
     Route::get('/learn/paths/{level}/units/{unit}/categories/{category}', [CurriculumController::class, 'category'])
         ->whereNumber(['level', 'unit', 'category'])->name('category');
+    Route::get('/learn/paths/{level}/units/{unit}/categories/{category}/lessons/{lesson}', [CurriculumController::class, 'lesson'])
+        ->whereNumber(['level', 'unit', 'category', 'lesson'])->name('lesson');
 });
 
 // Keep the fixture catalogue separate from live routes.

@@ -19,10 +19,12 @@ class AccountPages
         'admin.accounts.users.edit', 'admin.accounts.roles.index', 'admin.accounts.roles.create',
         'admin.accounts.roles.edit',
         'curriculum.home', 'curriculum.paths', 'curriculum.level', 'curriculum.units',
-        'curriculum.level.units', 'curriculum.unit', 'curriculum.category',
+        'curriculum.level.units', 'curriculum.unit', 'curriculum.category', 'curriculum.lesson',
         'admin.curriculum.levels.index', 'admin.curriculum.levels.create', 'admin.curriculum.levels.edit',
         'admin.curriculum.units.index', 'admin.curriculum.units.create', 'admin.curriculum.units.edit',
         'admin.curriculum.categories.index', 'admin.curriculum.categories.create', 'admin.curriculum.categories.edit',
+        'admin.curriculum.lessons.index', 'admin.curriculum.lessons.create', 'admin.curriculum.lessons.edit',
+        'admin.curriculum.lessons.relationships', 'admin.curriculum.lessons.preview',
     ];
 
     public static function html(Request $request): bool
@@ -80,6 +82,7 @@ class AccountPages
                 'A07' => route('admin.curriculum.levels.index'),
                 'A09' => route('admin.curriculum.units.index'),
                 'A11' => route('admin.curriculum.categories.index'),
+                'A13' => route('admin.curriculum.lessons.index'),
             ];
         }
 

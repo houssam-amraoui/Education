@@ -172,22 +172,22 @@ Screens: G07, A13–A15. PRD §§7, 19–20.
 
 ### 1. Prototype tasks
 
-- [ ] **LESSON-01** — Prototype lesson reading with rich text, images, video, document links, and responsive English/Arabic content.
+- [x] **LESSON-01** — Prototype lesson reading with rich text, images, video, document links, and responsive English/Arabic content.
 - [x] **LESSON-02** — Prototype lesson management listing and content editor using fixtures.
 - [x] **LESSON-03** — Prototype the shared related-content selector for exercises, exams, resources, and next lessons.
 
 ### 2. Backend implementation tasks
 
-- [ ] **LESSON-04** — Add lesson persistence and validated create/update actions within a category; hierarchy remains consistent.
-- [ ] **LESSON-05** — Add safe rich-content processing and image handling; stored content cannot execute injected scripts or unsafe URLs.
+- [x] **LESSON-04** — Add lesson persistence and validated create/update actions within a category; hierarchy remains consistent.
+- [x] **LESSON-05** — Add safe rich-content processing and image handling; stored content cannot execute injected scripts or unsafe URLs.
 - [ ] **LESSON-06** — Add lesson attachment/video/resource relationships using existing media records and authorized file references.
 - [ ] **LESSON-07** — Add explicit related-exercise, related-exam, and next-lesson relationships with validated targets.
-- [ ] **LESSON-08** — Add lesson publish/unpublish/archive/reorder actions and a visibility-scoped lesson detail query.
+- [x] **LESSON-08** — Add lesson publish/unpublish/archive/reorder actions and a visibility-scoped lesson detail query.
 
 ### 3. Integration tasks
 
 - [ ] **LESSON-09** — Bind lesson listing/reading to real content, safe rendering, and authorized media links.
-- [ ] **LESSON-10** — Connect lesson management listing/editor and publication/order controls to real actions.
+- [x] **LESSON-10** — Connect lesson management listing/editor and publication/order controls to real actions.
 - [ ] **LESSON-11** — Connect the related-content selector to persisted relationships and navigable learner links.
 
 ### 4. Testing tasks
@@ -615,7 +615,7 @@ The following prototype tasks have partial coverage and remain open.
 
 - **ACCESS-01** needs destination-specific previews. The access screen presents a shared set of examples.
 - **RECOMMEND-02** needs a dedicated empty state for a learner with no recommendations.
-- **LESSON-01, RES-03, EXAM-01, EXAM-02** still need lesson media and Arabic reading fixtures, file error feedback, distinct exam and correction downloads, or an untimed attempt preview, respectively.
+- **RES-03, EXAM-01, EXAM-02** still need file error feedback, distinct exam and correction downloads, or an untimed attempt preview, respectively.
 - **QUESTION-01–03, QUESTION-05–06, QUESTION-08** still need question-specific authoring or error states and a remove action on the question list. Matching and ordering use native selects for learners and text mapping in the shared editor.
 - **EXERCISE-03, EXAM-03** need histories scoped to the relevant exercise or exam. Both currently show the same mixed activity table.
 

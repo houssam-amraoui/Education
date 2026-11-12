@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CurriculumFiltersRequest;
 use App\Models\Category;
+use App\Models\Lesson;
 use App\Models\Level;
 use App\Models\Unit;
 use App\Support\AccountPages;
+use App\Support\CurriculumStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +39,62 @@ class CurriculumPageController extends Controller
         $query = Category::where('unit_id', $unit?->id);
 
         return $this->listing($request, 'A11', 'category', $query, ['A01', 'A07', 'A09'], $parents, $unit);
+    }
+
+    public function lessons(CurriculumFiltersRequest $request): View
+    {
+        $parents = Category::with('unit.level')->orderBy('unit_id')->ordered()->get();
+        $category = $this->selectedParent($parents, $request->validated('category_id'));
+
+        return $this->listing($request, 'A13', 'lesson', Lesson::where('category_id', $category?->id), ['A01', 'A07', 'A09', 'A11'], $parents, $category);
+    }
+
+    public function createLesson(Category $category): View
+    {
+        Gate::authorize('manage', Lesson::class);
+
+        return $this->lessonPage($category, new Lesson, 'A14', 'editor', 'curriculum.lesson-editor');
+    }
+
+    public function editLesson(Category $category, Lesson $lesson): View
+    {
+        Gate::authorize('manage', $lesson);
+
+        return $this->lessonPage($category, $lesson, 'A14', 'editor', 'curriculum.lesson-editor');
+    }
+
+    public function lessonRelationships(Category $category, Lesson $lesson): View
+    {
+        Gate::authorize('manage', $lesson);
+        $selected = $lesson->nextLessons()->pluck('lessons.id');
+        $candidates = Lesson::with('category.unit.level')->whereKeyNot($lesson->id)
+            ->where(fn (Builder $query) => $query->where('status', '!=', CurriculumStatus::Archived)->orWhereIn('id', $selected))
+            ->orderBy('category_id')->ordered()->get();
+
+        return $this->lessonPage($category, $lesson, 'A15', 'relationships', 'curriculum.lesson-relationships', compact('selected', 'candidates'));
+    }
+
+    public function previewLesson(Category $category, Lesson $lesson): View
+    {
+        Gate::authorize('manage', $lesson);
+        $lesson = $category->lessons()->with('category.unit.level')->withPublicNextLessons()->findOrFail($lesson->id);
+
+        return $this->lessonPage($category, $lesson, 'G07', 'lesson', 'curriculum.lesson', ['preview' => true, 'title' => $lesson->title]);
+    }
+
+    private function lessonPage(Category $category, Lesson $lesson, string $id, string $panel, string $view, array $data = []): View
+    {
+        $category->loadMissing('unit.level');
+        $links = $this->links($category);
+        if ($lesson->exists) {
+            $links['A14'] = ['title' => $lesson->title, 'url' => route('admin.curriculum.lessons.edit', [$category, $lesson])];
+        }
+        $crumbs = ['A01', 'A07', 'A09', 'A11', 'A13'];
+        if ($id !== 'A14') {
+            $crumbs[] = 'A14';
+        }
+
+        return AccountPages::view($id, $panel, $data + compact('category', 'lesson', 'links', 'crumbs'), $view);
     }
 
     public function createLevel(): View
@@ -98,7 +156,12 @@ class CurriculumPageController extends Controller
             $query->where('status', $status);
         }
 
-        $context = $kind === 'unit' ? ['level_id' => $parent?->id] : ($kind === 'category' ? ['unit_id' => $parent?->id] : []);
+        $context = match ($kind) {
+            'unit' => ['level_id' => $parent?->id],
+            'category' => ['unit_id' => $parent?->id],
+            'lesson' => ['category_id' => $parent?->id],
+            default => [],
+        };
         $records = $query->paginate(15)->appends($context + $request->validated());
 
         return AccountPages::view($id, 'list', compact(
@@ -139,6 +202,12 @@ class CurriculumPageController extends Controller
 
     private function links(?Model $parent): array
     {
+        if ($parent instanceof Category) {
+            return $this->links($parent->unit) + [
+                'A13' => ['url' => route('admin.curriculum.lessons.index', ['category_id' => $parent->id])],
+            ];
+        }
+
         $level = $parent instanceof Unit ? $parent->level : $parent;
         $links = [];
 

@@ -212,19 +212,49 @@ const fs = require("node:fs");
             /Not enough points/,
         );
 
-        await page.goto(base + "/lessons/passive-voice");
-        await Promise.all([
-            page.waitForNavigation(),
-            page.locator("[data-language]").selectOption("ar"),
-        ]);
-        assert.equal(await page.locator("html").getAttribute("dir"), "rtl");
-        assert.equal(await page.locator(".reading").getAttribute("dir"), "ltr");
-        assert.equal(
-            await page.evaluate(
-                () => document.documentElement.scrollWidth > innerWidth + 1,
-            ),
-            false,
-        );
+        for (const width of [1440, 320]) {
+            await page.setViewportSize({ width, height: 1000 });
+            await page.goto(base + "/lessons/passive-voice");
+            for (const locale of ["en", "ar"]) {
+                if (await page.locator("[data-language]").inputValue() !== locale) {
+                    await Promise.all([
+                        page.waitForNavigation(),
+                        page.locator("[data-language]").selectOption(locale),
+                    ]);
+                }
+                const arabicReading = page.locator(".reading details[lang=ar]");
+                assert.equal(await arabicReading.getAttribute("dir"), "rtl");
+                assert.equal(await arabicReading.evaluate((details) => details.open), locale === "ar");
+                assert.equal(await page.locator(".reading").getAttribute("dir"), "ltr");
+                assert.equal(await page.locator("html").getAttribute("dir"), locale === "ar" ? "rtl" : "ltr");
+                if (locale === "en") {
+                    await arabicReading.locator("summary").press("Enter");
+                }
+                assert(await arabicReading.locator("p[lang=en][dir=ltr]").first().isVisible());
+
+                const illustration = page.locator(".reading figure img");
+                await illustration.scrollIntoViewIfNeeded();
+                await page.waitForFunction((img) => img.complete && img.naturalWidth > 0, await illustration.elementHandle());
+                assert.equal(
+                    await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1),
+                    false,
+                    `${width}px overflow: ${locale} lesson`,
+                );
+            }
+
+            const video = page.locator(".reading video");
+            await video.evaluate((player) => player.play());
+            await page.waitForFunction((player) => player.currentTime > 0, await video.elementHandle());
+            await video.evaluate((player) => player.pause());
+
+            const guide = page.locator(".reading").getByRole("link", { name: "Open the study guide" });
+            const download = page.locator(".reading").getByRole("link", { name: "Download sample text" });
+            const [file] = await Promise.all([page.waitForEvent("download"), download.click()]);
+            assert.equal(file.suggestedFilename(), "study-guide.txt");
+            await guide.click();
+            assert(await page.getByRole("heading", { name: "The passive voice · Study guide" }).isVisible());
+            await page.goBack();
+        }
 
         fs.mkdirSync("storage/app/prototype-review", { recursive: true });
         await page.screenshot({

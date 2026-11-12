@@ -93,10 +93,10 @@
                     <x-prototype.link :href="route('admin.curriculum.units.index', ['level_id' => $record->id])">Units</x-prototype.link>
                 @elseif($record->exists && $kind === 'unit')
                     <x-prototype.link :href="route('admin.curriculum.categories.index', ['unit_id' => $record->id])">Categories</x-prototype.link>
-                @elseif($kind === 'category')
-                    <p>Lesson management is unavailable.</p>
+                @elseif($record->exists && $kind === 'category')
+                    <x-prototype.link :href="route('admin.curriculum.lessons.index', ['category_id' => $record->id])">Lessons</x-prototype.link>
                 @else
-                    <p>Save this {{ $label }} to manage its {{ $kind === 'level' ? 'units' : 'categories' }}.</p>
+                    <p>Save this {{ $label }} to manage its {{ match ($kind) {'level' => 'units', 'unit' => 'categories', default => 'lessons'} }}.</p>
                 @endif
             </x-prototype.card>
         </aside>

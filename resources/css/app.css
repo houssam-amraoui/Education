@@ -897,6 +897,33 @@ td.numeric {
 .reading .actions {
     margin-top: 1.5rem;
 }
+.lesson-body :lang(ar) {
+    font-family: var(--font-arabic);
+}
+.lesson-body :lang(en),
+.lesson-body :lang(fr) {
+    font-family: var(--font-sans);
+}
+.lesson-body h3,
+.lesson-body h4,
+.lesson-body figure,
+.lesson-body ul,
+.lesson-body ol {
+    margin-block: 1rem;
+}
+.lesson-body ul,
+.lesson-body ol {
+    padding-inline-start: 1.5rem;
+}
+.lesson-body img {
+    max-inline-size: 100%;
+    height: auto;
+}
+.lesson-body table,
+.lesson-body pre {
+    display: block;
+    overflow-x: auto;
+}
 .example-block {
     background: var(--surface);
     border: 1px solid var(--border);

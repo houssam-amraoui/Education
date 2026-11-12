@@ -4,6 +4,7 @@
     $parameters = match ($kind) {
         'level' => [$record],
         'unit' => [$record->level_id, $record],
+        'lesson' => [$record->category_id, $record],
         default => [$record->unit_id, $record],
     };
     $archiveDialog = 'archive-'.$kind.'-'.$record->id;
@@ -13,6 +14,7 @@
         <form method="post" action="{{ route($prefix.'.status', $parameters) }}" data-live-form>
             @csrf
             @method('PATCH')
+            @if(isset($returnTo))<input type="hidden" name="return_to" value="{{ $returnTo }}">@endif
             <input type="hidden" name="status" value="{{ $published ? 'draft' : 'published' }}">
             <button class="button button-tertiary" data-pending="Saving…" aria-label="{{ ($published ? 'Unpublish ' : 'Publish ').$record->title }}">
                 {{ $published ? 'Unpublish' : 'Publish' }}
@@ -27,6 +29,7 @@
         <form method="post" action="{{ route($prefix.($kind === 'category' ? '.archive' : '.status'), $parameters) }}" data-live-form>
             @csrf
             @method('PATCH')
+            @if(isset($returnTo))<input type="hidden" name="return_to" value="{{ $returnTo }}">@endif
             @if($kind !== 'category')<input type="hidden" name="status" value="archived">@endif
             <button class="button button-primary" data-pending="Archiving…">Archive</button>
         </form>
