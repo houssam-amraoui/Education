@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Level;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -17,6 +18,11 @@ class AccountPages
         'admin.accounts.users.index', 'admin.accounts.users.create',
         'admin.accounts.users.edit', 'admin.accounts.roles.index', 'admin.accounts.roles.create',
         'admin.accounts.roles.edit',
+        'curriculum.home', 'curriculum.paths', 'curriculum.level', 'curriculum.units',
+        'curriculum.level.units', 'curriculum.unit', 'curriculum.category',
+        'admin.curriculum.levels.index', 'admin.curriculum.levels.create', 'admin.curriculum.levels.edit',
+        'admin.curriculum.units.index', 'admin.curriculum.units.create', 'admin.curriculum.units.edit',
+        'admin.curriculum.categories.index', 'admin.curriculum.categories.create', 'admin.curriculum.categories.edit',
     ];
 
     public static function html(Request $request): bool
@@ -50,7 +56,7 @@ class AccountPages
         return in_array($name, $allowed, true) ? $url : null;
     }
 
-    public static function view(string $id, string $panel, array $data = []): View
+    public static function view(string $id, string $panel, array $data = [], string $view = 'account.page'): View
     {
         $screens = Prototype::screens();
         $screen = $screens[$id];
@@ -69,12 +75,25 @@ class AccountPages
             $destinations['A05'] = route('admin.accounts.roles.index');
         }
 
-        $destinations['G01'] = $destinations['S01'] ?? $destinations['G22'];
-        $destinations['A01'] = $destinations['A02'] ?? $destinations['A05'] ?? $destinations['G01'];
-        $breadcrumbs = isset($data['parent']) ? [$screens[$data['parent']]] : [];
-        $area = str_starts_with($id, 'A') ? 'admin' : ($actor ? 'student' : 'public');
-        $url = fn (string $target): string => $destinations[$target];
+        if ($actor && Gate::allows('manage', Level::class)) {
+            $destinations += [
+                'A07' => route('admin.curriculum.levels.index'),
+                'A09' => route('admin.curriculum.units.index'),
+                'A11' => route('admin.curriculum.categories.index'),
+            ];
+        }
 
-        return view('account.page', $data + compact('screen', 'area', 'breadcrumbs', 'url', 'destinations', 'panel') + ['live' => true]);
+        $destinations['G01'] = route('curriculum.home');
+        $destinations['G02'] = route('curriculum.paths');
+        $destinations['G04'] = route('curriculum.units');
+        $destinations['A01'] = $destinations['A02'] ?? $destinations['A05'] ?? $destinations['A07'] ?? $destinations['G01'];
+        $links = $data['links'] ?? [];
+        $crumbs = $data['crumbs'] ?? (isset($data['parent']) ? [$data['parent']] : []);
+        $breadcrumbs = array_map(fn (string $crumb): array => ($links[$crumb] ?? []) + $screens[$crumb], $crumbs);
+        $screen['title'] = $data['title'] ?? $screen['title'];
+        $area = str_starts_with($id, 'A') ? 'admin' : ($actor ? 'student' : 'public');
+        $url = fn (string $target): string => $links[$target]['url'] ?? $destinations[$target];
+
+        return view($view, $data + compact('screen', 'area', 'breadcrumbs', 'url', 'destinations', 'panel') + ['live' => true]);
     }
 }

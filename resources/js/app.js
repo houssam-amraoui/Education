@@ -279,6 +279,12 @@ $("[data-language]")?.addEventListener("change", (event) => {
 });
 
 $("[data-live-errors]")?.focus();
+const curriculumUnit = $("[data-curriculum-unit]");
+curriculumUnit?.addEventListener("change", () => {
+    const group = curriculumUnit.selectedOptions[0]?.closest("optgroup");
+    $("[data-curriculum-level]").value = group?.label || "";
+});
+
 $$("[data-live-form]").forEach((form) => {
     let pendingButton;
     let label;

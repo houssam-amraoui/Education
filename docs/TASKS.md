@@ -139,27 +139,27 @@ Screens: G01–G06, A07–A12. PRD §§4, 19–20, 23.
 
 - [x] **STRUCT-01** — Prototype Home and path listing using public-content fixtures.
 - [x] **STRUCT-02** — Prototype level detail and unit listing with working fixture navigation.
-- [ ] **STRUCT-03** — Prototype unit detail and category lesson listing with empty-category states.
+- [x] **STRUCT-03** — Prototype unit detail and category lesson listing with empty-category states.
 - [x] **STRUCT-04** — Prototype the level management list and create/edit form.
 - [x] **STRUCT-05** — Prototype the unit management list and create/edit form.
 - [x] **STRUCT-06** — Prototype the category management list and create/edit form.
 
 ### 2. Backend implementation tasks
 
-- [ ] **STRUCT-07** — Add level/path persistence, validated management create/update, and public listing queries.
-- [ ] **STRUCT-08** — Add unit persistence and validated management create/update with a required level relationship.
-- [ ] **STRUCT-09** — Add category persistence and validated management create/update with a required unit relationship.
-- [ ] **STRUCT-10** — Add level publish/unpublish/archive/reorder actions; nonpublic ancestors hide their descendants from public queries.
-- [ ] **STRUCT-11** — Add unit publish/unpublish/archive/reorder actions scoped to its level.
-- [ ] **STRUCT-12** — Add category archive/reorder actions scoped to its unit.
+- [x] **STRUCT-07** — Add level/path persistence, validated management create/update, and public listing queries.
+- [x] **STRUCT-08** — Add unit persistence and validated management create/update with a required level relationship.
+- [x] **STRUCT-09** — Add category persistence and validated management create/update with a required unit relationship.
+- [x] **STRUCT-10** — Add level publish/unpublish/archive/reorder actions; nonpublic ancestors hide their descendants from public queries.
+- [x] **STRUCT-11** — Add unit publish/unpublish/archive/reorder actions scoped to its level.
+- [x] **STRUCT-12** — Add category archive/reorder actions scoped to its unit.
 
 ### 3. Integration tasks
 
-- [ ] **STRUCT-13** — Bind Home, paths, and level detail to authorized live level/unit queries.
-- [ ] **STRUCT-14** — Bind units, categories, and breadcrumbs to their real parent relationships.
-- [ ] **STRUCT-15** — Connect level management forms and lifecycle controls to their backend actions.
-- [ ] **STRUCT-16** — Connect unit management forms and lifecycle controls to their backend actions.
-- [ ] **STRUCT-17** — Connect category management forms and lifecycle controls to their backend actions.
+- [x] **STRUCT-13** — Bind Home, paths, and level detail to authorized live level/unit queries.
+- [x] **STRUCT-14** — Bind units, categories, and breadcrumbs to their real parent relationships.
+- [x] **STRUCT-15** — Connect level management forms and lifecycle controls to their backend actions.
+- [x] **STRUCT-16** — Connect unit management forms and lifecycle controls to their backend actions.
+- [x] **STRUCT-17** — Connect category management forms and lifecycle controls to their backend actions.
 
 ### 4. Testing tasks
 
@@ -614,7 +614,7 @@ The earlier screen catalogue review covered 89 inventory IDs. The modules below 
 The following prototype tasks have partial coverage and remain open.
 
 - **ACCESS-01** needs destination-specific previews. The access screen presents a shared set of examples.
-- **STRUCT-03, RECOMMEND-02** need dedicated empty states for a category with no lessons and a learner with no recommendations.
+- **RECOMMEND-02** needs a dedicated empty state for a learner with no recommendations.
 - **LESSON-01, RES-03, EXAM-01, EXAM-02** still need lesson media and Arabic reading fixtures, file error feedback, distinct exam and correction downloads, or an untimed attempt preview, respectively.
 - **QUESTION-01–03, QUESTION-05–06, QUESTION-08** still need question-specific authoring or error states and a remove action on the question list. Matching and ordering use native selects for learners and text mapping in the shared editor.
 - **EXERCISE-03, EXAM-03** need histories scoped to the relevant exercise or exam. Both currently show the same mixed activity table.

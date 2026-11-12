@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
+use App\Models\Level;
+use App\Models\Unit;
 use App\Models\User;
+use App\Policies\CurriculumPolicy;
 use App\Support\Ability;
 use App\Support\Locale;
 use Illuminate\Support\Facades\Gate;
@@ -27,5 +31,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define(Ability::EnterAdministration->value, fn (User $user): bool => $user->hasAbility(Ability::EnterAdministration));
+        Gate::policy(Level::class, CurriculumPolicy::class);
+        Gate::policy(Unit::class, CurriculumPolicy::class);
+        Gate::policy(Category::class, CurriculumPolicy::class);
     }
 }

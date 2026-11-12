@@ -35,6 +35,14 @@ class PrototypeController extends Controller
     {
         $screens = Prototype::screens();
         $screen = $screens[$request->route('screen')];
+        $emptyCategory = false;
+        if ($screen['id'] === 'G06') {
+            $category = $request->query('category');
+            if (is_string($category) && isset(Prototype::UNIT_CATEGORIES[$category]) && $category !== 'grammar') {
+                $screen['title'] = Prototype::UNIT_CATEGORIES[$category].' lessons';
+                $emptyCategory = true;
+            }
+        }
         $area = str_starts_with($screen['id'], 'A') ? 'admin' : (str_starts_with($screen['id'], 'S') ? 'student' : 'public');
         if ($area === 'public' && $request->query('preview') === 'student') {
             $area = 'student';
@@ -50,6 +58,6 @@ class PrototypeController extends Controller
 
         $url = fn (string $id, array $parameters = []): string => Prototype::url($id, $parameters);
 
-        return view('prototype.page', compact('screens', 'screen', 'area', 'breadcrumbs', 'url'));
+        return view('prototype.page', compact('screens', 'screen', 'area', 'breadcrumbs', 'url', 'emptyCategory'));
     }
 }

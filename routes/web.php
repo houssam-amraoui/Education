@@ -1,12 +1,17 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CurriculumPageController;
+use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserRoleController;
 use App\Http\Controllers\Auth\AccountPageController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SessionController;
+use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PrototypeController;
 use App\Http\Middleware\SetLocale;
@@ -48,6 +53,46 @@ Route::prefix('admin/accounts')->name('admin.accounts.')
         Route::put('roles/{role}', [RoleController::class, 'update'])->whereNumber('role')->name('roles.update');
     });
 
+Route::prefix('admin/curriculum')->name('admin.curriculum.')
+    ->middleware([SetLocale::class, 'auth:web', 'can:'.Ability::EnterAdministration->value])
+    ->scopeBindings()
+    ->group(function (): void {
+        Route::get('levels', [CurriculumPageController::class, 'levels'])->name('levels.index');
+        Route::get('levels/create', [CurriculumPageController::class, 'createLevel'])->name('levels.create');
+        Route::get('levels/{level}/edit', [CurriculumPageController::class, 'editLevel'])->whereNumber('level')->name('levels.edit');
+        Route::get('units', [CurriculumPageController::class, 'units'])->name('units.index');
+        Route::get('units/create', [CurriculumPageController::class, 'createUnit'])->name('units.create');
+        Route::get('units/{unit}/edit', [CurriculumPageController::class, 'editUnit'])->whereNumber('unit')->name('units.edit');
+        Route::get('categories', [CurriculumPageController::class, 'categories'])->name('categories.index');
+        Route::get('categories/create', [CurriculumPageController::class, 'createCategory'])->name('categories.create');
+        Route::get('categories/{category}/edit', [CurriculumPageController::class, 'editCategory'])->whereNumber('category')->name('categories.edit');
+        Route::post('levels', [LevelController::class, 'store'])->name('levels.store');
+        Route::put('levels/{level}', [LevelController::class, 'update'])->whereNumber('level')->name('levels.update');
+        Route::patch('levels/{level}/status', [LevelController::class, 'status'])->whereNumber('level')->name('levels.status');
+        Route::patch('levels/{level}/position', [LevelController::class, 'reorder'])->whereNumber('level')->name('levels.reorder');
+        Route::post('units', [UnitController::class, 'store'])->name('units.store');
+        Route::put('units/{unit}', [UnitController::class, 'update'])->whereNumber('unit')->name('units.update');
+        Route::patch('levels/{level}/units/{unit}/status', [UnitController::class, 'status'])->whereNumber(['level', 'unit'])->name('units.status');
+        Route::patch('levels/{level}/units/{unit}/position', [UnitController::class, 'reorder'])->whereNumber(['level', 'unit'])->name('units.reorder');
+        Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::put('categories/{category}', [CategoryController::class, 'update'])->whereNumber('category')->name('categories.update');
+        Route::patch('units/{unit}/categories/{category}/archive', [CategoryController::class, 'archive'])
+            ->whereNumber(['unit', 'category'])->can('manage', 'category')->name('categories.archive');
+        Route::patch('units/{unit}/categories/{category}/position', [CategoryController::class, 'reorder'])->whereNumber(['unit', 'category'])->name('categories.reorder');
+    });
+
+Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): void {
+    Route::get('/home', [CurriculumController::class, 'home'])->name('home');
+    Route::get('/learn/paths', [CurriculumController::class, 'paths'])->name('paths');
+    Route::get('/learn/units', [CurriculumController::class, 'units'])->name('units');
+    Route::get('/learn/paths/{level}', [CurriculumController::class, 'level'])->whereNumber('level')->name('level');
+    Route::get('/learn/paths/{level}/units', [CurriculumController::class, 'units'])->whereNumber('level')->name('level.units');
+    Route::get('/learn/paths/{level}/units/{unit}', [CurriculumController::class, 'unit'])
+        ->whereNumber(['level', 'unit'])->name('unit');
+    Route::get('/learn/paths/{level}/units/{unit}/categories/{category}', [CurriculumController::class, 'category'])
+        ->whereNumber(['level', 'unit', 'category'])->name('category');
+});
+
 // Keep the fixture catalogue separate from live routes.
 if (app()->environment(['local', 'testing'])) {
     Route::withoutMiddleware(StartSession::class)
@@ -64,5 +109,5 @@ if (app()->environment(['local', 'testing'])) {
             }
         });
 } else {
-    Route::redirect('/', '/account/login');
+    Route::redirect('/', '/home');
 }

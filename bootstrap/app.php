@@ -23,10 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request): bool => $request->expectsJson()
-                || ($request->routeIs('account.*', 'admin.accounts.*') && ! AccountPages::html($request))
+                || ($request->routeIs('account.*', 'admin.accounts.*', 'admin.curriculum.*') && ! AccountPages::html($request))
         );
         $exceptions->render(function (HttpExceptionInterface $exception, Request $request) {
-            if ($exception->getStatusCode() === 403 && $request->routeIs('admin.accounts.*') && AccountPages::html($request)) {
+            if ($exception->getStatusCode() === 403 && $request->routeIs('admin.accounts.*', 'admin.curriculum.*') && AccountPages::html($request)) {
                 return response(AccountPages::view('A01', 'restricted'), 403);
             }
             if ($exception->getStatusCode() === 403 && $request->routeIs('account.profile.*', 'account.preferences.*') && AccountPages::html($request)) {

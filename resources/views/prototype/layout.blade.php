@@ -18,7 +18,7 @@
     $publicNav = [['G01','home','grid'],['G02','learning_paths','book'],['G04','units','grid'],['G11','exercises','check'],['G13','exams','file'],['G16','resources','file'],['G19','videos','play'],['G09','topic_index','book'],['G08','search','search'],['G21','create_account','user'],['G22','sign_in','lock']];
     $nav = match($area) {'admin' => $adminNav, 'student' => $studentNav, default => $publicNav};
     $nav = array_filter($nav, fn ($item) => $live
-        ? ! in_array($item[0], ['G01', 'A01'], true) && isset($destinations[$item[0]])
+        ? $item[0] !== 'A01' && ($item[0] !== 'G01' || request()->routeIs('curriculum.*')) && isset($destinations[$item[0]])
         : Route::has(\App\Support\Prototype::routeName($item[0])));
     $activeIds = [$screen['id'], ...array_reverse(array_column($breadcrumbs, 'id'))];
     $activeNavId = collect($activeIds)->first(fn ($id) => in_array($id, array_column($nav, 0), true));
@@ -30,7 +30,7 @@
     <div class="row"><button class="icon-button mobile-menu" aria-label="{{ __('shared.controls.open_navigation') }}" data-open-nav><x-prototype.icon name="menu"/></button><a class="brand" href="{{ $url('G01') }}"><span class="brand-mark"><x-prototype.icon/></span>English Atlas<span class="brand-tag">Learn. Practice. Grow.</span></a></div>
     @if($live)
         @auth
-            <nav class="role-switch" aria-label="Workspace"><a href="{{ $url('S01') }}" @if($area === 'student') aria-current="true" @endif>Account</a>@if(isset($destinations['A02']) || isset($destinations['A05']))<a href="{{ $url('A01') }}" @if($area === 'admin') aria-current="true" @endif>Admin</a>@endif</nav>
+            <nav class="role-switch" aria-label="Workspace"><a href="{{ $url('S01') }}" @if($area === 'student') aria-current="true" @endif>Account</a>@if(isset($destinations['A02']) || isset($destinations['A05']) || isset($destinations['A07']))<a href="{{ $url('A01') }}" @if($area === 'admin') aria-current="true" @endif>Admin</a>@endif</nav>
         @endauth
     @else
         <nav class="role-switch" aria-label="Prototype preview"><a href="{{ route('prototype.G01') }}" @if($area === 'public') aria-current="true" @endif>Explore</a><a href="{{ $url('S01') }}" @if($area === 'student') aria-current="true" @endif>Student</a><a href="{{ $url('A01') }}" @if($area === 'admin') aria-current="true" @endif>Admin</a></nav>
@@ -71,7 +71,7 @@
         @endif
     </aside>
     <main id="main" tabindex="-1">
-        <div class="content">
+        <div @class(['content', '[overflow-wrap:anywhere]' => $live && request()->routeIs('curriculum.*', 'admin.curriculum.*')])>
             <nav class="breadcrumbs" aria-label="Breadcrumb">
                 @foreach($breadcrumbs as $crumb)
                     <a href="{{ $url($crumb['id']) }}" lang="en">{{ $crumb['title'] }}</a><span aria-hidden="true">/</span>

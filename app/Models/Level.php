@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Models;
+
+use App\Models\Concerns\HasCurriculumOrder;
+use App\Support\CurriculumStatus;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Level extends Model
+{
+    use HasCurriculumOrder;
+
+    protected $fillable = ['title', 'description'];
+
+    protected $attributes = ['status' => 'draft', 'position' => null];
+
+    protected function casts(): array
+    {
+        return ['status' => CurriculumStatus::class, 'position' => 'integer'];
+    }
+
+    public function units(): HasMany
+    {
+        return $this->hasMany(Unit::class);
+    }
+
+    #[Scope]
+    protected function visibleToPublic(Builder $query): void
+    {
+        $query->where($this->qualifyColumn('status'), CurriculumStatus::Published);
+    }
+}

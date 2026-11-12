@@ -57,6 +57,35 @@ const fs = require("node:fs");
             }
         }
 
+        for (const [width, preview] of [[1440, ""], [320, "?preview=student"]]) {
+            await page.setViewportSize({ width, height: 1000 });
+            await page.goto(base + "/units/gifts-of-youth" + preview);
+            const categoryLink = (name) =>
+                page.locator("[data-filter-item]")
+                    .filter({ has: page.getByRole("heading", { name, exact: true }) })
+                    .getByRole("link", { name: "Explore" });
+
+            for (const category of ["Vocabulary", "Functions", "Reading", "Writing"]) {
+                await categoryLink(category).click();
+                assert(await page.getByRole("heading", { name: category + " lessons" }).isVisible());
+                assert(await page.getByRole("heading", { name: "No lessons yet" }).isVisible());
+                assert.equal(await page.locator("[data-filter-form], [data-filter-item]").count(), 0);
+                assert.equal(
+                    await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1),
+                    false,
+                    `${width}px overflow: ${category} empty category`,
+                );
+                await page.getByRole("link", { name: "Back to unit categories" }).click();
+                assert.equal(page.url(), base + "/units/gifts-of-youth" + preview);
+            }
+
+            await categoryLink("Grammar").click();
+            assert(await page.getByRole("heading", { name: "Grammar lessons" }).isVisible());
+            assert.equal(await page.locator("[data-filter-item]:visible").count(), 2);
+            await page.locator("[data-filter-item]").first().getByRole("link", { name: "Explore" }).click();
+            assert.equal(page.url(), base + "/lessons/passive-voice" + preview);
+        }
+
         await page.goto(base + "/dashboard");
         await page
             .getByRole("link", { name: "Continue learning", exact: true })

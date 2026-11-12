@@ -4,6 +4,14 @@ namespace App\Support;
 
 class Prototype
 {
+    public const UNIT_CATEGORIES = [
+        'vocabulary' => 'Vocabulary',
+        'functions' => 'Functions',
+        'reading' => 'Reading',
+        'grammar' => 'Grammar',
+        'writing' => 'Writing',
+    ];
+
     /** Static screen catalogue. Conditional and decision-gated features are excluded. */
     public static function screens(): array
     {
