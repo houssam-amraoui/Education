@@ -50,6 +50,57 @@ class VisualPrototypeTest extends TestCase
         $this->get('/admin/analytics/business')->assertSee('Business metrics aren’t available yet.');
     }
 
+    public function test_exam_catalogue_and_document_links_use_distinct_sample_files(): void
+    {
+        $this->get('/exams')->assertSee('/exams/national-document', false)->assertSee('/exams/unit-one', false);
+        $this->get('/exams/national-document')
+            ->assertSee('/documents/study-guide?source=exam', false)
+            ->assertSee('/documents/study-guide?source=correction', false);
+
+        $this->get('/documents/study-guide?source=exam')
+            ->assertSee('/prototype/exam-paper.txt')->assertDontSee('/prototype/exam-correction.txt');
+        $this->get('/documents/study-guide?source=correction')
+            ->assertSee('/prototype/exam-correction.txt')->assertDontSee('/prototype/exam-paper.txt');
+        $this->get('/documents/study-guide')->assertSee('/prototype/study-guide.txt');
+    }
+
+    public function test_interactive_exam_previews_timed_and_untimed_attempts(): void
+    {
+        $exam = '/exams/unit-one';
+
+        $this->get($exam)->assertSee('30 min')->assertSee('Preview untimed exam');
+        $this->get($exam.'?timing=untimed')->assertSee('No time limit')->assertSee($exam.'/attempt?timing=untimed', false);
+        $this->get($exam.'/attempt')->assertSee('30:00 · Static timer preview');
+        $this->get($exam.'/attempt?timing=untimed')
+            ->assertSee('Untimed · No time limit')
+            ->assertDontSee('Static timer preview')
+            ->assertSee($exam.'/results?timing=untimed', false);
+        $this->get($exam.'/attempt?timing[]=untimed')->assertSee('Static timer preview');
+    }
+
+    public function test_exam_history_only_links_to_unit_one_exam_results(): void
+    {
+        $exam = '/exams/unit-one';
+
+        $this->get($exam.'/history')
+            ->assertSeeInOrder(['Attempt 2', '15 / 20', 'Attempt 1', '10 / 20'])
+            ->assertSee($exam.'/results?attempt=1', false)
+            ->assertSee($exam.'/results?attempt=2', false)
+            ->assertDontSee('aria-label="Review Passive voice practice"', false)
+            ->assertDontSee('aria-label="Review Grammar review"', false);
+
+        $this->get($exam.'/results')->assertSee('75% · Sample score')->assertSee('The school is built.');
+        $this->get($exam.'/results?attempt=1&timing=untimed')
+            ->assertSee('50% · Sample score')
+            ->assertSee('They built the school.')
+            ->assertSee('The school was built.')
+            ->assertSee($exam.'/attempt?timing=untimed', false)
+            ->assertSee($exam.'/history?timing=untimed', false);
+
+        $this->get($exam.'/results?attempt=99')->assertNotFound();
+        $this->get($exam.'/results?attempt[]=1')->assertNotFound();
+    }
+
     public function test_prototype_has_no_write_routes(): void
     {
         foreach (app('router')->getRoutes() as $route) {
@@ -57,6 +108,34 @@ class VisualPrototypeTest extends TestCase
                 $this->assertSame(['GET', 'HEAD'], $route->methods());
             }
         }
+    }
+
+    public function test_exercise_history_links_to_distinct_sample_corrections(): void
+    {
+        $exercise = '/exercises/passive-voice';
+
+        $this->get($exercise.'/history')
+            ->assertOk()
+            ->assertSeeInOrder(['Attempt 2', '16 / 20', 'Attempt 1', '12 / 20'])
+            ->assertSee($exercise.'/results?attempt=2', false)
+            ->assertSee($exercise.'/results?attempt=1', false)
+            ->assertDontSee('aria-label="Review Unit 1 · Practice exam"', false)
+            ->assertDontSee('aria-label="Review Grammar review"', false);
+
+        $this->get($exercise.'/results')
+            ->assertOk()
+            ->assertSee('80% · Sample score')
+            ->assertSee('The school is built.');
+
+        $this->get($exercise.'/results?attempt=1')
+            ->assertOk()
+            ->assertSee('60% · Sample score')
+            ->assertSee('They built the school.')
+            ->assertSee('The school was built.')
+            ->assertSee($exercise.'/attempt', false);
+
+        $this->get($exercise.'/results?attempt=99')->assertNotFound();
+        $this->get($exercise.'/results?attempt[]=1')->assertNotFound();
     }
 
     public function test_login_preview_uses_known_return_destinations_and_defaults_to_the_dashboard(): void

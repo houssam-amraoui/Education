@@ -164,7 +164,11 @@ select:hover,
 textarea:hover {
     border-color: var(--text);
 }
-input[aria-invalid="true"] {
+input[aria-invalid="true"],
+[data-attempt-form] textarea[aria-invalid="true"],
+[data-question-editor] textarea[aria-invalid="true"],
+[data-attempt-form] .choice:has(input[aria-invalid="true"]),
+[data-question-editor] .choice:has(input[aria-invalid="true"]) {
     border-color: var(--danger);
 }
 input[readonly] {

@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CurriculumPageController;
+use App\Http\Controllers\Admin\ExamController;
+use App\Http\Controllers\Admin\ExerciseController;
 use App\Http\Controllers\Admin\LessonController;
 use App\Http\Controllers\Admin\LevelController;
+use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\ResourceController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UnitController;
@@ -15,6 +18,7 @@ use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\CurriculumController;
+use App\Http\Controllers\ExamFileController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PrototypeController;
 use App\Http\Controllers\ResourceFileController;
@@ -22,6 +26,8 @@ use App\Http\Controllers\ResourcePageController;
 use App\Http\Controllers\VideoPageController;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\StartPreviewSession;
+use App\Models\Exam;
+use App\Models\Exercise;
 use App\Support\Ability;
 use App\Support\Prototype;
 use Illuminate\Session\Middleware\StartSession;
@@ -63,6 +69,32 @@ Route::prefix('admin/curriculum')->name('admin.curriculum.')
     ->middleware([SetLocale::class, 'auth:web', 'can:'.Ability::EnterAdministration->value])
     ->scopeBindings()
     ->group(function (): void {
+        Route::model('questionExercise', Exercise::class);
+        Route::model('questionExam', Exam::class);
+
+        foreach ([
+            'exercises' => ['questionExercise', 'manage'],
+            'exams' => ['questionExam', 'manageQuestions'],
+        ] as $resource => [$owner, $ability]) {
+            Route::prefix("{$resource}/{{$owner}}/questions")
+                ->name("{$resource}.questions.")
+                ->where([$owner => '[0-9]+', 'question' => '[0-9]+'])
+                ->middleware("can:{$ability},{$owner}")
+                ->controller(QuestionController::class)
+                ->group(function (): void {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('create', 'create')->name('create');
+                    Route::get('{question}/edit', 'edit')->name('edit');
+                    Route::post('/', 'store')->name('store');
+                    Route::put('{question}', 'update')->name('update');
+                    Route::delete('{question}', 'destroy')->name('destroy');
+                    Route::patch('{question}/position', 'reorder')->name('reorder');
+                });
+        }
+
+        Route::get('exercises/questions', [QuestionController::class, 'exercises'])->name('exercises.questions.owners');
+        Route::get('exams/questions', [QuestionController::class, 'exams'])->name('exams.questions.owners');
+
         Route::get('levels', [CurriculumPageController::class, 'levels'])->name('levels.index');
         Route::get('levels/create', [CurriculumPageController::class, 'createLevel'])->name('levels.create');
         Route::get('levels/{level}/edit', [CurriculumPageController::class, 'editLevel'])->whereNumber('level')->name('levels.edit');
@@ -72,6 +104,14 @@ Route::prefix('admin/curriculum')->name('admin.curriculum.')
         Route::get('categories', [CurriculumPageController::class, 'categories'])->name('categories.index');
         Route::get('categories/create', [CurriculumPageController::class, 'createCategory'])->name('categories.create');
         Route::get('categories/{category}/edit', [CurriculumPageController::class, 'editCategory'])->whereNumber('category')->name('categories.edit');
+        Route::post('exercises', [ExerciseController::class, 'store'])->name('exercises.store');
+        Route::post('exams', [ExamController::class, 'store'])->name('exams.store');
+        Route::put('exams/{exam}', [ExamController::class, 'update'])->whereNumber('exam')->name('exams.update');
+        Route::patch('units/{unit}/exams/{exam}/status', [ExamController::class, 'status'])->whereNumber(['unit', 'exam'])->name('exams.status');
+        Route::patch('units/{unit}/exams/{exam}/position', [ExamController::class, 'reorder'])->whereNumber(['unit', 'exam'])->name('exams.reorder');
+        Route::put('exercises/{exercise}', [ExerciseController::class, 'update'])->whereNumber('exercise')->name('exercises.update');
+        Route::patch('units/{unit}/exercises/{exercise}/status', [ExerciseController::class, 'status'])->whereNumber(['unit', 'exercise'])->name('exercises.status');
+        Route::patch('units/{unit}/exercises/{exercise}/position', [ExerciseController::class, 'reorder'])->whereNumber(['unit', 'exercise'])->name('exercises.reorder');
         Route::post('levels', [LevelController::class, 'store'])->name('levels.store');
         Route::put('levels/{level}', [LevelController::class, 'update'])->whereNumber('level')->name('levels.update');
         Route::patch('levels/{level}/status', [LevelController::class, 'status'])->whereNumber('level')->name('levels.status');
@@ -117,6 +157,9 @@ Route::prefix('admin/library')->name('admin.library.')
     });
 
 Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): void {
+    Route::get('/learn/exams/{exam}/files/{document}/{disposition}', ExamFileController::class)
+        ->whereNumber('exam')->whereIn('document', ['paper', 'correction'])
+        ->whereIn('disposition', ['inline', 'attachment'])->name('exams.file');
     Route::get('/home', [CurriculumController::class, 'home'])->name('home');
     Route::get('/learn/paths', [CurriculumController::class, 'paths'])->name('paths');
     Route::get('/learn/units', [CurriculumController::class, 'units'])->name('units');

@@ -27,6 +27,10 @@ class AccountPages
         'admin.curriculum.categories.index', 'admin.curriculum.categories.create', 'admin.curriculum.categories.edit',
         'admin.curriculum.lessons.index', 'admin.curriculum.lessons.create', 'admin.curriculum.lessons.edit',
         'admin.curriculum.lessons.relationships', 'admin.curriculum.lessons.preview',
+        'admin.curriculum.exercises.questions.owners', 'admin.curriculum.exercises.questions.index',
+        'admin.curriculum.exercises.questions.create', 'admin.curriculum.exercises.questions.edit',
+        'admin.curriculum.exams.questions.owners', 'admin.curriculum.exams.questions.index',
+        'admin.curriculum.exams.questions.create', 'admin.curriculum.exams.questions.edit',
         'library.resources.index', 'library.resources.show', 'library.resources.document', 'library.lessons.resources.document',
         'admin.library.resources.index', 'admin.library.resources.create', 'admin.library.resources.edit',
         'library.videos.index', 'library.videos.show',
@@ -89,6 +93,8 @@ class AccountPages
                 'A09' => route('admin.curriculum.units.index'),
                 'A11' => route('admin.curriculum.categories.index'),
                 'A13' => route('admin.curriculum.lessons.index'),
+                'A16' => route('admin.curriculum.exercises.questions.owners'),
+                'A20' => route('admin.curriculum.exams.questions.owners'),
             ];
         }
         if ($actor && Gate::allows('manage', Resource::class)) {

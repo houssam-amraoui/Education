@@ -33,6 +33,16 @@ class Unit extends Model
         return $this->hasMany(Category::class);
     }
 
+    public function exercises(): HasMany
+    {
+        return $this->hasMany(Exercise::class);
+    }
+
+    public function exams(): HasMany
+    {
+        return $this->hasMany(Exam::class);
+    }
+
     #[Scope]
     protected function visibleToPublic(Builder $query): void
     {

@@ -254,35 +254,39 @@ Screens: question controls within S04/S07 and A18–A19/A23–A24. PRD §§8–9
 
 ### 1. Prototype tasks
 
-- [ ] **QUESTION-01** — Prototype single-choice answer and authoring controls with selected/error states.
-- [ ] **QUESTION-02** — Prototype multiple-selection answer and authoring controls.
-- [ ] **QUESTION-03** — Prototype true/false answer and authoring controls.
+- [x] **QUESTION-01** — Prototype single-choice answer and authoring controls with selected/error states.
+- [x] **QUESTION-02** — Prototype multiple-selection answer and authoring controls.
+- [x] **QUESTION-03** — Prototype true/false answer and authoring controls.
 - [x] **QUESTION-04** — Prototype matching answer and authoring controls with a keyboard/touch alternative to dragging.
-- [ ] **QUESTION-05** — Prototype fill-in-the-blanks answer and accepted-answer authoring controls.
-- [ ] **QUESTION-06** — Prototype short-answer and accepted-answer authoring controls.
+- [x] **QUESTION-05** — Prototype fill-in-the-blanks answer and accepted-answer authoring controls.
+- [x] **QUESTION-06** — Prototype short-answer and accepted-answer authoring controls.
 - [x] **QUESTION-07** — Prototype ordering answer and authoring controls with keyboard/touch reordering.
-- [ ] **QUESTION-08** — Prototype reusable question list with add/edit/remove/reorder interactions using fixtures.
+- [x] **QUESTION-08** — Prototype reusable question list with add/edit/remove/reorder interactions using fixtures.
 
 ### 2. Backend implementation tasks
 
-- [ ] **QUESTION-09** — Add owned question/answer-definition persistence and ordered exercise/exam associations; learner queries never expose correct-answer definitions before evaluation.
-- [ ] **QUESTION-10** — Implement single-choice definition validation and deterministic grading with explanation output.
-- [ ] **QUESTION-11** — Implement multiple-selection validation and grading; document the chosen exact-match scoring rule.
-- [ ] **QUESTION-12** — Implement true/false definition validation and grading.
-- [ ] **QUESTION-13** — Implement matching definition validation and grading with stable pair identifiers.
-- [ ] **QUESTION-14** — Implement blanks validation and grading with explicit accepted answers and documented normalization.
-- [ ] **QUESTION-15** — Implement short-answer validation and grading against explicit accepted answers; document normalization without implying free-form AI grading.
-- [ ] **QUESTION-16** — Implement ordering validation and grading against the configured sequence.
-- [ ] **QUESTION-17** — Implement authorized question add/update/remove/reorder actions with type-specific validation and ownership checks.
+- [x] **QUESTION-09** — Add owned question/answer-definition persistence and ordered exercise/exam associations; learner queries never expose correct-answer definitions before evaluation.
+- [x] **QUESTION-10** — Implement single-choice definition validation and deterministic grading with explanation output.
+- [x] **QUESTION-11** — Implement multiple-selection validation and grading; document the chosen exact-match scoring rule.
+- [x] **QUESTION-12** — Implement true/false definition validation and grading.
+- [x] **QUESTION-13** — Implement matching definition validation and grading with stable pair identifiers.
+- [x] **QUESTION-14** — Implement blanks validation and grading with explicit accepted answers and documented normalization.
+- [x] **QUESTION-15** — Implement short-answer validation and grading against explicit accepted answers; document normalization without implying free-form AI grading.
+- [x] **QUESTION-16** — Implement ordering validation and grading against the configured sequence.
+- [x] **QUESTION-17** — Implement authorized question add/update/remove/reorder actions with type-specific validation and ownership checks.
+
+Each question awards its configured integer points for an exact match and zero otherwise. Multiple selection compares the full set of distinct option IDs in any order. Matching compares a complete one-to-one mapping of left IDs to right IDs. Ordering compares the full sequence of item IDs. The order of display items is authored separately from the answer definition.
+
+Blanks map each `___` marker to its slot in display order and require a configured accepted answer for every slot. Blanks and short answers compare responses with explicit accepted alternatives after collapsing Unicode whitespace, trimming, and applying Unicode case folding. Punctuation and accents remain significant. The comparison applies no Unicode composition normalization or free-form evaluation.
 
 ### 3. Integration tasks
 
-- [ ] **QUESTION-18** — Bind question management lists to real exercise/exam ownership and ordering actions.
-- [ ] **QUESTION-19** — Connect single-choice and true/false authoring forms to their validated definitions.
-- [ ] **QUESTION-20** — Connect multiple-selection authoring to its validated definition.
-- [ ] **QUESTION-21** — Connect matching authoring to its validated definition.
-- [ ] **QUESTION-22** — Connect blanks and short-answer authoring to explicit accepted-answer definitions.
-- [ ] **QUESTION-23** — Connect ordering authoring to its validated definition.
+- [x] **QUESTION-18** — Bind question management lists to real exercise/exam ownership and ordering actions.
+- [x] **QUESTION-19** — Connect single-choice and true/false authoring forms to their validated definitions.
+- [x] **QUESTION-20** — Connect multiple-selection authoring to its validated definition.
+- [x] **QUESTION-21** — Connect matching authoring to its validated definition.
+- [x] **QUESTION-22** — Connect blanks and short-answer authoring to explicit accepted-answer definitions.
+- [x] **QUESTION-23** — Connect ordering authoring to its validated definition.
 - [ ] **QUESTION-24** — Connect the shared learner question renderer and single-choice control to the attempt payload. Check that the response omits answer keys before submission.
 - [ ] **QUESTION-30** — Connect multiple-selection rendering and answer serialization to the learner renderer from QUESTION-24.
 - [ ] **QUESTION-31** — Connect true/false rendering and answer serialization to the learner renderer.
@@ -290,6 +294,8 @@ Screens: question controls within S04/S07 and A18–A19/A23–A24. PRD §§8–9
 - [ ] **QUESTION-33** — Connect fill-in-the-blanks rendering and slot answer serialization to the learner renderer.
 - [ ] **QUESTION-34** — Connect short-answer rendering and text answer serialization to the learner renderer.
 - [ ] **QUESTION-35** — Connect ordering rendering and ordered-ID serialization to the learner renderer.
+
+The shared learner controls and answer serializer are available. Live attempt wiring depends on owned exercise and exam attempt creation and submission (EXERCISE-07–08, EXAM-09–10).
 
 ### 4. Testing tasks
 
@@ -299,7 +305,7 @@ Screens: question controls within S04/S07 and A18–A19/A23–A24. PRD §§8–9
 - [ ] **QUESTION-28** — Test question ownership, management authorization, scoped reordering, and pre-submission answer-key secrecy.
 - [ ] **QUESTION-29** — Verify matching/ordering and all other answer controls with keyboard, touch, and RTL content.
 
-Initial scoring assumption: explicit configured question points; exact-match correctness per question without partial credit. Record these semantics during the type tasks and revisit if product requirements specify another rule. Saved submitted question/scoring snapshots are owned by attempt tasks below.
+Saved submitted question and scoring snapshots are owned by the attempt tasks below.
 
 ## 9. Exercise attempts and history — EXERCISE
 
@@ -345,9 +351,9 @@ Screens: G13–G15, S07–S09, A20–A24. PRD §9.
 
 ### 2. Backend implementation tasks
 
-- [ ] **EXAM-06** — Add exam ownership/type schema, learning placement, availability, and authorized document-exam create/update with protected PDF references.
+- [x] **EXAM-06** — Add exam ownership/type schema, learning placement, availability, and authorized document-exam create/update with protected PDF references.
 - [ ] **EXAM-07** — Add validated interactive-exam create/update with timing configuration and question ownership.
-- [ ] **EXAM-08** — Add exam publish/unpublish/archive/reorder actions and availability-aware catalog/detail queries.
+- [x] **EXAM-08** — Add exam publish/unpublish/archive/reorder actions and availability-aware catalog/detail queries.
 - [ ] **EXAM-09** — Add owned exam attempt creation with server start/deadline and immutable question/scoring snapshots.
 - [ ] **EXAM-10** — Implement atomic exam submission/grading with server-enforced deadline and duplicate-finalization protection; document expiration behavior.
 - [ ] **EXAM-11** — Add owned exam result/history queries returning stored answers, scores, corrections, and completion state.
@@ -616,7 +622,7 @@ The following prototype tasks have partial coverage and remain open.
 - **ACCESS-01** needs destination-specific previews. The access screen presents a shared set of examples.
 - **RECOMMEND-02** needs a dedicated empty state for a learner with no recommendations.
 - **RES-03, EXAM-01, EXAM-02** still need file error feedback, distinct exam and correction downloads, or an untimed attempt preview, respectively.
-- **QUESTION-01–03, QUESTION-05–06, QUESTION-08** still need question-specific authoring or error states and a remove action on the question list. Matching and ordering use native selects for learners and text mapping in the shared editor.
+- Matching and ordering use native selects for learners and text mapping in the shared editor.
 - **EXERCISE-03, EXAM-03** need histories scoped to the relevant exercise or exam. Both currently show the same mixed activity table.
 
 The broader keyboard, text zoom, reduced motion, and multilingual checks remain open under **BASE-13** and **RELEASE-08**.

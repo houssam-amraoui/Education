@@ -35,6 +35,26 @@ class PrototypeController extends Controller
     {
         $screens = Prototype::screens();
         $screen = $screens[$request->route('screen')];
+        $untimedExam = in_array($screen['id'], ['G15', 'S07', 'S08', 'S09'], true)
+            && $request->query('timing') === 'untimed';
+        $examTiming = $untimedExam ? ['timing' => 'untimed'] : [];
+        $exerciseAttempts = $screen['id'] === 'S06' ? Prototype::EXERCISE_ATTEMPTS : [];
+        $exerciseResult = null;
+        if ($screen['id'] === 'S05') {
+            $attempt = $request->query('attempt', array_key_first(Prototype::EXERCISE_ATTEMPTS));
+            abort_unless(is_scalar($attempt) && isset(Prototype::EXERCISE_ATTEMPTS[$attempt]), 404);
+            $exerciseResult = Prototype::EXERCISE_ATTEMPTS[$attempt];
+        }
+
+        $examAttempts = $screen['id'] === 'S09' ? Prototype::EXAM_ATTEMPTS : [];
+        $examResult = null;
+        if ($screen['id'] === 'S08') {
+            $attempt = $request->query('attempt', array_key_first(Prototype::EXAM_ATTEMPTS));
+            abort_unless(is_string($attempt) || is_int($attempt), 404);
+            abort_unless(isset(Prototype::EXAM_ATTEMPTS[$attempt]), 404);
+            $examResult = Prototype::EXAM_ATTEMPTS[$attempt];
+        }
+
         $emptyCategory = false;
         if ($screen['id'] === 'G06') {
             $category = $request->query('category');
@@ -58,6 +78,9 @@ class PrototypeController extends Controller
 
         $url = fn (string $id, array $parameters = []): string => Prototype::url($id, $parameters);
 
-        return view('prototype.page', compact('screens', 'screen', 'area', 'breadcrumbs', 'url', 'emptyCategory'));
+        return view('prototype.page', compact(
+            'screens', 'screen', 'area', 'breadcrumbs', 'url', 'emptyCategory',
+            'exerciseAttempts', 'exerciseResult', 'examAttempts', 'examResult', 'untimedExam', 'examTiming',
+        ));
     }
 }

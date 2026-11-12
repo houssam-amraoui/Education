@@ -1,3 +1,5 @@
+import "./question-authoring";
+
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
@@ -62,6 +64,9 @@ $$("[data-prototype-form]").forEach((form) => {
     const loginError = $("[data-login-error]", form);
     const resourceFile = $("[data-resource-file]", form);
     const actions = $("[data-success-actions]", form);
+    const requiredSelections = $$("[data-required-selection]", form);
+    const requiredText = $$("[data-required-text]", form);
+    const blankAnswers = $("#blank-answers", form);
     form.noValidate = true;
     form.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -92,8 +97,29 @@ $$("[data-prototype-form]").forEach((form) => {
             }
             resourceFile.setCustomValidity(error);
         }
+        requiredSelections.forEach((group) => {
+            const first = $('input[type="radio"],input[type="checkbox"]', group);
+            first.setCustomValidity(
+                $("input:checked", group) ? "" : group.dataset.requiredSelection,
+            );
+        });
+        requiredText.forEach((field) => {
+            field.setCustomValidity(field.value.trim() ? "" : "Enter a value.");
+        });
+        if (blankAnswers?.willValidate && blankAnswers.value.trim()) {
+            const prompt = $("#question-prompt", form).value;
+            const blanks = (prompt.match(/___/g) || []).length;
+            const answers = blankAnswers.value.trim().split(/\r?\n/);
+            const hasEmptyAnswer = answers.some((line) =>
+                line.split("|").some((answer) => !answer.trim()),
+            );
+            if (blanks !== answers.length || hasEmptyAnswer) {
+                blankAnswers.setCustomValidity("Enter a line of accepted answers for each ___ in the prompt.");
+            }
+        }
         const invalid = $$("input,select,textarea", form).filter(
-            (field) => !field.validity.valid,
+            (field) => field.willValidate && !field.validity.valid &&
+                (field.type !== "radio" || field.required || field.validity.customError),
         );
         const password = $("#password", form),
             confirmation = $("#password-confirmation", form);
@@ -115,6 +141,7 @@ $$("[data-prototype-form]").forEach((form) => {
                 const link = document.createElement("a");
                 link.href = `#${field.id}`;
                 const label =
+                    field.dataset.validationLabel ||
                     $(`label[for="${field.id}"]`, form)?.textContent ||
                     field.name;
                 link.textContent = `${label}: ${field === confirmation && confirmation.value !== password.value ? "Passwords must match." : field.validationMessage}`;
@@ -139,6 +166,14 @@ $$("[data-prototype-form]").forEach((form) => {
             summary.focus();
             return;
         }
+        if (form.hasAttribute("data-attempt-form")) {
+            location.assign(form.dataset.resultUrl);
+            return;
+        }
+        if (form.hasAttribute("data-question-editor")) {
+            saveQuestionPreview(form);
+            return;
+        }
         const button = $('button[type="submit"],button:not([type])', form);
         const original = button?.textContent;
         if (button) {
@@ -159,10 +194,6 @@ $$("[data-prototype-form]").forEach((form) => {
         }, 350);
     });
 });
-$("[data-attempt-form]")?.addEventListener("submit", (event) => {
-    event.preventDefault();
-    location.assign(event.currentTarget.dataset.resultUrl);
-});
 
 function filterContent() {
     const query = ($("[data-content-search]")?.value || "")
@@ -176,9 +207,10 @@ function filterContent() {
             !!(type && item.dataset.filterType?.toLocaleLowerCase() !== type);
     });
     const visible = items.filter((item) => !item.hidden).length;
-    if ($("[data-result-count]"))
-        $("[data-result-count]").textContent =
-            `${visible} of ${items.length} sample results`;
+    if ($("[data-result-count]")) {
+        const label = $("[data-live-question-list]") ? "questions" : "sample results";
+        $("[data-result-count]").textContent = `${visible} of ${items.length} ${label}`;
+    }
     if ($("[data-empty-state]")) $("[data-empty-state]").hidden = visible !== 0;
 }
 $$("[data-filter-form]").forEach((form) =>
@@ -265,12 +297,166 @@ $$("[data-move-up]").forEach((button) =>
         button.focus();
     }),
 );
-$("[data-question-type]")?.addEventListener("change", (event) => {
-    $("[data-question-options]").hidden = [
-        "Short answer",
-        "Fill in the blanks",
-    ].includes(event.target.value);
+const questionType = $("[data-question-type]");
+function showQuestionFields() {
+    $$("[data-question-fields]", questionType.form).forEach((fields) => {
+        const active = fields.dataset.questionFields.split("|").includes(questionType.value);
+        fields.hidden = !active;
+        fields.disabled = !active;
+    });
+}
+const questionPrompts = {
+    "Multiple choice": "Choose the correct passive sentence.",
+    "Multiple selection": "Select all past participles.",
+    "True / False": "“The room was cleaned” is in the passive voice.",
+    "Fill in the blanks": "English ___ spoken here.",
+    "Short answer": "Rewrite in the passive: They built the school.",
+};
+questionType?.addEventListener("change", () => {
+    const prompt = $("#question-prompt", questionType.form);
+    if (!prompt.value.trim() || Object.values(questionPrompts).includes(prompt.value)) {
+        prompt.value = questionPrompts[questionType.value] || prompt.value;
+    }
+    showQuestionFields();
 });
+
+function questionPreviewKey(url) {
+    return "question-preview:" + new URL(url, location.href).pathname;
+}
+
+function fixtureQuestions(fixtures) {
+    return fixtures.map(([prompt, type, status], index) => ({
+        id: String(index + 1), prompt, type, status,
+    }));
+}
+
+function loadQuestionPreview(url, fixtures) {
+    const stored = sessionStorage.getItem(questionPreviewKey(url));
+    return stored === null ? fixtureQuestions(fixtures) : JSON.parse(stored);
+}
+
+function saveQuestionPreview(form) {
+    const url = form.dataset.questionEditor;
+    const questions = loadQuestionPreview(url, JSON.parse(form.dataset.questionFixtures));
+    const values = new FormData(form);
+    const entry = {
+        id: form.dataset.editQuestion || crypto.getRandomValues(new Uint32Array(4)).join("-"),
+        prompt: values.get("question-prompt").trim(),
+        type: values.get("question-type"),
+        status: values.get("publication-status") === "Published" ? "Ready" : values.get("publication-status"),
+        values: [...values],
+    };
+    const index = questions.findIndex(({ id }) => id === entry.id);
+    if (index === -1) questions.push(entry);
+    else questions[index] = entry;
+    sessionStorage.setItem(questionPreviewKey(url), JSON.stringify(questions));
+    location.assign(url);
+}
+
+if (questionType) {
+    const form = questionType.form;
+    const url = form.dataset.questionEditor;
+    const id = new URLSearchParams(location.search).get("question");
+    const record = loadQuestionPreview(url, JSON.parse(form.dataset.questionFixtures))
+        .find((question) => question.id === id);
+    if (record) {
+        form.dataset.editQuestion = record.id;
+        questionType.value = record.type;
+        $("#question-prompt", form).value = record.prompt;
+        $("#publication-status", form).value = record.status === "Ready" ? "Published" : record.status;
+        if (record.values) {
+            const values = new URLSearchParams(record.values);
+            for (const field of form.elements) {
+                if (!values.has(field.name)) continue;
+                if (field.type === "checkbox" || field.type === "radio") {
+                    field.checked = values.getAll(field.name).includes(field.value);
+                } else {
+                    field.value = values.get(field.name);
+                }
+            }
+        }
+    }
+    showQuestionFields();
+}
+
+const questionList = $("[data-question-list]");
+if (questionList) {
+    const addQuestion = $("[data-add-question]");
+    const template = questionList.firstElementChild.cloneNode(true);
+    const fixtures = [...questionList.rows].map((row) => [
+        $("strong", row).textContent, row.cells[1].textContent, row.dataset.filterType,
+    ]);
+    const questions = loadQuestionPreview(location.href, fixtures);
+    const status = $("[data-content-type]");
+    for (const value of new Set(questions.map((question) => question.status))) {
+        if (![...status.options].some((option) => option.value === value)) {
+            status.add(new Option(value));
+        }
+    }
+
+    function renderQuestions() {
+        questionList.replaceChildren(...questions.map((question) => {
+            const row = template.cloneNode(true);
+            row.dataset.questionId = question.id;
+            row.dataset.filterType = question.status;
+            $("strong", row).textContent = question.prompt;
+            row.cells[1].textContent = question.type;
+            const badge = $(".badge", row);
+            badge.textContent = question.status;
+            badge.classList.toggle("badge-success", question.status === "Ready");
+            badge.classList.toggle("badge-neutral", question.status !== "Ready");
+            const edit = $(".table-action", row);
+            const url = new URL(addQuestion.href);
+            url.search = new URLSearchParams({ mode: "edit", question: question.id });
+            edit.href = url;
+            $(".sr-only", edit).textContent = question.prompt;
+            for (const button of $$("[data-question-move]", row)) {
+                button.setAttribute("aria-label", `Move ${question.prompt} ${button.dataset.questionMove}`);
+            }
+            $("[data-question-remove]", row).setAttribute("aria-label", `Remove ${question.prompt}`);
+            return row;
+        }));
+        $("[data-empty-heading]").textContent = questions.length ? "No matching records" : "No questions yet";
+        $("[data-empty-hint]").textContent = questions.length ? "Try another name or status." : "Add a question to start the list.";
+        $("[data-reset-filters]").hidden = questions.length === 0;
+        filterContent();
+    }
+
+    renderQuestions();
+    questionList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-question-remove], [data-question-move]");
+        if (!button) return;
+
+        const row = button.closest("tr");
+        const visible = [...questionList.rows].filter((item) => !item.hidden);
+        const position = visible.indexOf(row);
+        const index = questions.findIndex(({ id }) => id === row.dataset.questionId);
+        const direction = button.dataset.questionMove;
+        let focusRow = row.dataset.questionId;
+        const output = $("[data-list-feedback]");
+        output.hidden = false;
+        if (direction) {
+            const neighbor = visible[position + (direction === "up" ? -1 : 1)];
+            if (!neighbor) {
+                output.textContent = direction === "up" ? "This question is already first." : "This question is already last.";
+                return;
+            }
+            const destination = questions.findIndex(({ id }) => id === neighbor.dataset.questionId);
+            const [question] = questions.splice(index, 1);
+            questions.splice(destination, 0, question);
+            output.textContent = "Question order updated in this preview.";
+        } else {
+            const [removed] = questions.splice(index, 1);
+            focusRow = (visible[position + 1] || visible[position - 1])?.dataset.questionId;
+            output.textContent = `Removed ${removed.prompt} from this preview.`;
+        }
+        sessionStorage.setItem(questionPreviewKey(location.href), JSON.stringify(questions));
+        renderQuestions();
+        const nextRow = [...questionList.rows].find((item) => item.dataset.questionId === focusRow && !item.hidden);
+        const nextControl = nextRow && $(direction ? `[data-question-move="${direction}"]` : ".table-action", nextRow);
+        (nextControl || addQuestion).focus();
+    });
+}
 $("[data-unlock]")?.addEventListener("click", (event) => {
     feedback(
         event.target.closest("section"),

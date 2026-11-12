@@ -4,6 +4,12 @@ namespace App\Support;
 
 class Prototype
 {
+    public const QUESTIONS = [
+        ['Choose the passive sentence', 'Multiple choice', 'Ready'],
+        ['Select the participles', 'Multiple selection', 'Ready'],
+        ['Passive statement', 'True / False', 'Draft'],
+    ];
+
     public const UNIT_CATEGORIES = [
         'vocabulary' => 'Vocabulary',
         'functions' => 'Functions',
@@ -114,6 +120,34 @@ class Prototype
 
         return $screens;
     }
+
+    public const EXERCISE_ATTEMPTS = [
+        2 => ['date' => '29 Oct 2026', 'score' => 16, 'answers' => [6 => 'The school is built.']],
+        1 => ['date' => '26 Oct 2026', 'score' => 12, 'answers' => [
+            2 => 'Written, Went',
+            5 => 'are',
+            6 => 'They built the school.',
+        ]],
+    ];
+
+    public const EXAM_ATTEMPTS = [
+        2 => ['date' => '27 Oct 2026', 'score' => 15, 'answers' => [6 => 'The school is built.']],
+        1 => ['date' => '24 Oct 2026', 'score' => 10, 'answers' => [
+            2 => 'Written, Went',
+            5 => 'are',
+            6 => 'They built the school.',
+        ]],
+    ];
+
+    public const PRACTICE_CORRECTIONS = [
+        1 => ['The report is written by them.', 'Use is + past participle for the present simple passive.'],
+        2 => ['Written, Seen', 'Written and seen are past participles. Went is the simple past of go.'],
+        3 => ['True', 'Was cleaned uses be and a past participle, which form the passive voice.'],
+        4 => ['Present simple: is written. Past simple: was written. Future simple: will be written.', 'Change the tense of be and keep the past participle written.'],
+        5 => ['is', 'English is a singular subject. Use is spoken.'],
+        6 => ['The school was built.', 'Built is the past participle of build. Use was for a singular past subject.'],
+        7 => ['The event is organized by students.', 'Start with the subject, then the passive verb, then the by-phrase.'],
+    ];
 
     public static function routeName(string $id): string
     {
