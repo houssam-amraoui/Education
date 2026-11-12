@@ -205,19 +205,19 @@ Screens: G16–G18, A25–A26; document use from G07/G14. PRD §§9–10.
 
 - [x] **RES-01** — Prototype resource listing/search/filter and resource detail using fixtures.
 - [x] **RES-02** — Prototype document viewing with a download fallback when inline viewing is unavailable.
-- [ ] **RES-03** — Prototype resource management list and create/edit upload form with file errors.
+- [x] **RES-03** — Prototype resource management list and create/edit upload form with file errors.
 
 ### 2. Backend implementation tasks
 
-- [ ] **RES-04** — Add resource metadata/type persistence and validated create/update/list/filter queries.
-- [ ] **RES-05** — Implement validated resource upload/replacement with allowed file types, size limits, and protected storage for restricted files.
+- [x] **RES-04** — Add resource metadata/type persistence and validated create/update/list/filter queries.
+- [x] **RES-05** — Implement validated resource upload/replacement with allowed file types, size limits, and protected storage for restricted files.
 - [ ] **RES-06** — Implement authorized inline/download responses for resources, lesson attachments, and exam/correction PDFs; direct URLs cannot bypass access.
-- [ ] **RES-07** — Add resource publication/archive actions and learning-content relationships.
+- [x] **RES-07** — Add resource publication/archive actions and learning-content relationships.
 
 ### 3. Integration tasks
 
-- [ ] **RES-08** — Connect resource catalog/detail/filter UI and document viewer to authorized live files.
-- [ ] **RES-09** — Connect management upload/edit/publication controls and existing attachment selectors to persisted resources.
+- [x] **RES-08** — Connect resource catalog/detail/filter UI and document viewer to authorized live files.
+- [x] **RES-09** — Connect management upload/edit/publication controls and existing attachment selectors to persisted resources.
 
 ### 4. Testing tasks
 

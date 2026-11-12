@@ -35,6 +35,11 @@ class Lesson extends Model
         return $this->belongsToMany(self::class, 'lesson_next_lesson', 'lesson_id', 'next_lesson_id');
     }
 
+    public function resources(): BelongsToMany
+    {
+        return $this->belongsToMany(Resource::class);
+    }
+
     #[Scope]
     protected function visibleToPublic(Builder $query): void
     {

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CurriculumPageController;
 use App\Http\Controllers\Admin\LessonController;
 use App\Http\Controllers\Admin\LevelController;
+use App\Http\Controllers\Admin\ResourceController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\Admin\UserController;
@@ -15,6 +16,8 @@ use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PrototypeController;
+use App\Http\Controllers\ResourceFileController;
+use App\Http\Controllers\ResourcePageController;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\StartPreviewSession;
 use App\Support\Ability;
@@ -92,6 +95,18 @@ Route::prefix('admin/curriculum')->name('admin.curriculum.')
         Route::patch('categories/{category}/lessons/{lesson}/position', [LessonController::class, 'reorder'])->whereNumber(['category', 'lesson'])->name('lessons.reorder');
     });
 
+Route::prefix('admin/library')->name('admin.library.')
+    ->middleware([SetLocale::class, 'auth:web', 'can:'.Ability::EnterAdministration->value])
+    ->group(function (): void {
+        Route::get('resources', [ResourceController::class, 'index'])->name('resources.index');
+        Route::post('resources', [ResourceController::class, 'store'])->name('resources.store');
+        Route::get('resources/create', [ResourceController::class, 'create'])->name('resources.create');
+        Route::get('resources/{resource}/edit', [ResourceController::class, 'edit'])->whereNumber('resource')->name('resources.edit');
+        Route::put('resources/{resource}', [ResourceController::class, 'update'])->whereNumber('resource')->name('resources.update');
+        Route::put('resources/{resource}/links', [ResourceController::class, 'links'])->whereNumber('resource')->name('resources.links');
+        Route::patch('resources/{resource}/status', [ResourceController::class, 'status'])->whereNumber('resource')->name('resources.status');
+    });
+
 Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): void {
     Route::get('/home', [CurriculumController::class, 'home'])->name('home');
     Route::get('/learn/paths', [CurriculumController::class, 'paths'])->name('paths');
@@ -104,6 +119,18 @@ Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): voi
         ->whereNumber(['level', 'unit', 'category'])->name('category');
     Route::get('/learn/paths/{level}/units/{unit}/categories/{category}/lessons/{lesson}', [CurriculumController::class, 'lesson'])
         ->whereNumber(['level', 'unit', 'category', 'lesson'])->name('lesson');
+});
+
+Route::middleware(SetLocale::class)->name('library.')->scopeBindings()->group(function (): void {
+    Route::get('/learn/resources', [ResourcePageController::class, 'index'])->name('resources.index');
+    Route::get('/learn/resources/{resource}', [ResourcePageController::class, 'show'])->whereNumber('resource')->name('resources.show');
+    Route::get('/learn/resources/{resource}/document', [ResourcePageController::class, 'document'])->whereNumber('resource')->name('resources.document');
+    Route::get('/learn/resources/{resource}/file/{disposition}', [ResourceFileController::class, 'show'])
+        ->whereNumber('resource')->whereIn('disposition', ['inline', 'attachment'])->name('resources.file');
+    Route::get('/learn/lessons/{lesson}/resources/{resource}/document', [ResourcePageController::class, 'lessonDocument'])
+        ->whereNumber(['lesson', 'resource'])->name('lessons.resources.document');
+    Route::get('/learn/lessons/{lesson}/resources/{resource}/file/{disposition}', [ResourceFileController::class, 'lesson'])
+        ->whereNumber(['lesson', 'resource'])->whereIn('disposition', ['inline', 'attachment'])->name('lessons.resources.file');
 });
 
 // Keep the fixture catalogue separate from live routes.

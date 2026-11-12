@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Level;
+use App\Models\Resource;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -25,6 +26,8 @@ class AccountPages
         'admin.curriculum.categories.index', 'admin.curriculum.categories.create', 'admin.curriculum.categories.edit',
         'admin.curriculum.lessons.index', 'admin.curriculum.lessons.create', 'admin.curriculum.lessons.edit',
         'admin.curriculum.lessons.relationships', 'admin.curriculum.lessons.preview',
+        'library.resources.index', 'library.resources.show', 'library.resources.document', 'library.lessons.resources.document',
+        'admin.library.resources.index', 'admin.library.resources.create', 'admin.library.resources.edit',
     ];
 
     public static function html(Request $request): bool
@@ -85,10 +88,14 @@ class AccountPages
                 'A13' => route('admin.curriculum.lessons.index'),
             ];
         }
+        if ($actor && Gate::allows('manage', Resource::class)) {
+            $destinations['A25'] = route('admin.library.resources.index');
+        }
 
         $destinations['G01'] = route('curriculum.home');
         $destinations['G02'] = route('curriculum.paths');
         $destinations['G04'] = route('curriculum.units');
+        $destinations['G16'] = route('library.resources.index');
         $destinations['A01'] = $destinations['A02'] ?? $destinations['A05'] ?? $destinations['A07'] ?? $destinations['G01'];
         $links = $data['links'] ?? [];
         $crumbs = $data['crumbs'] ?? (isset($data['parent']) ? [$data['parent']] : []);

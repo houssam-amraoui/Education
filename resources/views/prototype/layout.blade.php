@@ -18,7 +18,7 @@
     $publicNav = [['G01','home','grid'],['G02','learning_paths','book'],['G04','units','grid'],['G11','exercises','check'],['G13','exams','file'],['G16','resources','file'],['G19','videos','play'],['G09','topic_index','book'],['G08','search','search'],['G21','create_account','user'],['G22','sign_in','lock']];
     $nav = match($area) {'admin' => $adminNav, 'student' => $studentNav, default => $publicNav};
     $nav = array_filter($nav, fn ($item) => $live
-        ? $item[0] !== 'A01' && ($item[0] !== 'G01' || request()->routeIs('curriculum.*')) && isset($destinations[$item[0]])
+        ? $item[0] !== 'A01' && ($item[0] !== 'G01' || request()->routeIs('curriculum.*', 'library.*')) && isset($destinations[$item[0]])
         : Route::has(\App\Support\Prototype::routeName($item[0])));
     $activeIds = [$screen['id'], ...array_reverse(array_column($breadcrumbs, 'id'))];
     $activeNavId = collect($activeIds)->first(fn ($id) => in_array($id, array_column($nav, 0), true));
@@ -71,7 +71,7 @@
         @endif
     </aside>
     <main id="main" tabindex="-1">
-        <div @class(['content', '[overflow-wrap:anywhere]' => $live && request()->routeIs('curriculum.*', 'admin.curriculum.*')])>
+        <div @class(['content', '[overflow-wrap:anywhere]' => $live && request()->routeIs('curriculum.*', 'admin.curriculum.*', 'library.*', 'admin.library.*')])>
             <nav class="breadcrumbs" aria-label="Breadcrumb">
                 @foreach($breadcrumbs as $crumb)
                     <a href="{{ $url($crumb['id']) }}" lang="en">{{ $crumb['title'] }}</a><span aria-hidden="true">/</span>

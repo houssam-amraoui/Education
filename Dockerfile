@@ -14,6 +14,8 @@ RUN npm run build
 
 FROM php:8.2-apache
 
+RUN printf 'upload_max_filesize=10M\npost_max_size=12M\n' > "$PHP_INI_DIR/conf.d/resource-uploads.ini"
+
 # Enable Apache rewrite
 RUN a2enmod rewrite
 

@@ -7,7 +7,7 @@
         <ul>
             @foreach($errors->getMessages() as $field => $messages)
                 @foreach($messages as $message)
-                    <li>@if($panel === 'editor')<a href="#{{ $field }}">{{ $message }}</a>@else{{ $message }}@endif</li>
+                    <li>@if($panel === 'editor')<a href="#{{ Str::before($field, '.') }}">{{ $message }}</a>@else{{ $message }}@endif</li>
                 @endforeach
             @endforeach
         </ul>

@@ -19,7 +19,19 @@
                 <x-prototype.field label="Unit" name="unit-placement" :value="$category->unit->title" readonly dir="auto"/>
                 <x-prototype.field label="Category" name="category-placement" :value="$category->title" readonly dir="auto"/>
                 <x-account.field label="Lesson content" name="body" type="textarea" :value="$lesson->body" rows="8" maxlength="500000" dir="auto" help="Use plain text or HTML for headings, paragraphs, lists, and links."/>
-                <x-prototype.field label="Image or document attachment" name="lesson-attachment" type="file" disabled help="File attachments are unavailable."/>
+                <div class="field">
+                    <strong>Image or document attachment</strong>
+                    @if($lesson->exists)
+                        @forelse($lesson->resources as $resource)
+                            <small dir="auto">{{ $resource->title }}</small>
+                        @empty
+                            <small>No resources attached.</small>
+                        @endforelse
+                        <a href="{{ route($prefix.'.relationships', $parameters) }}#resource_ids">Manage resource attachments</a>
+                    @else
+                        <small>Save this lesson to attach resources.</small>
+                    @endif
+                </div>
                 <x-prototype.field label="Embedded video URL" name="lesson-video" type="url" disabled help="Embedded videos are unavailable."/>
             </x-prototype.card>
             <div class="actions">

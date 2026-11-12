@@ -7,6 +7,7 @@ use App\Http\Requests\CurriculumFiltersRequest;
 use App\Models\Category;
 use App\Models\Lesson;
 use App\Models\Level;
+use App\Models\Resource;
 use App\Models\Unit;
 use App\Support\AccountPages;
 use App\Support\CurriculumStatus;
@@ -59,6 +60,7 @@ class CurriculumPageController extends Controller
     public function editLesson(Category $category, Lesson $lesson): View
     {
         Gate::authorize('manage', $lesson);
+        $lesson->load(['resources' => fn ($resources) => $resources->matching([])]);
 
         return $this->lessonPage($category, $lesson, 'A14', 'editor', 'curriculum.lesson-editor');
     }
@@ -70,8 +72,10 @@ class CurriculumPageController extends Controller
         $candidates = Lesson::with('category.unit.level')->whereKeyNot($lesson->id)
             ->where(fn (Builder $query) => $query->where('status', '!=', CurriculumStatus::Archived)->orWhereIn('id', $selected))
             ->orderBy('category_id')->ordered()->get();
+        $attached = $lesson->resources()->pluck('resources.id');
+        $resources = Resource::matching([])->get();
 
-        return $this->lessonPage($category, $lesson, 'A15', 'relationships', 'curriculum.lesson-relationships', compact('selected', 'candidates'));
+        return $this->lessonPage($category, $lesson, 'A15', 'relationships', 'curriculum.lesson-relationships', compact('selected', 'candidates', 'attached', 'resources'));
     }
 
     public function previewLesson(Category $category, Lesson $lesson): View

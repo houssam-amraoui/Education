@@ -40,7 +40,7 @@ class LessonController extends Controller
 
     public function nextLessons(SaveNextLessonsRequest $request, Category $category, Lesson $lesson, SaveNextLessons $save): Response|RedirectResponse
     {
-        $save->handle($lesson, $request->validated('next_lesson_ids'));
+        $save->handle($lesson, $request->validated('next_lesson_ids'), $request->validated('resource_ids'));
 
         return AccountPages::html($request)
             ? redirect()->route('admin.curriculum.lessons.relationships', [$category, $lesson], status: 303)->with('status', 'Relationships saved.')

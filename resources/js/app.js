@@ -60,6 +60,7 @@ $$("[data-simulate]").forEach((button) =>
 );
 $$("[data-prototype-form]").forEach((form) => {
     const loginError = $("[data-login-error]", form);
+    const resourceFile = $("[data-resource-file]", form);
     const actions = $("[data-success-actions]", form);
     form.noValidate = true;
     form.addEventListener("submit", (event) => {
@@ -76,6 +77,21 @@ $$("[data-prototype-form]").forEach((form) => {
                 field.setAttribute("aria-describedby", field.id + "-help");
             }
         });
+        if (resourceFile) {
+            $("[data-feedback]", form).hidden = true;
+            const file = resourceFile.files[0];
+            let error = "";
+            if (!file && resourceFile.required) {
+                error = "Choose a resource file.";
+            } else if (file && !file.name.toLowerCase().endsWith(".pdf")) {
+                error = "Choose a PDF file.";
+            } else if (file && file.size === 0) {
+                error = "Choose a PDF file that is not empty.";
+            } else if (file && file.size > 10 * 1024 * 1024) {
+                error = "Choose a PDF file of 10 MiB or less.";
+            }
+            resourceFile.setCustomValidity(error);
+        }
         const invalid = $$("input,select,textarea", form).filter(
             (field) => !field.validity.valid,
         );

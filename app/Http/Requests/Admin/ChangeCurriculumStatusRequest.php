@@ -10,7 +10,7 @@ class ChangeCurriculumStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('manage', $this->route('lesson') ?? $this->route('unit') ?? $this->route('level'));
+        return $this->user()->can('manage', $this->route('lesson') ?? $this->route('unit') ?? $this->route('level') ?? $this->route('resource'));
     }
 
     public function rules(): array

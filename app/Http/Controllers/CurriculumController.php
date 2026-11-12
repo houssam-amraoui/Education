@@ -79,6 +79,7 @@ class CurriculumController extends Controller
         $unitRecord = $record->units()->visibleToPublic()->findOrFail($unit);
         $categoryRecord = $unitRecord->categories()->visibleToPublic()->findOrFail($category);
         $lessonRecord = $detail->findOrFail($categoryRecord, (int) $lesson);
+        $lessonRecord->load(['resources' => fn ($resources) => $resources->visibleTo(request()->user())->matching([])]);
 
         return AccountPages::view('G07', 'lesson', [
             'title' => $lessonRecord->title,
