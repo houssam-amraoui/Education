@@ -34,9 +34,22 @@ class Category extends Model
     }
 
     #[Scope]
-    protected function visibleToPublic(Builder $query): void
+    protected function publishedInCurriculum(Builder $query): void
     {
         $query->where($this->qualifyColumn('status'), CurriculumStatus::Published)
-            ->whereHas('unit', fn (Builder $unit) => $unit->visibleToPublic());
+            ->whereHas('unit', fn (Builder $unit) => $unit->publishedInCurriculum());
+    }
+
+    #[Scope]
+    protected function visibleToPublic(Builder $query): void
+    {
+        $query->visibleTo();
+    }
+
+    #[Scope]
+    protected function visibleTo(Builder $query, ?User $user = null): void
+    {
+        $query->where($this->qualifyColumn('status'), CurriculumStatus::Published);
+        $query->whereHas('unit', fn (Builder $parent) => $parent->visibleTo($user));
     }
 }

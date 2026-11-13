@@ -79,6 +79,7 @@
             </x-prototype.card>
             <x-prototype.card>
                 <h3>Connected content</h3>
+                @include('access.editor-link', ['accessRecord' => $lesson])
                 @if($lesson->exists)
                     <x-prototype.link :href="route($prefix.'.relationships', $parameters)">Relationships &amp; prerequisites</x-prototype.link>
                     <x-prototype.link :href="route($prefix.'.preview', $parameters)" variant="tertiary">Preview lesson →</x-prototype.link>

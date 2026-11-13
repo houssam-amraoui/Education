@@ -12,12 +12,15 @@ From the project directory:
 ```powershell
 npm.cmd install
 npm.cmd run build
-C:/xampp/php/php.exe -S 127.0.0.1:8123 -t public
+C:/xampp/php/php.exe artisan serve --host=127.0.0.1 --port=8123
 ```
 
 The PHP path above is the existing local XAMPP installation. On other machines,
 use the installed PHP executable. The existing Laravel dependencies and `.env`
 application key must be available. Database setup is not required.
+Use the local application environment for the preview routes. The Artisan server
+routes A44–A49 through Laravel even though their URLs start with `/prototype/`,
+which also contains static files.
 
 - Public home: <http://127.0.0.1:8123/>
 - Student dashboard: <http://127.0.0.1:8123/dashboard>
@@ -47,6 +50,37 @@ Per the backlog, S19–S21 and A40–A42 remain outside this phase: leaderboard,
 subscriptions, commercial fulfillment, and advertising. A37 previews streak settings
 only. Premium content is classified in G23/A38–A39, without a purchase process.
 Business analytics A49 shows an unavailable state instead of invented revenue metrics.
+
+### RELEASE-01 navigation audit
+
+The 12 November 2026 audit matched the rendered Screen directory against all 95
+inventory IDs. The preview includes 23 guest/shared, 20 student, and 46 admin
+destinations. The six absent IDs belong to the following backlog entries.
+
+| Inventory ID | Destination outside the preview | Backlog |
+| --- | --- | --- |
+| S19 | Leaderboard | RANK-01 |
+| S20 | Paid offer and access outcomes | PAID-01 |
+| S21 | Subscription terms and access status | SUB-01 |
+| A40 | Paid offer and teacher-service editors | PAID-02, SERVICE-02 |
+| A41 | Subscription plan editor | SUB-02 |
+| A42 | Advertising and promotional settings | ADS-01 |
+
+G18 has a source-return gap. From G07, **Open the study guide** opens the
+document viewer, whose **Back to resource** link leads to G17. The viewer has a
+return path for G14 exam and correction previews, while the lesson attachment
+has no return-to-lesson state. The destination itself renders.
+
+G23 previews the premium access requirement and returns to G16. The offer and
+fulfillment states belong to S20. A49 explicitly shows that business metrics
+are unavailable.
+
+The earlier RELEASE-01 note about missing file errors is stale. A26 displayed
+feedback for both a missing file and a non-PDF file at 1440px and 320px.
+
+The browser suite passed all 267 renders at 1440px, 768px, and 320px with the
+Artisan server. The full Laravel suite passed 244 tests with 2,952 assertions,
+and the production asset build passed.
 
 ## Interaction and presentation
 

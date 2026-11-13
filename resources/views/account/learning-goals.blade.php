@@ -6,6 +6,7 @@
     <form method="post" action="{{ route('account.learning-goals.update') }}" class="stack" data-live-form>
         @csrf
         @method('PUT')
+        @if($returnTo)<input type="hidden" name="return_to" value="{{ $returnTo }}">@endif
         <fieldset class="stack" id="level_ids" tabindex="-1">
             <legend class="sr-only">Learning paths</legend>
             <div class="cards three">

@@ -11,7 +11,7 @@ class VisibleVideos
     /** @param array{search?: string, level_id?: int, access?: string} $filters */
     public function paginate(?User $user, array $filters = [], int $perPage = 12): LengthAwarePaginator
     {
-        return Video::visibleTo($user)->matching($filters)->ordered()->paginate($perPage)->appends($filters);
+        return Video::visibleTo($user)->matching($filters, $user)->ordered()->paginate($perPage)->appends($filters);
     }
 
     public function findOrFail(?User $user, int $videoId): Video

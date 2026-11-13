@@ -72,7 +72,7 @@
                     @endphp
                     <x-prototype.card>
                         <span class="tile-icon"><x-prototype.icon name="book"/></span>
-                        <x-prototype.badge>Free</x-prototype.badge>
+                        <x-access-labels :record="$record"/>
                         <h2 class="card-title" dir="auto">{{ $record->title }}</h2>
                         @if($kind !== 'lesson' && $record->description)<p dir="auto">{{ $record->description }}</p>@endif
                         <small dir="auto">{{ $meta }}</small>

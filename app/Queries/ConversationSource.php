@@ -15,11 +15,6 @@ class ConversationSource
             return null;
         }
 
-        $query = $model::query();
-
-        return (match ($type) {
-            'lesson', 'exercise' => $query->visibleToPublic(),
-            'exam', 'resource', 'video' => $query->visibleTo($actor),
-        })->with($relations)->find($id);
+        return $model::visibleTo($actor)->with($relations)->find($id);
     }
 }

@@ -65,7 +65,7 @@ class TopicSearchBackendTest extends TestCase
         $topic->videos()->attach($video);
 
         $topics = app(VisibleTopics::class);
-        $student = User::factory()->create();
+        $student = User::factory()->hasAttached(Role::where('key', Role::STUDENT)->sole())->create();
 
         $this->assertSame(1, $topics->paginate(levelId: $level->id)->total());
         $this->assertSame(0, $topics->paginate(levelId: $otherLevel->id)->total());
@@ -110,7 +110,7 @@ class TopicSearchBackendTest extends TestCase
         $destination = $page->items()[0]['destination'];
         $this->assertSame(route('curriculum.lesson', [$level, $unit, $category, $lesson]), route($destination['route'], $destination['parameters']));
 
-        $results = $search->paginate('Listening', User::factory()->create());
+        $results = $search->paginate('Listening', User::factory()->hasAttached(Role::where('key', Role::STUDENT)->sole())->create());
         $this->assertSame(['lesson', 'exercise', 'exam', 'exam', 'resource', 'video', 'topic'], array_column($results->items(), 'type'));
         $this->assertSame(0, $search->paginate('Body-only phrase')->total());
         $this->assertSame(0, $search->paginate('%')->total());

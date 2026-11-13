@@ -20,11 +20,8 @@ return new class extends Migration
 
         foreach (['UPDATE', 'DELETE'] as $operation) {
             $trigger = 'point_transactions_block_'.strtolower($operation);
-            $body = match (DB::getDriverName()) {
-                'sqlite' => "BEGIN SELECT RAISE(ABORT, 'Point transactions are immutable'); END",
-                'mysql', 'mariadb' => "SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Point transactions are immutable'",
-            };
-            DB::unprepared("CREATE TRIGGER {$trigger} BEFORE {$operation} ON point_transactions FOR EACH ROW {$body}");
+            DB::unprepared("CREATE TRIGGER {$trigger} BEFORE {$operation} ON point_transactions
+                FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Point transactions are immutable'");
         }
     }
 

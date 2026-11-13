@@ -2,6 +2,7 @@
 
 namespace App\Actions\Lessons;
 
+use App\Actions\Analytics\RecordAnalyticsEvent;
 use App\Actions\Rewards\AwardLearningRewards;
 use App\Actions\Rewards\LockPointAccount;
 use App\Models\Lesson;
@@ -12,17 +13,25 @@ use Illuminate\Support\Facades\Gate;
 
 class RecordLessonProgress
 {
-    public function __construct(private LockPointAccount $lock, private AwardLearningRewards $rewards) {}
+    public function __construct(
+        private LockPointAccount $lock,
+        private AwardLearningRewards $rewards,
+        private RecordAnalyticsEvent $analytics,
+    ) {}
 
     public function view(User $student, Lesson $lesson): void
     {
         $key = $this->authorizedKey($student, $lesson);
 
-        LessonProgress::upsert(
-            $key + ['last_viewed_at' => now()->utc()->toDateTimeString()],
-            ['student_id', 'lesson_id'],
-            ['last_viewed_at'],
-        );
+        DB::transaction(function () use ($key, $student, $lesson): void {
+            $viewedAt = now()->utc()->toImmutable();
+            LessonProgress::upsert(
+                $key + ['last_viewed_at' => $viewedAt->toDateTimeString()],
+                ['student_id', 'lesson_id'],
+                ['last_viewed_at'],
+            );
+            $this->analytics->lessonOpen($student, $lesson->id, $viewedAt);
+        }, 3);
     }
 
     public function complete(User $student, Lesson $lesson): void
@@ -43,7 +52,7 @@ class RecordLessonProgress
     private function authorizedKey(User $student, Lesson $lesson): array
     {
         Gate::forUser($student)->authorize('manageLearningProfile', $student);
-        abort_unless(Lesson::visibleToPublic()->whereKey($lesson->getKey())->exists(), 404);
+        abort_unless(Lesson::visibleTo($student)->whereKey($lesson->getKey())->exists(), 404);
 
         return [
             'student_id' => $student->getKey(),

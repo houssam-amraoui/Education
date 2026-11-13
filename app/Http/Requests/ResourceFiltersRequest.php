@@ -15,12 +15,13 @@ class ResourceFiltersRequest extends FormRequest
             'type' => ['nullable', Rule::in(Resource::TYPES)],
             'access' => ['nullable', Rule::in(Resource::ACCESS)],
             'level_id' => ['nullable', 'integer', 'min:1'],
+            'selected' => ['sometimes', Rule::in(['1']), 'prohibits:level_id'],
             'page' => ['sometimes', 'integer', 'min:1'],
         ];
     }
 
     protected function getRedirectUrl(): string
     {
-        return route('library.resources.index');
+        return route('library.resources.index', $this->query('selected') === '1' ? ['selected' => 1] : []);
     }
 }

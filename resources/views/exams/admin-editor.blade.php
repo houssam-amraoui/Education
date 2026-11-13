@@ -99,6 +99,7 @@
             @if(!$document || $editing)
                 <x-prototype.card>
                     <h3>Connected content</h3>
+                @include('access.editor-link', ['accessRecord' => $exam])
                     @if($editing && !$document)
                         <x-prototype.link :href="route($prefix.'.questions.index', $exam)">Manage questions</x-prototype.link>
                     @elseif(!$editing)

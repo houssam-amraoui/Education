@@ -20,7 +20,7 @@ class ExercisePolicy extends CurriculumPolicy
 
     public function view(?User $user, Exercise $exercise): Response
     {
-        return Exercise::visibleToPublic()->whereKey($exercise->getKey())->exists()
+        return Exercise::visibleTo($user)->whereKey($exercise->getKey())->exists()
             ? Response::allow()
             : Response::denyAsNotFound();
     }

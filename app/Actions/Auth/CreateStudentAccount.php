@@ -2,6 +2,7 @@
 
 namespace App\Actions\Auth;
 
+use App\Actions\Analytics\RecordAnalyticsEvent;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -11,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class CreateStudentAccount
 {
+    public function __construct(private RecordAnalyticsEvent $analytics) {}
+
     public function handle(array $identity): User
     {
         return DB::transaction(function () use ($identity): User {
@@ -22,6 +25,7 @@ class CreateStudentAccount
                 throw ValidationException::withMessages(['email' => __('validation.unique', ['attribute' => 'email'])]);
             }
             $user->roles()->attach($student);
+            $this->analytics->registration($user);
 
             return $user;
         });

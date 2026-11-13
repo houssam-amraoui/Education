@@ -20,8 +20,9 @@ class LearningPathSelectionController extends Controller
 
         return AccountPages::view('S02', 'learning-goals', [
             'parent' => 'S01',
-            'levels' => Level::visibleToPublic()->ordered()->get(),
+            'levels' => Level::publishedInCurriculum()->ordered()->get(),
             'selected' => $student->selectedLevels()->pluck('levels.id')->all(),
+            'returnTo' => AccountPages::destination($request, $request->query('return_to')),
         ]);
     }
 
@@ -29,6 +30,7 @@ class LearningPathSelectionController extends Controller
     {
         $save->handle($request->user(), $request->validated('level_ids', []));
 
-        return redirect()->route('account.home', status: 303)->with('status', 'Learning paths saved.');
+        return redirect()->to(AccountPages::destination($request, $request->validated('return_to')) ?? route('account.home'), 303)
+            ->with('status', 'Learning paths saved.');
     }
 }

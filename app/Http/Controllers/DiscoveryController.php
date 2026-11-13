@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DiscoveryFiltersRequest;
 use App\Models\Level;
 use App\Models\Topic;
+use App\Queries\AccessDestination;
 use App\Queries\GlobalSearch;
 use App\Queries\VisibleTopics;
 use App\Support\AccountPages;
@@ -35,7 +36,7 @@ class DiscoveryController extends Controller
         ], 'discovery.catalogue');
     }
 
-    public function topic(DiscoveryFiltersRequest $request, int $topic, VisibleTopics $topics): View
+    public function topic(DiscoveryFiltersRequest $request, int $topic, VisibleTopics $topics, AccessDestination $access): View
     {
         $filters = $request->safe()->except('page');
         $level = $this->level($request);
@@ -43,9 +44,10 @@ class DiscoveryController extends Controller
         $records = collect();
         foreach (array_keys(Topic::CONTENT) as $type) {
             foreach ($record->{$type.'s'} as $item) {
-                if ((! isset($filters['access']) || ($item->access ?? 'public') === 'public')
+                $labels = $access->labels($item);
+                if ((! isset($filters['access']) || $labels->isEmpty())
                     && (! isset($filters['q']) || Str::contains($item->title, $filters['q'], ignoreCase: true))) {
-                    $records->push(LearningResult::from($type, $item));
+                    $records->push(LearningResult::from($type, $item) + ['access_labels' => $labels->all()]);
                 }
             }
         }
@@ -63,6 +65,6 @@ class DiscoveryController extends Controller
     {
         $id = $request->validated('level_id');
 
-        return $id === null ? null : Level::visibleToPublic()->findOrFail($id);
+        return $id === null ? null : Level::visibleTo($request->user())->findOrFail($id);
     }
 }

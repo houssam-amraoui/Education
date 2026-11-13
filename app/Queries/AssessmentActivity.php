@@ -15,7 +15,7 @@ class AssessmentActivity
         return ExerciseAttempt::query()
             ->where('student_id', $student->getKey())
             ->whereNotNull('submitted_at')
-            ->whereHas('exercise', fn (Builder $exercise) => $exercise->visibleToPublic()
+            ->whereHas('exercise', fn (Builder $exercise) => $exercise->visibleTo($student)
                 ->when($levelId !== null, fn (Builder $content) => $content->whereRelation('unit', 'level_id', $levelId)));
     }
 

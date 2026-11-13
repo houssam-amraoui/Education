@@ -32,9 +32,9 @@ class VisibleTopics
         $relations = [];
         foreach (array_keys(Topic::CONTENT) as $type) {
             $visible = $this->visibleContent($type, $user, $levelId);
-            $relations[$type.'s'] = function (BelongsToMany $content) use ($visible, $type, $levelId): void {
+            $relations[$type.'s'] = function (BelongsToMany $content) use ($visible, $type, $levelId, $user): void {
                 $visible($content);
-                $content->with(LearningResult::relations($type, $levelId));
+                $content->with(LearningResult::relations($type, $levelId, $user));
                 $content->orderBy($content->qualifyColumn('title'))->orderBy($content->getRelated()->getQualifiedKeyName());
             };
         }
@@ -54,17 +54,14 @@ class VisibleTopics
     private function visibleContent(string $type, ?User $user, ?int $levelId): Closure
     {
         return function (Builder|BelongsToMany $content) use ($type, $user, $levelId): void {
-            match ($type) {
-                'lesson', 'exercise' => $content->visibleToPublic(),
-                'exam', 'resource', 'video' => $content->visibleTo($user),
-            };
+            $content->visibleTo($user);
 
             if ($levelId !== null) {
                 match ($type) {
                     'lesson' => $content->whereRelation('category.unit', 'level_id', $levelId),
                     'exercise', 'exam' => $content->whereRelation('unit', 'level_id', $levelId),
                     'resource', 'video' => $content->whereHas(
-                        'levels', fn (Builder $levels) => $levels->visibleToPublic()->whereKey($levelId)
+                        'levels', fn (Builder $levels) => $levels->visibleTo($user)->whereKey($levelId)
                     ),
                 };
             }

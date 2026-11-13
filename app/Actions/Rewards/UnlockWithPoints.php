@@ -2,6 +2,7 @@
 
 namespace App\Actions\Rewards;
 
+use App\Models\Entitlement;
 use App\Models\PointCost;
 use App\Models\PointTransaction;
 use App\Models\PointUnlock;
@@ -16,9 +17,9 @@ class UnlockWithPoints
 {
     public function __construct(private LockPointAccount $lock, private PointBalance $balance) {}
 
-    public function handle(User $student, RewardTarget $target, int $targetId): PointUnlock
+    public function handle(User $student, RewardTarget $target, int $targetId, ?int $expectedPoints = null): PointUnlock
     {
-        return DB::transaction(function () use ($student, $target, $targetId): PointUnlock {
+        return DB::transaction(function () use ($student, $target, $targetId, $expectedPoints): PointUnlock {
             $this->lock->handle($student);
             Gate::forUser($student)->authorize('manageLearningProfile', $student);
 
@@ -33,6 +34,10 @@ class UnlockWithPoints
 
             abort_unless($cost->enabled && $cost->points > 0 && $target->canUnlock($student, $targetId), 404);
 
+            if ($expectedPoints !== null && $cost->points !== $expectedPoints) {
+                throw ValidationException::withMessages(['points' => __('The points cost changed. Review the new cost before unlocking.')]);
+            }
+
             if ($this->balance->for($student) < $cost->points) {
                 throw ValidationException::withMessages(['points' => __('Insufficient point balance.')]);
             }
@@ -45,7 +50,17 @@ class UnlockWithPoints
                 'recorded_at' => $time,
             ]);
 
-            return PointUnlock::create($key + ['point_transaction_id' => $debit->id, 'unlocked_at' => $time]);
+            $unlock = PointUnlock::create($key + ['point_transaction_id' => $debit->id, 'unlocked_at' => $time]);
+            Entitlement::create([
+                'student_id' => $student->getKey(),
+                'target_type' => $target->value,
+                'target_id' => $targetId,
+                'source' => 'points',
+                'point_unlock_id' => $unlock->id,
+                'granted_at' => $time,
+            ]);
+
+            return $unlock;
         }, 3);
     }
 }

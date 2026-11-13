@@ -4,15 +4,16 @@ namespace App\Queries;
 
 use App\Models\Category;
 use App\Models\Lesson;
+use App\Models\User;
 
 class VisibleLessonDetail
 {
-    public function findOrFail(Category $category, int $lessonId): Lesson
+    public function findOrFail(Category $category, int $lessonId, ?User $viewer = null): Lesson
     {
         return $category->lessons()
-            ->visibleToPublic()
+            ->visibleTo($viewer)
             ->with('category.unit.level')
-            ->withPublicNextLessons()
+            ->withVisibleNextLessons($viewer)
             ->findOrFail($lessonId);
     }
 }

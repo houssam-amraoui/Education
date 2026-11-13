@@ -40,7 +40,7 @@
             @foreach($records as $record)
                 <x-prototype.card>
                     <div class="video-thumbnail"><x-prototype.icon name="play"/><span>{{ $record->provider === 'youtube' ? 'YouTube' : ucfirst($record->provider) }}</span></div>
-                    <div class="row between"><x-prototype.badge>{{ __("library.access.$record->access") }}</x-prototype.badge></div>
+                    <div class="row between"><x-access-labels :record="$record"/></div>
                     <h2 class="card-title" dir="auto">{{ $record->title }}</h2>
                     @if($record->description)<p dir="auto">{{ $record->description }}</p>@endif
                     <x-prototype.link :href="route('library.videos.show', $record)">Explore <x-prototype.icon name="arrow"/></x-prototype.link>

@@ -53,7 +53,7 @@
                             <option value="{{ $access }}" @selected($value('access') === $access)>{{ __("library.access.$access") }}</option>
                         @endforeach
                     </select>
-                    <small id="access-help">Learners can open published Free and Registered-user only videos.</small>
+                    <small id="access-help">Access also depends on configured rules.</small>
                     @error('access')<small id="access-error" class="field-error">{{ $message }}</small>@enderror
                 </div>
                 @if($editing && $video->status->value !== 'archived')
@@ -81,6 +81,7 @@
             </x-prototype.card>
             <x-prototype.card>
                 <h3>Connected content</h3>
+                @include('access.editor-link', ['accessRecord' => $video])
                 <div class="field">
                     <label for="lesson_ids">Lessons</label>
                     <input type="hidden" name="lesson_ids" form="video-editor" value="">

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Policies\ContentAccess;
 use App\Support\CurriculumStatus;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -56,18 +57,18 @@ class Resource extends Model
     }
 
     #[Scope]
-    protected function visibleTo(Builder $query, ?User $user): void
+    protected function visibleTo(Builder $query, ?User $user, bool $unlocking = false): void
     {
-        $query->publishedForDelivery()
-            ->whereIn($this->qualifyColumn('access'), $user ? ['public', 'registered'] : ['public']);
+        $query->publishedForDelivery($user);
+        app(ContentAccess::class)->constrain($query, $user, $this->qualifyColumn('access'), $unlocking);
     }
 
     #[Scope]
-    protected function publishedForDelivery(Builder $query): void
+    protected function publishedForDelivery(Builder $query, ?User $user = null): void
     {
         $query->where($this->qualifyColumn('status'), CurriculumStatus::Published)
             ->whereNotNull($this->qualifyColumn('stored_file_id'))
             ->where(fn (Builder $placements) => $placements->doesntHave('levels')
-                ->orWhereHas('levels', fn (Builder $levels) => $levels->visibleToPublic()));
+                ->orWhereHas('levels', fn (Builder $levels) => $levels->visibleTo($user)));
     }
 }

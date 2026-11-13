@@ -19,7 +19,7 @@ class PrerequisiteCompletion
             return $this->forContent($viewer, $content)['lessons']->load('category.unit.level');
         }
 
-        return $content->prerequisiteLessons()->visibleToPublic()->ordered()->with('category.unit.level')->get();
+        return $content->prerequisiteLessons()->visibleTo($viewer)->ordered()->with('category.unit.level')->get();
     }
 
     /** @return array{lessons: Collection<int, Lesson>, required: bool, allows_access: bool} */
@@ -27,11 +27,11 @@ class PrerequisiteCompletion
     {
         Gate::forUser($student)->authorize('manageLearningProfile', $student);
 
-        $visibleContent = $content instanceof Exam ? Exam::visibleTo($student) : $content->newQuery()->visibleToPublic();
+        $visibleContent = $content->newQuery()->visibleTo($student);
         abort_unless($visibleContent->whereKey($content->getKey())->exists(), 404);
 
         $links = $content->prerequisiteLessons();
-        $visibility = Lesson::visibleToPublic()
+        $visibility = Lesson::visibleTo($student)
             ->whereColumn('lessons.id', $links->getQualifiedRelatedPivotKeyName())
             ->selectRaw('1');
 

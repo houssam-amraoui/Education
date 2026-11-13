@@ -60,7 +60,7 @@
                             <option value="{{ $access }}" @selected($value('access') === $access)>{{ __("library.access.$access") }}</option>
                         @endforeach
                     </select>
-                    <small id="access-help">Learners can open Free and Registered-user only resources.</small>
+                    <small id="access-help">Access also depends on configured rules.</small>
                     @error('access')<small id="access-error" class="field-error">{{ $message }}</small>@enderror
                 </div>
                 @if($editing && $resource->status->value !== 'archived')
@@ -88,6 +88,7 @@
             </x-prototype.card>
             <x-prototype.card>
                 <h3>Connected content</h3>
+                @include('access.editor-link', ['accessRecord' => $resource])
                 <div class="field">
                     <label for="lesson_ids">Lessons</label>
                     <input type="hidden" name="lesson_ids" form="resource-editor" value="">

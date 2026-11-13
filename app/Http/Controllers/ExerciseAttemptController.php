@@ -25,8 +25,10 @@ class ExerciseAttemptController extends Controller
     public function catalogue(CurriculumFiltersRequest $request, VisibleExercises $exercises): View
     {
         $filters = $request->validated();
-        $level = isset($filters['level_id']) ? Level::visibleToPublic()->findOrFail($filters['level_id']) : null;
-        $records = $exercises->paginate($level?->id, search: $filters['search'] ?? null)->appends($filters);
+        $level = isset($filters['level_id']) ? Level::visibleTo($request->user())->findOrFail($filters['level_id']) : null;
+        $records = $exercises->paginate(
+            $level?->id, search: $filters['search'] ?? null, viewer: $request->user(), freeOnly: ($filters['access'] ?? null) === 'free',
+        )->appends($filters);
 
         return AccountPages::view('G11', 'list', compact('filters', 'level', 'records') + ['crumbs' => ['G01']], 'exercises.catalogue');
     }

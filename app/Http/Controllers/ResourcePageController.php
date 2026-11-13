@@ -16,8 +16,16 @@ class ResourcePageController extends Controller
     public function index(ResourceFiltersRequest $request): View
     {
         $filters = $request->safe()->except('page');
-        $level = isset($filters['level_id']) ? Level::visibleToPublic()->findOrFail($filters['level_id']) : null;
-        $records = Resource::visibleTo($request->user())->matching($filters)->paginate(12)->appends($filters);
+        $level = isset($filters['level_id']) ? Level::visibleTo($request->user())->findOrFail($filters['level_id']) : null;
+        $resources = Resource::visibleTo($request->user())->matching($filters);
+        if (isset($filters['selected'])) {
+            $student = $request->user();
+            Gate::authorize('manageLearningProfile', $student);
+            $selectedLevelIds = $student->selectedLevels()->visibleTo($student)->pluck('levels.id')->all();
+            $resources->whereHas('levels', fn ($levels) => $levels->whereKey($selectedLevelIds));
+        }
+
+        $records = $resources->paginate(12)->appends($filters);
 
         return AccountPages::view('G16', 'list', compact('records', 'filters', 'level') + ['crumbs' => ['G01']], 'library.catalogue');
     }
@@ -26,8 +34,8 @@ class ResourcePageController extends Controller
     {
         Gate::authorize('view', $resource);
         $resource->load([
-            'levels' => fn ($levels) => $levels->visibleToPublic()->ordered(),
-            'lessons' => fn ($lessons) => $lessons->visibleToPublic()->with('category.unit.level')->orderBy('title'),
+            'levels' => fn ($levels) => $levels->visibleTo(request()->user())->ordered(),
+            'lessons' => fn ($lessons) => $lessons->visibleTo(request()->user())->with('category.unit.level')->orderBy('title'),
             'storedFile',
         ]);
 
@@ -46,7 +54,7 @@ class ResourcePageController extends Controller
 
     public function lessonDocument(Lesson $lesson, Resource $resource, DocumentResponse $documents): View
     {
-        $lesson = Lesson::visibleToPublic()->with('category.unit.level')->findOrFail($lesson->id);
+        $lesson = Lesson::visibleTo(request()->user())->with('category.unit.level')->findOrFail($lesson->id);
 
         return $this->viewer($resource, $documents, $lesson);
     }

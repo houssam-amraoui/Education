@@ -47,7 +47,7 @@ class VisualPrototypeTest extends TestCase
     public function test_sample_results_and_unavailable_business_metrics_are_explicit(): void
     {
         $this->get('/exercises/passive-voice/results')->assertSee('Fixed sample result');
-        $this->get('/admin/analytics/business')->assertSee('Business metrics aren’t available yet.');
+        $this->get(route(Prototype::routeName('A49')))->assertSee('Business metrics aren’t available yet.');
     }
 
     public function test_next_learning_previews_show_fixture_reasons_and_an_empty_state(): void
@@ -129,6 +129,40 @@ class VisualPrototypeTest extends TestCase
                 $this->assertSame(['GET', 'HEAD'], $route->methods());
             }
         }
+    }
+
+    public function test_access_previews_show_the_requested_destination_and_its_recovery_action(): void
+    {
+        $exercise = '/exercises/passive-voice';
+        $exam = '/exams/unit-one';
+
+        foreach ([
+            ['exercise-attempt', $exercise, 'Passive voice practice', 'Sign-in required', '/login?return=exercise'],
+            ['unit-exam', $exam, 'Unit 1 · Practice exam', 'Learning level required', '/learning-goals'],
+            ['passive-voice-practice', $exercise, 'Passive voice practice', 'Prerequisite required', '/lessons/passive-voice'],
+            ['grammar-worksheet', '/resources', 'Grammar revision worksheet', '100 points required', '/rewards/unlock'],
+            ['revision-pack', '/resources', 'Complete revision pack', 'Premium content', null],
+        ] as [$destination, $source, $title, $requirement, $action]) {
+            $path = '/access?destination='.$destination;
+            $this->get($source)->assertSee('href="'.url($path).'"', false);
+            $this->get('/access')->assertSee('href="'.url($path).'"', false);
+
+            $response = $this->get($path)
+                ->assertOk()
+                ->assertSeeInOrder([$title, $requirement])
+                ->assertSee('href="'.url($source).'"', false)
+                ->assertDontSee('Explore the sample states below.');
+
+            if ($action !== null) {
+                $response->assertSee('class="button button-primary"', false)
+                    ->assertSee('href="'.url($action).'"', false);
+            } else {
+                $response->assertDontSee('class="button button-primary"', false);
+            }
+        }
+
+        $this->get('/access?destination=unknown')->assertNotFound();
+        $this->get('/access?destination[]=unit-exam')->assertNotFound();
     }
 
     public function test_exercise_history_links_to_distinct_sample_corrections(): void

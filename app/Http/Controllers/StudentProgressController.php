@@ -17,10 +17,10 @@ class StudentProgressController extends Controller
     {
         $student = $request->user();
         Gate::authorize('manageLearningProfile', $student);
-        $selected = $student->selectedLevels()->visibleToPublic()->ordered()->get();
-        $path = $level === null ? null : Level::visibleToPublic()->findOrFail($level);
+        $selected = $student->selectedLevels()->visibleTo($student)->ordered()->get();
+        $path = $level === null ? null : Level::visibleTo($student)->findOrFail($level);
         $levelId = $path?->id;
-        $groups = $path ? $path->units()->visibleToPublic()->ordered()->get() : Level::visibleToPublic()->ordered()->get();
+        $groups = $path ? $path->units()->visibleTo($student)->ordered()->get() : Level::visibleTo($student)->ordered()->get();
 
         return AccountPages::view($path ? 'S11' : 'S10', 'overview', [
             'title' => $path ? $path->title.' progress' : null,

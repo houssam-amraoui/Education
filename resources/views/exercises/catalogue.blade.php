@@ -37,7 +37,7 @@
             @foreach($records as $record)
                 <x-prototype.card>
                     <span class="tile-icon"><x-prototype.icon name="book"/></span>
-                    <div class="row between"><x-prototype.badge>Free</x-prototype.badge></div>
+                    <div class="row between"><x-access-labels :record="$record"/></div>
                     <h2 class="card-title" dir="auto">{{ $record->title }}</h2>
                     <p><bdi>{{ $record->unit->level->title }}</bdi> · <bdi>{{ $record->unit->title }}</bdi></p>
                     <small>{{ trans_choice('{1} :count question|[0,*] :count questions', $record->questions_count) }} · Untimed</small>

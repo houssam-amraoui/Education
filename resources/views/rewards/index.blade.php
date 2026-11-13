@@ -35,5 +35,15 @@
         </nav>
     @endif
     <div class="section-heading"><h2>Put your points to good use</h2></div>
-    <x-prototype.card><p>No points unlocks are available yet.</p></x-prototype.card>
+    <div class="stack">
+        @forelse($unlocks as $unlock)
+            <x-prototype.card>
+                <h3 dir="auto">{{ $unlock['title'] }}</h3>
+                <x-prototype.badge>{{ $unlock['points'] }} points required</x-prototype.badge>
+                <x-prototype.link :href="$unlock['url']">View requirements</x-prototype.link>
+            </x-prototype.card>
+        @empty
+            <x-prototype.card><p>No points unlocks are available yet.</p></x-prototype.card>
+        @endforelse
+    </div>
 @endsection

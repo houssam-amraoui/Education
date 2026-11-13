@@ -7,6 +7,7 @@ use App\Actions\Messaging\CreateConversation;
 use App\Http\Requests\ConversationFiltersRequest;
 use App\Http\Requests\CreateConversationRequest;
 use App\Http\Requests\ReplyToConversationRequest;
+use App\Policies\ContentAccess;
 use App\Queries\Conversations;
 use App\Support\AccountPages;
 use App\Support\ConversationPages;
@@ -28,10 +29,20 @@ class ConversationController extends Controller
         ], 'messages.inbox');
     }
 
-    public function create(Request $request, ?string $type = null, ?int $source = null): View
+    public function create(Request $request, ?string $type = null, ?int $source = null): View|RedirectResponse
     {
         $context = $this->pages->source($request->user(), $type, $source);
         abort_if($type !== null && $context === null, 404);
+        if (! app(ContentAccess::class)->allowsAskTeacher($request->user())) {
+            if ($type !== null) {
+                $request->session()->put('access.ask_teacher_source', ['type' => $type, 'source' => $source]);
+            } else {
+                $request->session()->forget('access.ask_teacher_source');
+            }
+
+            return redirect()->route('access.requirements', ['ask_teacher', 0]);
+        }
+        $request->session()->forget('access.ask_teacher_source');
 
         return AccountPages::view('S14', 'editor', [
             'parent' => 'S13', 'context' => $context,

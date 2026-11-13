@@ -11,10 +11,10 @@ use Illuminate\Support\Collection;
 
 class VisibleQuestions
 {
-    public function forExercise(int $exerciseId): Collection
+    public function forExercise(int $exerciseId, ?User $user = null): Collection
     {
         return $this->project(Question::whereHas('exercise', fn (Builder $exercise) => $exercise
-            ->whereKey($exerciseId)->visibleToPublic()));
+            ->whereKey($exerciseId)->visibleTo($user)));
     }
 
     public function forExam(int $examId, ?User $user = null): Collection

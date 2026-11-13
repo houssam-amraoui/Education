@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasCurriculumOrder;
+use App\Policies\ContentAccess;
 use App\Support\CurriculumStatus;
 use App\Support\LessonRichText;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -57,17 +58,31 @@ class Lesson extends Model
     }
 
     #[Scope]
-    protected function visibleToPublic(Builder $query): void
+    protected function publishedInCurriculum(Builder $query): void
     {
         $query->where($this->qualifyColumn('status'), CurriculumStatus::Published)
-            ->whereHas('category', fn (Builder $category) => $category->visibleToPublic());
+            ->whereHas('category', fn (Builder $category) => $category->publishedInCurriculum());
     }
 
     #[Scope]
-    protected function withPublicNextLessons(Builder $query): void
+    protected function visibleToPublic(Builder $query): void
+    {
+        $query->visibleTo();
+    }
+
+    #[Scope]
+    protected function visibleTo(Builder $query, ?User $user = null): void
+    {
+        $query->where($this->qualifyColumn('status'), CurriculumStatus::Published);
+        $query->whereHas('category', fn (Builder $parent) => $parent->visibleTo($user));
+        app(ContentAccess::class)->constrain($query, $user);
+    }
+
+    #[Scope]
+    protected function withVisibleNextLessons(Builder $query, ?User $user = null): void
     {
         $query->with([
-            'nextLessons' => fn (BelongsToMany $links) => $links->visibleToPublic()->ordered()->with('category.unit.level'),
+            'nextLessons' => fn (BelongsToMany $links) => $links->visibleTo($user)->ordered()->with('category.unit.level'),
         ]);
     }
 

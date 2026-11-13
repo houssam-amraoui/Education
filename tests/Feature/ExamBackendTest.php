@@ -146,7 +146,7 @@ class ExamBackendTest extends TestCase
         $this->assertTrue($catalogue->findOrFail($visible->id)->is($visible));
         $this->assertTrue(Gate::allows('view', $visible));
         $this->assertSame(404, Gate::inspect('view', $expired)->status());
-        $this->assertSame(3, $catalogue->paginate(User::factory()->create())->total());
+        $this->assertSame(3, $catalogue->paginate(User::factory()->hasAttached(Role::where('key', Role::STUDENT)->sole())->create())->total());
 
         $this->expectException(ModelNotFoundException::class);
         $catalogue->findOrFail($expired->id);
@@ -173,7 +173,7 @@ class ExamBackendTest extends TestCase
         auth('web')->logout();
         $this->get($paper)->assertNotFound();
         $this->get($correction)->assertNotFound();
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->hasAttached(Role::where('key', Role::STUDENT)->sole())->create());
 
         $exam = Exam::findOrFail($id);
         $response = $this->get($paper)->assertOk()->assertHeader('Content-Type', 'application/pdf')
@@ -226,6 +226,8 @@ class ExamBackendTest extends TestCase
         $catalogue = route('curriculum.exams.index', ['level_id' => $unit->level_id, 'type' => 'document']);
         $paper = route('curriculum.exams.document', [$exam, 'paper']);
         $correction = route('curriculum.exams.document', [$exam, 'correction']);
+        $this->get($detail)->assertNotFound();
+        $this->actingAs(User::factory()->hasAttached(Role::where('key', Role::STUDENT)->sole())->create());
         $this->get($catalogue)->assertOk()->assertSee($detail);
         $this->get($detail)->assertOk()->assertSee($paper)->assertSee($correction);
         $this->get($paper)->assertOk()->assertSee(route('curriculum.exams.file', [$exam, 'paper', 'inline']));

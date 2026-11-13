@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccessPageController;
 use App\Http\Middleware\StartPreviewSession;
 use App\Support\AccountPages;
 use Illuminate\Foundation\Application;
@@ -23,10 +24,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request): bool => $request->expectsJson()
-                || ($request->routeIs('account.*', 'admin.accounts.*', 'admin.curriculum.*', 'admin.library.*', 'admin.messages.*') && ! AccountPages::html($request))
+                || ($request->routeIs('account.*', 'admin.overview', 'admin.settings.*', 'admin.accounts.*', 'admin.curriculum.*', 'admin.library.*', 'admin.messages.*', 'admin.access-rules.*') && ! AccountPages::html($request))
         );
         $exceptions->render(function (HttpExceptionInterface $exception, Request $request) {
-            if ($exception->getStatusCode() === 403 && $request->routeIs('admin.accounts.*', 'admin.curriculum.*', 'admin.library.*', 'admin.messages.*') && AccountPages::html($request)) {
+            if ($exception->getStatusCode() === 404 && AccountPages::html($request)) {
+                $response = app(AccessPageController::class)->deniedPage($request);
+                if ($response !== null) {
+                    return $response->header('Cache-Control', 'private, no-store');
+                }
+            }
+            if ($exception->getStatusCode() === 403 && $request->routeIs('admin.overview', 'admin.settings.*', 'admin.accounts.*', 'admin.curriculum.*', 'admin.library.*', 'admin.messages.*', 'admin.access-rules.*') && AccountPages::html($request)) {
                 return response(AccountPages::view('A01', 'restricted'), 403);
             }
             if ($exception->getStatusCode() === 403 && $request->routeIs('account.profile.*', 'account.preferences.*') && AccountPages::html($request)) {

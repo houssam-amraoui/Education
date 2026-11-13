@@ -35,16 +35,8 @@ return new class extends Migration
             $table->unique(['exam_id', 'position']);
         });
 
-        if (DB::getDriverName() === 'sqlite') {
-            foreach (['INSERT', 'UPDATE'] as $event) {
-                DB::statement("CREATE TRIGGER questions_owner_{$event} BEFORE {$event} ON questions
-                    WHEN (NEW.exercise_id IS NULL) = (NEW.exam_id IS NULL) OR NEW.exam_type <> 'interactive'
-                    BEGIN SELECT RAISE(ABORT, 'A question must belong to an exercise or interactive exam'); END");
-            }
-        } else {
-            DB::statement('ALTER TABLE questions ADD CONSTRAINT questions_single_owner
-                CHECK ((exercise_id IS NULL) <> (exam_id IS NULL) AND exam_type = \'interactive\')');
-        }
+        DB::statement('ALTER TABLE questions ADD CONSTRAINT questions_single_owner
+            CHECK ((exercise_id IS NULL) <> (exam_id IS NULL) AND exam_type = \'interactive\')');
     }
 
     public function down(): void

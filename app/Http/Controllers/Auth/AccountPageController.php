@@ -20,8 +20,13 @@ use Illuminate\View\View;
 
 class AccountPageController extends Controller
 {
-    public function register(): View
+    public function register(Request $request): View
     {
+        $destination = AccountPages::destination($request, $request->query('return_to'));
+        if ($destination !== null) {
+            $request->session()->put('url.intended', $destination);
+        }
+
         return AccountPages::view('G21', 'auth');
     }
 
@@ -50,7 +55,7 @@ class AccountPageController extends Controller
             return AccountPages::view('S01', 'home');
         }
 
-        $levels = $student->selectedLevels()->visibleToPublic()->ordered()->get();
+        $levels = $student->selectedLevels()->visibleTo($student)->ordered()->get();
         $selected = $levels->modelKeys();
 
         return AccountPages::view('S01', 'dashboard', [

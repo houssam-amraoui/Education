@@ -5,6 +5,7 @@
     @include('curriculum.feedback')
     <form class="filter-bar" method="get" action="{{ route('library.resources.index') }}" data-live-form>
         @if($level)<input type="hidden" name="level_id" value="{{ $level->id }}">@endif
+        @if(isset($filters['selected']))<input type="hidden" name="selected" value="1">@endif
         <div class="field grow">
             <label for="content-search">Find in {{ $screen['title'] }}</label>
             <input id="content-search" name="search" type="search" placeholder="Try passive voice" value="{{ $filters['search'] ?? '' }}" maxlength="255">
@@ -32,14 +33,18 @@
     <div class="row between results-meta">
         <span>{{ trans_choice('{1} :count result|[0,*] :count results', $records->total()) }}</span>
         @if($level)<small dir="auto">{{ $level->title }}</small>@endif
+        @if(isset($filters['selected']))<small>Your learning paths</small>@endif
     </div>
     @if($records->isEmpty())
         <div class="empty-state">
             <x-prototype.icon name="search"/>
-            @if(array_filter($filters, fn ($value) => $value !== null) || $records->currentPage() > 1)
+            @if(isset($filters['search']) || isset($filters['type']) || isset($filters['access']) || $records->currentPage() > 1)
                 <h2>No matching content</h2>
                 <p>Try a different search or reset your filters.</p>
-                <x-prototype.link :href="route('library.resources.index')">Reset filters</x-prototype.link>
+                <x-prototype.link :href="route('library.resources.index', array_intersect_key($filters, array_flip(['selected', 'level_id'])))">Reset filters</x-prototype.link>
+            @elseif(isset($filters['selected']))
+                <h2>No resources available for your learning paths</h2>
+                <x-prototype.link :href="route('account.learning-goals.show')">Change learning paths</x-prototype.link>
             @else
                 <h2>No resources available yet</h2>
             @endif
@@ -49,7 +54,7 @@
             @foreach($records as $record)
                 <x-prototype.card>
                     <span class="tile-icon"><x-prototype.icon name="file"/></span>
-                    <div class="row between"><x-prototype.badge>{{ __("library.access.$record->access") }}</x-prototype.badge></div>
+                    <div class="row between"><x-access-labels :record="$record"/></div>
                     <h2 class="card-title" dir="auto">{{ $record->title }}</h2>
                     @if($record->description)<p dir="auto">{{ $record->description }}</p>@endif
                     <small>{{ __("library.types.$record->type") }}@if($record->type !== 'pdf') · PDF @endif</small>

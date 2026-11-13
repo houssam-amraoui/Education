@@ -34,7 +34,7 @@ class CurriculumController extends Controller
 
     public function level(string $level): View
     {
-        $record = Level::visibleToPublic()->withCount(['units' => fn (Builder $units) => $units->visibleToPublic()])->findOrFail($level);
+        $record = Level::visibleTo(request()->user())->withCount(['units' => fn (Builder $units) => $units->visibleTo(request()->user())])->findOrFail($level);
 
         return AccountPages::view('G03', 'level', [
             'level' => $record,
@@ -45,8 +45,8 @@ class CurriculumController extends Controller
 
     public function units(CurriculumFiltersRequest $request, ?string $level = null): View
     {
-        $record = $level === null ? null : Level::visibleToPublic()->findOrFail($level);
-        $query = Unit::visibleToPublic()->with('level')->withCount(['categories' => fn (Builder $categories) => $categories->visibleToPublic()]);
+        $record = $level === null ? null : Level::visibleTo(request()->user())->findOrFail($level);
+        $query = Unit::visibleTo(request()->user())->with('level')->withCount(['categories' => fn (Builder $categories) => $categories->visibleTo(request()->user())]);
 
         if ($record) {
             $query->whereBelongsTo($record);
@@ -59,23 +59,23 @@ class CurriculumController extends Controller
 
     public function unit(CurriculumFiltersRequest $request, string $level, string $unit): View
     {
-        $record = Level::visibleToPublic()->findOrFail($level);
-        $unitRecord = $record->units()->visibleToPublic()->findOrFail($unit);
+        $record = Level::visibleTo(request()->user())->findOrFail($level);
+        $unitRecord = $record->units()->visibleTo(request()->user())->findOrFail($unit);
 
         return $this->listing(
-            'G05', $request, $unitRecord->categories()->visibleToPublic()->ordered()->getQuery(),
+            'G05', $request, $unitRecord->categories()->visibleTo(request()->user())->ordered()->getQuery(),
             ['G01', 'G02', 'G03', 'G04'], $record, $unitRecord,
         );
     }
 
     public function category(CurriculumFiltersRequest $request, string $level, string $unit, string $category): View
     {
-        $record = Level::visibleToPublic()->findOrFail($level);
-        $unitRecord = $record->units()->visibleToPublic()->findOrFail($unit);
-        $categoryRecord = $unitRecord->categories()->visibleToPublic()->findOrFail($category);
+        $record = Level::visibleTo(request()->user())->findOrFail($level);
+        $unitRecord = $record->units()->visibleTo(request()->user())->findOrFail($unit);
+        $categoryRecord = $unitRecord->categories()->visibleTo(request()->user())->findOrFail($category);
 
         return $this->listing(
-            'G06', $request, $categoryRecord->lessons()->visibleToPublic()->ordered()->getQuery(),
+            'G06', $request, $categoryRecord->lessons()->visibleTo(request()->user())->ordered()->getQuery(),
             ['G01', 'G02', 'G03', 'G04', 'G05'], $record, $unitRecord, $categoryRecord,
         );
     }
@@ -90,10 +90,10 @@ class CurriculumController extends Controller
         PrerequisiteCompletion $preparation,
         LearningRecommendations $recommendations,
     ): View {
-        $record = Level::visibleToPublic()->findOrFail($level);
-        $unitRecord = $record->units()->visibleToPublic()->findOrFail($unit);
-        $categoryRecord = $unitRecord->categories()->visibleToPublic()->findOrFail($category);
-        $lessonRecord = $detail->findOrFail($categoryRecord, (int) $lesson);
+        $record = Level::visibleTo(request()->user())->findOrFail($level);
+        $unitRecord = $record->units()->visibleTo(request()->user())->findOrFail($unit);
+        $categoryRecord = $unitRecord->categories()->visibleTo(request()->user())->findOrFail($category);
+        $lessonRecord = $detail->findOrFail($categoryRecord, (int) $lesson, request()->user());
         $student = request()->user();
         $canTrack = $student && Gate::allows('manageLearningProfile', $student);
         if ($canTrack && request()->isMethod('GET')) {
@@ -119,7 +119,7 @@ class CurriculumController extends Controller
 
     public function completeLesson(string $level, string $unit, string $category, string $lesson, RecordLessonProgress $progress): RedirectResponse
     {
-        $record = Lesson::visibleToPublic()->whereRelation('category', 'id', $category)
+        $record = Lesson::visibleTo(request()->user())->whereRelation('category', 'id', $category)
             ->whereRelation('category.unit', 'id', $unit)
             ->whereRelation('category.unit.level', 'id', $level)->findOrFail($lesson);
         $progress->complete(request()->user(), $record);
@@ -130,7 +130,7 @@ class CurriculumController extends Controller
 
     private function levelsQuery(): Builder
     {
-        return Level::visibleToPublic()->withCount(['units' => fn (Builder $units) => $units->visibleToPublic()])->ordered();
+        return Level::visibleTo(request()->user())->withCount(['units' => fn (Builder $units) => $units->visibleTo(request()->user())])->ordered();
     }
 
     private function listing(string $id, CurriculumFiltersRequest $request, Builder $query, array $crumbs, ?Level $level = null, ?Unit $unit = null, ?Category $category = null): View

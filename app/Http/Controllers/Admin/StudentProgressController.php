@@ -19,7 +19,7 @@ class StudentProgressController extends Controller
     public function show(Request $request, User $user, ManagedStudentProgress $managed, StudentProgress $progress): View
     {
         $completion = $managed->completion($request->user(), $user);
-        $levels = $user->selectedLevels()->visibleToPublic()->ordered()->get();
+        $levels = $user->selectedLevels()->visibleTo($user)->ordered()->get();
 
         return AccountPages::view('A04', 'overview', [
             'parent' => 'A02',

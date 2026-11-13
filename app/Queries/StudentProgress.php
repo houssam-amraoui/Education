@@ -5,6 +5,7 @@ namespace App\Queries;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -15,15 +16,16 @@ class StudentProgress
 {
     public function __construct(private AssessmentActivity $assessments) {}
 
-    public function completion(User $student, ?int $levelId = null, ?int $unitId = null): array
+    public function completion(User $student, ?int $levelId = null, ?int $unitId = null, ?CarbonImmutable $before = null): array
     {
         Gate::forUser($student)->authorize('manageLearningProfile', $student);
 
         $completed = LessonProgress::query()
             ->where('student_id', $student->getKey())
             ->whereNotNull('completed_at')
+            ->when($before !== null, fn (Builder $query) => $query->where('completed_at', '<', $before))
             ->select('lesson_id');
-        $counts = $this->lessons($levelId)
+        $counts = $this->lessons($student, $levelId)
             ->when($unitId !== null, fn (Builder $lessons) => $lessons->whereRelation('category', 'unit_id', $unitId))
             ->leftJoinSub($completed, 'completed_lessons', 'completed_lessons.lesson_id', '=', 'lessons.id')
             ->toBase()
@@ -91,7 +93,7 @@ class StudentProgress
     private function activity(User $student, ?int $levelId): QueryBuilder
     {
         $lessons = LessonProgress::where('student_id', $student->getKey())
-            ->whereIn('lesson_id', $this->lessons($levelId)->select('lessons.id'))
+            ->whereIn('lesson_id', $this->lessons($student, $levelId)->select('lessons.id'))
             ->toBase();
         $exercises = $this->assessments->exercises($student, $levelId)->toBase();
         $exams = $this->assessments->exams($student, $levelId)->toBase();
@@ -114,9 +116,9 @@ class StudentProgress
         return DB::query()->fromSub($events, 'activity');
     }
 
-    private function lessons(?int $levelId): Builder
+    private function lessons(User $student, ?int $levelId): Builder
     {
-        return Lesson::visibleToPublic()
+        return Lesson::visibleTo($student)
             ->when($levelId !== null, fn (Builder $lessons) => $lessons->whereRelation('category.unit', 'level_id', $levelId));
     }
 }

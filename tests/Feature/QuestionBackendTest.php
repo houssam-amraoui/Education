@@ -90,7 +90,7 @@ class QuestionBackendTest extends TestCase
             'points' => 2, 'position' => 1, 'content' => $this->definition()['content'],
         ], $visible->first());
         $this->assertTrue($questions->forExam($registeredExam->id)->isEmpty());
-        $student = User::factory()->create();
+        $student = User::factory()->hasAttached(Role::where('key', Role::STUDENT)->sole())->create();
         $this->assertCount(1, $questions->forExam($registeredExam->id, $student));
         $unit->forceFill(['status' => 'draft'])->save();
         $this->assertTrue($questions->forExercise($exercise->id)->isEmpty());

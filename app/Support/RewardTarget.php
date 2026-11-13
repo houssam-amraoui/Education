@@ -2,10 +2,12 @@
 
 namespace App\Support;
 
+use App\Models\AccessRule;
 use App\Models\Exam;
 use App\Models\Exercise;
 use App\Models\Resource;
 use App\Models\User;
+use App\Policies\ContentAccess;
 
 enum RewardTarget: string
 {
@@ -37,10 +39,13 @@ enum RewardTarget: string
     public function canUnlock(User $student, int $id): bool
     {
         return match ($this) {
-            self::Exercise => Exercise::visibleToPublic()->whereKey($id)->exists(),
-            self::Exam => Exam::visibleTo($student)->whereKey($id)->exists(),
-            self::Resource => Resource::publishedForDelivery()->where('access', 'points')->whereKey($id)->exists(),
-            self::AskTeacher => $id === 0,
+            self::Exercise => Exercise::visibleTo($student, unlocking: true)->whereKey($id)->exists(),
+            self::Exam => Exam::visibleTo($student, unlocking: true)->whereKey($id)->exists(),
+            self::Resource => Resource::visibleTo($student, unlocking: true)->whereKey($id)
+                ->where(fn ($resources) => $resources->where('access', 'points')->orWhereExists(
+                    AccessRule::where(['target_type' => 'resource', 'target_id' => $id, 'requirement' => 'points'])->toBase()
+                ))->exists(),
+            self::AskTeacher => $id === 0 && app(ContentAccess::class)->allowsAskTeacher($student, unlocking: true),
         };
     }
 }

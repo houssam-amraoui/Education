@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasCurriculumOrder;
+use App\Policies\ContentAccess;
 use App\Support\CurriculumStatus;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -70,17 +71,17 @@ class Exam extends Model
     }
 
     #[Scope]
-    protected function visibleTo(Builder $query, ?User $user): void
+    protected function visibleTo(Builder $query, ?User $user, bool $unlocking = false): void
     {
         $now = now()->utc()->toDateTimeString();
 
         $query->where('status', CurriculumStatus::Published)
-            ->whereIn('access', $user ? self::ACCESS : ['public'])
-            ->whereHas('unit', fn (Builder $unit) => $unit->visibleToPublic())
+            ->whereHas('unit', fn (Builder $unit) => $unit->visibleTo($user))
             ->where(fn (Builder $start) => $start->whereNull('available_from')->orWhere('available_from', '<=', $now))
             ->where(fn (Builder $end) => $end->whereNull('available_until')->orWhere('available_until', '>', $now))
             ->where(fn (Builder $configured) => $configured->where('type', self::INTERACTIVE)
                 ->orWhere(fn (Builder $document) => $document->where('type', self::DOCUMENT)
                     ->whereNotNull('exam_file_id')->whereNotNull('correction_file_id')));
+        app(ContentAccess::class)->constrain($query, $user, $this->qualifyColumn('access'), $unlocking);
     }
 }

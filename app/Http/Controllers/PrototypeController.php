@@ -35,6 +35,12 @@ class PrototypeController extends Controller
     {
         $screens = Prototype::screens();
         $screen = $screens[$request->route('screen')];
+        $accessPreview = null;
+        if ($screen['id'] === 'G23' && $request->query->has('destination')) {
+            $destination = $request->query('destination');
+            abort_unless(is_string($destination) && isset(Prototype::ACCESS_PREVIEWS[$destination]), 404);
+            $accessPreview = Prototype::ACCESS_PREVIEWS[$destination];
+        }
         $untimedExam = in_array($screen['id'], ['G15', 'S07', 'S08', 'S09'], true)
             && $request->query('timing') === 'untimed';
         $examTiming = $untimedExam ? ['timing' => 'untimed'] : [];
@@ -82,6 +88,7 @@ class PrototypeController extends Controller
         return view('prototype.page', compact(
             'screens', 'screen', 'area', 'breadcrumbs', 'url', 'emptyCategory', 'emptyRecommendations',
             'exerciseAttempts', 'exerciseResult', 'examAttempts', 'examResult', 'untimedExam', 'examTiming',
+            'accessPreview',
         ));
     }
 }

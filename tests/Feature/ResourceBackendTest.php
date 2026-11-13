@@ -113,7 +113,7 @@ class ResourceBackendTest extends TestCase
         auth()->logout();
         $this->get($inline)->assertNotFound();
         $this->get($download)->assertNotFound();
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->hasAttached(Role::where('key', Role::STUDENT)->sole())->create());
         $response = $this->get($inline)->assertOk()->assertHeader('Content-Type', 'application/pdf')
             ->assertHeader('Content-Disposition', 'inline; filename=study-notes.pdf')
             ->assertHeader('X-Content-Type-Options', 'nosniff');

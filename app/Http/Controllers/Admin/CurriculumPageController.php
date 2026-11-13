@@ -84,7 +84,10 @@ class CurriculumPageController extends Controller
     public function previewLesson(Category $category, Lesson $lesson): View
     {
         Gate::authorize('manage', $lesson);
-        $lesson = $category->lessons()->with('category.unit.level')->withPublicNextLessons()->findOrFail($lesson->id);
+        $lesson = $category->lessons()->with([
+            'category.unit.level',
+            'nextLessons' => fn ($links) => $links->publishedInCurriculum()->ordered()->with('category.unit.level'),
+        ])->findOrFail($lesson->id);
 
         return $this->lessonPage($category, $lesson, 'G07', 'lesson', 'curriculum.lesson', ['preview' => true, 'title' => $lesson->title]);
     }

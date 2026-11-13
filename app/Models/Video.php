@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasCurriculumOrder;
+use App\Policies\ContentAccess;
 use App\Support\CurriculumStatus;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -47,13 +48,13 @@ class Video extends Model
     protected function visibleTo(Builder $query, ?User $user): void
     {
         $query->where($this->qualifyColumn('status'), CurriculumStatus::Published)
-            ->whereIn($this->qualifyColumn('access'), $user ? ['public', 'registered'] : ['public'])
             ->where(fn (Builder $placement) => $placement->doesntHave('levels')
-                ->orWhereHas('levels', fn (Builder $levels) => $levels->visibleToPublic()));
+                ->orWhereHas('levels', fn (Builder $levels) => $levels->visibleTo($user)));
+        app(ContentAccess::class)->constrain($query, $user, $this->qualifyColumn('access'));
     }
 
     #[Scope]
-    protected function matching(Builder $query, array $filters): void
+    protected function matching(Builder $query, array $filters, ?User $viewer = null): void
     {
         $search = $filters['search'] ?? null;
         $level = $filters['level_id'] ?? null;
@@ -64,7 +65,7 @@ class Video extends Model
                 ->orWhereLike($this->qualifyColumn('description'), '%'.$search.'%')
         ))
             ->when($level !== null, fn (Builder $videos) => $videos->whereHas(
-                'levels', fn (Builder $levels) => $levels->visibleToPublic()->whereKey($level)
+                'levels', fn (Builder $levels) => $levels->visibleTo($viewer)->whereKey($level)
             ))
             ->when($access !== null, fn (Builder $videos) => $videos->where($this->qualifyColumn('access'), $access));
     }

@@ -13,7 +13,7 @@
             <div class="stat-grid compact">
                 <div><strong>{{ $questionCount }}</strong><small>Questions</small></div>
                 <div><strong>{{ $exam && $assessment->duration_minutes !== null ? $assessment->duration_minutes.' min' : 'Untimed' }}</strong><small>Time limit</small></div>
-                <div><strong>{{ $exam && $assessment->access === 'registered' ? 'Registered users' : 'Free' }}</strong><small>Access</small></div>
+                <div><x-access-labels :record="$assessment"/><small>Access</small></div>
             </div>
             <h3>Before you start</h3>
             <ol><li>Read each question carefully.</li><li>Select or enter your answer using the labeled controls.</li></ol>

@@ -25,8 +25,8 @@ class ProgressPages
         $items = [];
         foreach ($events as $type => $group) {
             $query = match ($type) {
-                'lesson' => Lesson::visibleToPublic(),
-                'exercise' => Exercise::visibleToPublic(),
+                'lesson' => Lesson::visibleTo($student),
+                'exercise' => Exercise::visibleTo($student),
                 'exam' => Exam::visibleTo($student)->where('type', Exam::INTERACTIVE),
             };
             $items[$type] = $query->whereKey($group->pluck('content_id')->unique()->all())

@@ -17,7 +17,7 @@ class ConversationPages
             return null;
         }
 
-        $content = $this->sources->find($actor, $type, $id, LearningResult::relations($type));
+        $content = $this->sources->find($actor, $type, $id, LearningResult::relations($type, viewer: $actor));
         if ($content === null) {
             return null;
         }

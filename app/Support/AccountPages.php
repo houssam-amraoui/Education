@@ -18,6 +18,8 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 class AccountPages
 {
     private const DESTINATIONS = [
+        'admin.overview', 'admin.settings.show', 'admin.analytics.show',
+        'access.requirements', 'access.unlock.show', 'admin.access-rules.index', 'admin.access-rules.create', 'admin.access-rules.edit',
         'account.home', 'account.profile.show', 'account.preferences.show',
         'account.learning-goals.show', 'account.progress.show', 'account.progress.level', 'account.progress.history',
         'account.messages.index', 'account.messages.create', 'account.messages.source', 'account.messages.show',
@@ -111,6 +113,18 @@ class AccountPages
                 'A37' => route('admin.rewards.streak.index'),
             ];
         }
+        if ($actor && Gate::allows('access-rules.manage')) {
+            $destinations['A38'] = route('admin.access-rules.index');
+        }
+        if ($actor && Gate::allows(Ability::EnterAdministration->value)) {
+            $destinations['A01'] = route('admin.overview');
+        }
+        if ($actor && Gate::allows('analytics.view')) {
+            $destinations['A44'] = route('admin.analytics.show');
+        }
+        if ($actor && Gate::allows('settings.manage')) {
+            $destinations['A43'] = route('admin.settings.show');
+        }
         if ($actor && Gate::allows('viewAny', User::class)) {
             $destinations['A02'] = route('admin.accounts.users.index');
         }
@@ -155,7 +169,6 @@ class AccountPages
         $destinations['G13'] = route('curriculum.exams.index');
         $destinations['G16'] = route('library.resources.index');
         $destinations['G19'] = route('library.videos.index');
-        $destinations['A01'] = $destinations['A02'] ?? $destinations['A05'] ?? $destinations['A07'] ?? $destinations['G01'];
         $links = $data['links'] ?? [];
         $crumbs = $data['crumbs'] ?? (isset($data['parent']) ? [$data['parent']] : []);
         $breadcrumbs = array_map(fn (string $crumb): array => ($links[$crumb] ?? []) + $screens[$crumb], $crumbs);

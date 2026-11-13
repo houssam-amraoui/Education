@@ -74,7 +74,15 @@
                 @endphp
                 <x-prototype.card>
                     <span class="tile-icon"><x-prototype.icon name="book"/></span>
-                    <div class="row between"><x-prototype.badge>{{ $isIndex ? 'Topic' : ($record['type'] === 'topic' ? 'Topic' : __("library.access.{$record['access']}")) }}</x-prototype.badge></div>
+                    <div class="row wrap">
+                        @if($isIndex || $record['type'] === 'topic')
+                            <x-prototype.badge>Topic</x-prototype.badge>
+                        @else
+                            @foreach($record['access_labels'] ?: ['public'] as $classification)
+                                <x-prototype.badge>{{ __("library.access.$classification") }}</x-prototype.badge>
+                            @endforeach
+                        @endif
+                    </div>
                     <h2 class="card-title" dir="auto">{{ $isIndex ? $record->title : $record['title'] }}</h2>
                     @if($isIndex)
                         @if($record->description)<p dir="auto">{{ $record->description }}</p>@endif

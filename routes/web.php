@@ -1,6 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\AccessRuleController;
+use App\Http\Controllers\AccessPageController;
 use App\Http\Controllers\Admin\AchievementController;
+use App\Http\Controllers\Admin\AnalyticsPageController;
+use App\Http\Controllers\Admin\AnalyticsReportController;
+use App\Http\Controllers\Admin\AdministrationController;
 use App\Http\Controllers\Admin\AssessmentPrerequisiteController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ConversationController as AdminConversationController;
@@ -9,6 +14,7 @@ use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\Admin\ExerciseController;
 use App\Http\Controllers\Admin\LessonController;
 use App\Http\Controllers\Admin\LevelController;
+use App\Http\Controllers\Admin\PlatformSettingsController;
 use App\Http\Controllers\Admin\PointCostController;
 use App\Http\Controllers\Admin\PointRuleController;
 use App\Http\Controllers\Admin\QuestionController;
@@ -40,11 +46,13 @@ use App\Http\Controllers\ResourcePageController;
 use App\Http\Controllers\RewardPageController;
 use App\Http\Controllers\StudentProgressController;
 use App\Http\Controllers\VideoPageController;
+use App\Http\Middleware\RecordLearnerVisit;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\StartPreviewSession;
 use App\Models\Conversation;
 use App\Models\Exam;
 use App\Models\Exercise;
+use App\Queries\Analytics\AnalyticsReports;
 use App\Support\Ability;
 use App\Support\Prototype;
 use Illuminate\Session\Middleware\StartSession;
@@ -105,6 +113,32 @@ Route::prefix('admin/reward-configuration')->name('admin.reward-configuration.')
         Route::resource('achievements', AchievementController::class)->only(['index', 'store', 'update']);
         Route::resource('point-costs', PointCostController::class)
             ->parameters(['point-costs' => 'pointCost'])->only(['index', 'store', 'update']);
+    });
+
+Route::get('admin/analytics/{report?}', AnalyticsPageController::class)
+    ->whereIn('report', AnalyticsReports::REPORTS)
+    ->middleware([SetLocale::class, 'auth:web', 'cache.headers:private;no_store'])
+    ->name('admin.analytics.show');
+
+Route::get('admin/analytics-data/{report?}', AnalyticsReportController::class)
+    ->whereIn('report', AnalyticsReports::REPORTS)
+    ->middleware([SetLocale::class, 'auth:web', 'cache.headers:private;no_store'])
+    ->name('admin.analytics.data');
+
+Route::get('admin/overview', AdministrationController::class)
+    ->middleware([SetLocale::class, 'auth:web', 'can:'.Ability::EnterAdministration->value])
+    ->name('admin.overview');
+
+Route::middleware([SetLocale::class, 'auth:web', 'can:settings.manage'])->group(function (): void {
+    Route::get('admin/platform-settings', [PlatformSettingsController::class, 'show'])->name('admin.settings.show');
+    Route::put('admin/platform-settings', [PlatformSettingsController::class, 'update'])->name('admin.settings.update');
+});
+
+Route::middleware([SetLocale::class, 'auth:web', 'can:access-rules.manage'])
+    ->name('admin.')
+    ->group(function (): void {
+        Route::resource('admin/access-rules', AccessRuleController::class)
+            ->parameters(['access-rules' => 'accessRule'])->only(['index', 'create', 'edit', 'store', 'update']);
     });
 
 Route::prefix('admin/rewards')->name('admin.rewards.')
@@ -256,7 +290,16 @@ Route::prefix('admin/library')->name('admin.library.')
         Route::patch('videos/{video}/position', [VideoController::class, 'reorder'])->whereNumber('video')->name('videos.reorder');
     });
 
-Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): void {
+Route::prefix('learn/access/{type}/{target}')->name('access.')
+    ->where(['type' => implode('|', [...array_keys(\App\Support\AccessTarget::MODELS), \App\Support\AccessTarget::FEATURE]), 'target' => '[0-9]+'])
+    ->middleware([SetLocale::class, 'cache.headers:private;no_store'])
+    ->controller(AccessPageController::class)->group(function (): void {
+        Route::get('/', 'show')->name('requirements');
+        Route::get('unlock', 'unlock')->middleware('auth:web')->name('unlock.show');
+        Route::post('unlock', 'spend')->middleware('auth:web')->name('unlock.store');
+    });
+
+Route::middleware([SetLocale::class, RecordLearnerVisit::class])->name('curriculum.')->group(function (): void {
     Route::get('/learn/exams/{exam}/files/{document}/{disposition}', ExamFileController::class)
         ->whereNumber('exam')->whereIn('document', ['paper', 'correction'])
         ->whereIn('disposition', ['inline', 'attachment'])->name('exams.file');
@@ -278,9 +321,11 @@ Route::middleware(SetLocale::class)->name('curriculum.')->group(function (): voi
         ->middleware('auth:web')->whereNumber(['level', 'unit', 'category', 'lesson'])->name('lesson.complete');
 });
 
-Route::middleware(SetLocale::class)->name('library.')->scopeBindings()->group(function (): void {
+Route::middleware([SetLocale::class, RecordLearnerVisit::class])->name('library.')->scopeBindings()->group(function (): void {
     Route::get('/learn/videos', [VideoPageController::class, 'index'])->name('videos.index');
     Route::get('/learn/videos/{video}', [VideoPageController::class, 'show'])->whereNumber('video')->name('videos.show');
+    Route::post('/learn/videos/{video}/playback', [VideoPageController::class, 'playback'])
+        ->whereNumber('video')->name('videos.playback');
     Route::get('/learn/resources', [ResourcePageController::class, 'index'])->name('resources.index');
     Route::get('/learn/resources/{resource}', [ResourcePageController::class, 'show'])->whereNumber('resource')->name('resources.show');
     Route::get('/learn/resources/{resource}/document', [ResourcePageController::class, 'document'])->whereNumber('resource')->name('resources.document');
@@ -292,7 +337,7 @@ Route::middleware(SetLocale::class)->name('library.')->scopeBindings()->group(fu
         ->whereNumber(['lesson', 'resource'])->whereIn('disposition', ['inline', 'attachment'])->name('lessons.resources.file');
 });
 
-Route::middleware(SetLocale::class)->group(function (): void {
+Route::middleware([SetLocale::class, RecordLearnerVisit::class])->group(function (): void {
     Route::get('learn/exercises', [ExerciseAttemptController::class, 'catalogue'])->name('curriculum.exercises.index');
     Route::get('learn/exercises/{exercise}', [ExerciseAttemptController::class, 'instructions'])
         ->whereNumber('exercise')->name('curriculum.exercises.instructions');

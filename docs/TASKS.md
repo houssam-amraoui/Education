@@ -531,27 +531,27 @@ Screens: G23, S18, premium requirement portion of S20, A38–A39. PRD §§17, 19
 
 ### 1. Prototype tasks
 
-- [ ] **ACCESS-01** — Prototype contextual access requirements for guest, level, prerequisite, points, and premium restrictions.
+- [x] **ACCESS-01** — Prototype contextual access requirements for guest, level, prerequisite, points, and premium restrictions.
 - [x] **ACCESS-02** — Prototype access-rule listing/editor with clear free/restricted classification and feature targets such as Ask Teacher.
 
 ### 2. Backend implementation tasks
 
-- [ ] **ACCESS-03** — Add access-rule/entitlement persistence and a policy contract for public, registered, level, prerequisite, points, and premium access.
-- [ ] **ACCESS-04** — Implement consistent guest/student/manager evaluation with explicit rule-combination semantics; deny access when required configuration is missing.
-- [ ] **ACCESS-05** — Implement authorized rule create/update and target validation for supported content and Ask Teacher.
-- [ ] **ACCESS-06** — Enforce access policies on level and lesson reads, including direct links and ancestor visibility.
-- [ ] **ACCESS-14** — Enforce access policies on resource reads and direct protected file delivery.
-- [ ] **ACCESS-15** — Enforce access policies on video listings and direct watch requests.
-- [ ] **ACCESS-07** — Enforce exercise policy and attempt ownership at start, submission, and result review.
-- [ ] **ACCESS-16** — Enforce exam policy and attempt ownership at start, submission, and result review.
-- [ ] **ACCESS-17** — Enforce configured Ask Teacher access on the message creation action.
-- [ ] **ACCESS-08** — Connect persisted points-unlock entitlements and premium entitlement lookups to policy decisions; no payment grants are invented.
+- [x] **ACCESS-03** — Add access-rule/entitlement persistence and a policy contract for public, registered, level, prerequisite, points, and premium access.
+- [x] **ACCESS-04** — Implement consistent guest/student/manager evaluation with explicit rule-combination semantics; deny access when required configuration is missing.
+- [x] **ACCESS-05** — Implement authorized rule create/update and target validation for supported content and Ask Teacher.
+- [x] **ACCESS-06** — Enforce access policies on level and lesson reads, including direct links and ancestor visibility.
+- [x] **ACCESS-14** — Enforce access policies on resource reads and direct protected file delivery.
+- [x] **ACCESS-15** — Enforce access policies on video listings and direct watch requests.
+- [x] **ACCESS-07** — Enforce exercise policy and attempt ownership at start, submission, and result review.
+- [x] **ACCESS-16** — Enforce exam policy and attempt ownership at start, submission, and result review.
+- [x] **ACCESS-17** — Enforce configured Ask Teacher access on the message creation action.
+- [x] **ACCESS-08** — Connect persisted points-unlock entitlements and premium entitlement lookups to policy decisions; no payment grants are invented.
 
 ### 3. Integration tasks
 
-- [ ] **ACCESS-09** — Connect management access-rule editing from the central list and individual content editors.
-- [ ] **ACCESS-10** — Bind content labels, access-requirement feedback, and sign-in/level/prerequisite recovery links to real policy outcomes.
-- [ ] **ACCESS-11** — Connect points-restricted destinations to the unlock flow and re-evaluate access after a successful unlock.
+- [x] **ACCESS-09** — Connect management access-rule editing from the central list and individual content editors.
+- [x] **ACCESS-10** — Bind content labels, access-requirement feedback, and sign-in/level/prerequisite recovery links to real policy outcomes.
+- [x] **ACCESS-11** — Connect points-restricted destinations to the unlock flow and re-evaluate access after a successful unlock.
 
 ### 4. Testing tasks
 
@@ -568,12 +568,12 @@ Screens: A01, A43. PRD §§19, 22–23.
 
 ### 2. Backend implementation tasks
 
-- [ ] **SETTINGS-02** — Add validated storage/read behavior for supported platform settings and enabled interface languages; accept only explicitly supported keys.
-- [ ] **SETTINGS-03** — Add authorized settings update actions and configuration fallback behavior.
+- [x] **SETTINGS-02** — Add validated storage/read behavior for supported platform settings and enabled interface languages; accept only explicitly supported keys.
+- [x] **SETTINGS-03** — Add authorized settings update actions and configuration fallback behavior.
 
 ### 3. Integration tasks
 
-- [ ] **SETTINGS-04** — Connect settings form/read behavior and administration entry to real authorized module routes.
+- [x] **SETTINGS-04** — Connect settings form/read behavior and administration entry to real authorized module routes.
 
 ### 4. Testing tasks
 
@@ -590,23 +590,23 @@ Screens: A44–A49; student drill-down A04. PRD §21. Included reports use actua
 
 ### 2. Backend implementation tasks
 
-- [ ] **ANALYTICS-03** — Document visitor/active-user/event definitions and add minimal deduplicated acquisition/activity recording consistent with those definitions.
-- [ ] **ANALYTICS-04** — Add acquisition aggregates for visitors, registrations, and active students over an explicit reporting period.
-- [ ] **ANALYTICS-05** — Record authorized resource opens and expose a period-scoped usage count.
-- [ ] **ANALYTICS-14** — Record video usage using an explicit playback signal and expose a period-scoped count.
-- [ ] **ANALYTICS-15** — Aggregate lesson opens and completions from existing activity.
-- [ ] **ANALYTICS-16** — Aggregate exercise starts, completions, and repeat attempts from attempt records.
-- [ ] **ANALYTICS-17** — Aggregate exam attempts and completions from exam activity.
-- [ ] **ANALYTICS-18** — Aggregate learning streak activity using the REWARD day-boundary rules.
-- [ ] **ANALYTICS-06** — Add learning aggregates for completion rates, scores, progress, and question-level difficulty with documented denominators.
-- [ ] **ANALYTICS-07** — Add communication aggregates for Ask Teacher requests, messages, and teacher response activity.
-- [ ] **ANALYTICS-08** — Add authorized report/overview queries with shared reporting-period validation and explicit unavailable business metrics.
+- [x] **ANALYTICS-03** — Document visitor/active-user/event definitions and add minimal deduplicated acquisition/activity recording consistent with those definitions.
+- [x] **ANALYTICS-04** — Add acquisition aggregates for visitors, registrations, and active students over an explicit reporting period.
+- [x] **ANALYTICS-05** — Record authorized resource opens and expose a period-scoped usage count.
+- [x] **ANALYTICS-14** — Record video usage using an explicit playback signal and expose a period-scoped count.
+- [x] **ANALYTICS-15** — Aggregate lesson opens and completions from existing activity.
+- [x] **ANALYTICS-16** — Aggregate exercise starts, completions, and repeat attempts from attempt records.
+- [x] **ANALYTICS-17** — Aggregate exam attempts and completions from exam activity.
+- [x] **ANALYTICS-18** — Aggregate learning streak activity using the REWARD day-boundary rules.
+- [x] **ANALYTICS-06** — Add learning aggregates for completion rates, scores, progress, and question-level difficulty with documented denominators.
+- [x] **ANALYTICS-07** — Add communication aggregates for Ask Teacher requests, messages, and teacher response activity.
+- [x] **ANALYTICS-08** — Add authorized report/overview queries with shared reporting-period validation and explicit unavailable business metrics.
 
 ### 3. Integration tasks
 
-- [ ] **ANALYTICS-09** — Bind overview/acquisition/engagement views to live aggregates and reporting-period controls.
-- [ ] **ANALYTICS-10** — Bind learning/communication reports and authorized student/conversation drill-down links.
-- [ ] **ANALYTICS-11** — Connect business-report availability to actual configured event sources; display missing-source explanations instead of zero conversions.
+- [x] **ANALYTICS-09** — Bind overview/acquisition/engagement views to live aggregates and reporting-period controls.
+- [x] **ANALYTICS-10** — Bind learning/communication reports and authorized student/conversation drill-down links.
+- [x] **ANALYTICS-11** — Connect business-report availability to actual configured event sources; display missing-source explanations instead of zero conversions.
 
 ### 4. Testing tasks
 
@@ -625,7 +625,6 @@ The earlier screen catalogue review covered 89 inventory IDs. The modules below 
 
 The following prototype tasks have partial coverage and remain open.
 
-- **ACCESS-01** needs destination-specific previews. The access screen presents a shared set of examples.
 - **RES-03** still needs file error feedback.
 - Matching and ordering use native selects for learners and text mapping in the shared editor.
 
@@ -633,22 +632,34 @@ The broader keyboard, text zoom, reduced motion, and multilingual checks remain 
 
 ### 2. Backend implementation tasks
 
-- [ ] **RELEASE-02** — Add a local/testing-only demonstration seed for one coherent 2nd Baccalaureate learning journey using implemented factories; do not create production credentials.
+- [x] **RELEASE-02** — Add a local/testing-only demonstration seed for one coherent 2nd Baccalaureate learning journey using implemented factories; do not create production credentials.
 
 ### 3. Integration tasks
 
-- [ ] **RELEASE-03** — Check integrated navigation for remaining fixture bindings and dead links; create individually scoped follow-up tasks for defects rather than fixing unrelated modules in this task.
-- [ ] **RELEASE-04** — Connect the dashboard's exam/resource shortcuts to authorized selected-level queries; other dashboard sections are integrated by their owning feature tasks.
+- [x] **RELEASE-03** — Check integrated navigation for remaining fixture bindings and dead links; create individually scoped follow-up tasks for defects rather than fixing unrelated modules in this task.
+- [x] **RELEASE-04** — Connect the dashboard's exam/resource shortcuts to authorized selected-level queries; other dashboard sections are integrated by their owning feature tasks.
+
+#### Integrated navigation audit follow-ups
+
+Reviewed the live shared shell, destination mappings, and public, student, and admin page links for fixture URLs, dead ends, and placeholder states. Browser checks exercised the student dashboard shortcuts at desktop and mobile widths.
+
+- [ ] **RELEASE-NAV-01** — A01. The “Create a lesson” action opens the lessons list. Route it to category selection for lesson creation and verify the empty-curriculum path.
+- [ ] **RELEASE-NAV-02** — A15. The Topics fieldset displays “Unavailable” even when topics can be associated through A30. Connect the lesson-side fieldset to existing topic associations with curriculum authorization.
+- [ ] **RELEASE-NAV-03** — A01. The Active students and Average score tiles always display “Unavailable.” Connect them to the existing authorized analytics with an explicit reporting period and empty state.
+- [ ] **RELEASE-NAV-04** — S10/S11. The Learning streak tile displays “Unavailable” even when the student dashboard shows a streak. Use the existing streak query on the progress overview.
 
 ### 4. Testing tasks
 
-- [ ] **RELEASE-05** — Verify guest browse → registration → level selection → lesson → exercise → correction → persisted progress with an automated journey where supported.
-- [ ] **RELEASE-06** — Verify manager authoring/publication → student access → document/interactive exam → results/history with representative permissions.
-- [ ] **RELEASE-07** — Verify lesson Ask Teacher → teacher reply and earned points → unlock → restricted content with no duplicate charges.
-- [ ] **RELEASE-08** — Audit included public/student/admin flows in Arabic, French, and English at mobile/desktop widths with keyboard, zoom, and reduced motion; record defects individually.
-- [ ] **RELEASE-09** — Run the full relevant automated suite and production asset build; report results and unresolved defects against PRD acceptance criteria.
+- [x] **RELEASE-05** — Verify guest browse → registration → level selection → lesson → exercise → correction → persisted progress with an automated journey where supported.
+- [x] **RELEASE-06** — Verify manager authoring/publication → student access → document/interactive exam → results/history with representative permissions.
+- [x] **RELEASE-07** — Verify lesson Ask Teacher → teacher reply and earned points → unlock → restricted content with no duplicate charges.
+- [x] **RELEASE-08** — Audit included public/student/admin flows in Arabic, French, and English at mobile/desktop widths with keyboard, zoom, and reduced motion; record defects individually.
+- [x] **RELEASE-09** — Run the full relevant automated suite and production asset build; report results and unresolved defects against PRD acceptance criteria.
 - [ ] **RELEASE-10** — Verify the configured paid offer through entitlement activation and access to its protected content after PAID integration.
 - [ ] **RELEASE-11** — Check navigation to S19–S21 and A40–A42 for the features enabled in the release. Record missing destinations or permission mismatches by screen ID.
+
+See the [release verification report](RELEASE_VERIFICATION.md) for test results,
+individual defects, and the prerequisites still pending for RELEASE-10 and RELEASE-11.
 
 ## 20. Paid content and paid lessons — PAID
 

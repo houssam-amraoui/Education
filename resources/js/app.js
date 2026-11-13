@@ -1,5 +1,6 @@
 import "./question-authoring";
 import "./learner-attempt";
+import "./video-playback";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];

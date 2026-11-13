@@ -89,6 +89,7 @@
             </x-prototype.card>
             <x-prototype.card>
                 <h3>Connected content</h3>
+                @include('access.editor-link', ['accessRecord' => $record])
                 @if($record->exists && $kind === 'level')
                     <x-prototype.link :href="route('admin.curriculum.units.index', ['level_id' => $record->id])">Units</x-prototype.link>
                 @elseif($record->exists && $kind === 'unit')

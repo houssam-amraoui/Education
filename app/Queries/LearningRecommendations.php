@@ -23,7 +23,7 @@ class LearningRecommendations
         Gate::forUser($student)->authorize('manageLearningProfile', $student);
 
         $levels = $this->selectedLevels($student);
-        $eligible = Lesson::visibleToPublic()
+        $eligible = Lesson::visibleTo($student)
             ->whereHas('category.unit', fn (Builder $unit) => $unit->whereIn('level_id', $levels));
 
         $sourceId = $source !== null
@@ -71,7 +71,7 @@ class LearningRecommendations
             ->whereNotNull('submitted_at')->whereNotNull('awarded_points')->where('possible_points', '>', 0)
             ->orderByDesc('submitted_at')->orderByDesc('id')->limit(1);
 
-        return Exercise::visibleToPublic()
+        return Exercise::visibleTo($student)
             ->whereHas('unit', fn (Builder $unit) => $unit->whereIn('level_id', $this->selectedLevels($student)))
             ->has('questions')
             ->select('exercises.*')
@@ -100,7 +100,7 @@ class LearningRecommendations
         $prerequisites = $links->newPivotQuery()->select('prerequisite_lesson_id');
         $configured = (clone $prerequisites)->whereColumn('prerequisite_lesson_id', 'lessons.id');
 
-        return Lesson::visibleToPublic()
+        return Lesson::visibleTo($student)
             ->select('lessons.*')
             ->where(fn (Builder $lesson) => $lesson->whereIn('lessons.id', $prerequisites)
                 ->orWhereRelation('category', 'unit_id', $result->exam->unit_id))
@@ -110,6 +110,6 @@ class LearningRecommendations
 
     private function selectedLevels(User $student): Builder
     {
-        return $student->selectedLevels()->visibleToPublic()->select('levels.id')->getQuery();
+        return $student->selectedLevels()->visibleTo($student)->select('levels.id')->getQuery();
     }
 }

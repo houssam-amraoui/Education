@@ -18,8 +18,15 @@ class ExamPageController extends Controller
     public function index(CurriculumFiltersRequest $request, VisibleExams $exams): View
     {
         $filters = $request->validated();
-        $level = isset($filters['level_id']) ? Level::visibleToPublic()->findOrFail($filters['level_id']) : null;
-        $records = $exams->paginate($request->user(), $level?->id, search: $filters['search'] ?? null, type: $filters['type'] ?? null)
+        $selectedLevelIds = null;
+        if (isset($filters['selected'])) {
+            $student = $request->user();
+            Gate::authorize('manageLearningProfile', $student);
+            $selectedLevelIds = $student->selectedLevels()->visibleTo($student)->pluck('levels.id')->all();
+        }
+
+        $level = isset($filters['level_id']) ? Level::visibleTo($request->user())->findOrFail($filters['level_id']) : null;
+        $records = $exams->paginate($request->user(), $level?->id, search: $filters['search'] ?? null, type: $filters['type'] ?? null, selectedLevelIds: $selectedLevelIds)
             ->appends($filters);
 
         return AccountPages::view('G13', 'list', compact('filters', 'level', 'records') + ['crumbs' => ['G01']], 'exams.catalogue');

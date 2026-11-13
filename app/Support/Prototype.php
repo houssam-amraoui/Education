@@ -4,6 +4,44 @@ namespace App\Support;
 
 class Prototype
 {
+    public const ACCESS_PREVIEWS = [
+        'exercise-attempt' => [
+            'title' => 'Passive voice practice',
+            'requirement' => 'Sign-in required',
+            'description' => 'Sign in to start an attempt and keep a history of your practice.',
+            'action' => ['G22', 'Preview sign in', ['return' => 'exercise']],
+            'back' => ['G12', 'Back to exercise'],
+        ],
+        'unit-exam' => [
+            'title' => 'Unit 1 · Practice exam',
+            'requirement' => 'Learning level required',
+            'description' => 'Choose 2nd Baccalaureate in your learning goals to access this exam.',
+            'action' => ['S02', 'Choose learning goals', []],
+            'back' => ['G15', 'Back to exam'],
+        ],
+        'passive-voice-practice' => [
+            'title' => 'Passive voice practice',
+            'requirement' => 'Prerequisite required',
+            'description' => 'Complete the passive voice lesson before starting this practice exercise.',
+            'action' => ['G07', 'Open prerequisite lesson', []],
+            'back' => ['G12', 'Back to exercise'],
+        ],
+        'grammar-worksheet' => [
+            'title' => 'Grammar revision worksheet',
+            'requirement' => '100 points required',
+            'description' => 'Use 100 points to unlock this worksheet.',
+            'action' => ['S18', 'Preview points unlock', []],
+            'back' => ['G16', 'Back to resources'],
+        ],
+        'revision-pack' => [
+            'title' => 'Complete revision pack',
+            'requirement' => 'Premium content',
+            'description' => 'This revision pack requires premium access. This preview shows the access requirement.',
+            'action' => null,
+            'back' => ['G16', 'Back to resources'],
+        ],
+    ];
+
     public const QUESTIONS = [
         ['Choose the passive sentence', 'Multiple choice', 'Ready'],
         ['Select the participles', 'Multiple selection', 'Ready'],
@@ -105,12 +143,12 @@ class Prototype
             ['A38', 'Access rules', '/admin/access', 'admin-list', 'A01'],
             ['A39', 'Access rule', '/admin/access/editor', 'admin-editor', 'A38'],
             ['A43', 'Platform settings', '/admin/settings', 'settings', 'A01'],
-            ['A44', 'Analytics overview', '/admin/analytics', 'analytics', 'A01'],
-            ['A45', 'Acquisition analytics', '/admin/analytics/acquisition', 'analytics', 'A44'],
-            ['A46', 'Engagement analytics', '/admin/analytics/engagement', 'analytics', 'A44'],
-            ['A47', 'Learning analytics', '/admin/analytics/learning', 'analytics', 'A44'],
-            ['A48', 'Communication analytics', '/admin/analytics/communication', 'analytics', 'A44'],
-            ['A49', 'Business analytics', '/admin/analytics/business', 'analytics', 'A44'],
+            ['A44', 'Analytics overview', '/prototype/admin/analytics', 'analytics', 'A01'],
+            ['A45', 'Acquisition analytics', '/prototype/admin/analytics/acquisition', 'analytics', 'A44'],
+            ['A46', 'Engagement analytics', '/prototype/admin/analytics/engagement', 'analytics', 'A44'],
+            ['A47', 'Learning analytics', '/prototype/admin/analytics/learning', 'analytics', 'A44'],
+            ['A48', 'Communication analytics', '/prototype/admin/analytics/communication', 'analytics', 'A44'],
+            ['A49', 'Business analytics', '/prototype/admin/analytics/business', 'analytics', 'A44'],
         ];
 
         $screens = [];

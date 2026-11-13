@@ -16,6 +16,7 @@ class SaveSelectedLevelsRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'return_to' => ['nullable', 'string', 'max:2048'],
             'level_ids' => ['sometimes', 'array', 'list'],
             'level_ids.*' => ['bail', 'required', 'integer', 'min:1', 'distinct',
                 Rule::exists('levels', 'id')->where('status', CurriculumStatus::Published->value)],

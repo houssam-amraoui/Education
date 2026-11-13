@@ -2,18 +2,19 @@
 
 namespace App\Support;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class LearningResult
 {
-    public static function relations(string $type, ?int $levelId = null): array
+    public static function relations(string $type, ?int $levelId = null, ?User $viewer = null): array
     {
         return match ($type) {
             'lesson' => ['category:id,unit_id,title', 'category.unit:id,level_id,title', 'category.unit.level:id,title'],
             'exercise', 'exam' => ['unit:id,level_id,title', 'unit.level:id,title'],
             'resource', 'video' => [
-                'levels' => fn (BelongsToMany $levels) => $levels->visibleToPublic()
+                'levels' => fn (BelongsToMany $levels) => $levels->visibleTo($viewer)
                     ->when($levelId !== null, fn ($query) => $query->whereKey($levelId))
                     ->select('levels.id', 'levels.title')->orderBy('levels.title')->orderBy('levels.id'),
             ],

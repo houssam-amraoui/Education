@@ -9,7 +9,7 @@
         <article class="reading">
             <div class="row wrap">
                 <x-prototype.badge tone="info"><bdi>{{ $lesson->category->title }}</bdi></x-prototype.badge>
-                @empty($preview)<x-prototype.badge>Free</x-prototype.badge>@endempty
+                @empty($preview)<x-access-labels :record="$lesson"/>@endempty
             </div>
             @php($body = App\Support\LessonRichText::clean($lesson->body ?? ''))
             @if(trim($body) !== '')

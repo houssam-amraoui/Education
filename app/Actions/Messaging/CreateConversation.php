@@ -4,6 +4,7 @@ namespace App\Actions\Messaging;
 
 use App\Models\Conversation;
 use App\Models\User;
+use App\Policies\ContentAccess;
 use App\Queries\ConversationSource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ use Illuminate\Validation\Rule;
 
 class CreateConversation
 {
-    public function __construct(private ConversationSource $sources) {}
+    public function __construct(private ConversationSource $sources, private ContentAccess $access) {}
 
     public static function rules(): array
     {
@@ -44,6 +45,8 @@ class CreateConversation
         ])->validate();
 
         return DB::transaction(function () use ($student, $message, $context): Conversation {
+            abort_unless($this->access->allowsAskTeacher($student), 404);
+
             $source = null;
             if ($context['type'] !== null) {
                 $source = $this->sources->find($student, $context['type'], $context['id'])

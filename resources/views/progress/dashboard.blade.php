@@ -128,7 +128,7 @@
                 @endif
                 <x-prototype.link :href="$url('S16')">View rewards</x-prototype.link>
             </x-prototype.card>
-            <div class="quick-links"><a href="{{ $url('G13') }}"><x-prototype.icon name="file"/>Exam preparation →</a><a href="{{ $url('G16') }}"><x-prototype.icon name="book"/>Study resources →</a></div>
+            <div class="quick-links"><a href="{{ route('curriculum.exams.index', ['selected' => 1]) }}"><x-prototype.icon name="file"/>Exam preparation →</a><a href="{{ route('library.resources.index', ['selected' => 1]) }}"><x-prototype.icon name="book"/>Study resources →</a></div>
         </div>
     </div>
 @endsection

@@ -121,7 +121,7 @@ class VideoBackendTest extends TestCase
         $public->levels()->attach([$draft->id, $published->id]);
         $registered = $this->video('Revision', 'registered', CurriculumStatus::Published);
         $registered->update(['description' => 'More grammar practice']);
-        $student = User::factory()->create();
+        $student = User::factory()->hasAttached(Role::where('key', Role::STUDENT)->sole())->create();
         $catalogue = app(VisibleVideos::class);
 
         $results = $catalogue->paginate(null, ['search' => 'grammar'], perPage: 1);

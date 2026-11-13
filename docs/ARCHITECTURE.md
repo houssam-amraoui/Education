@@ -61,6 +61,14 @@ For learner-facing content, use policies for individual records and reusable Elo
 
 Apply these checks to canonical pages, direct file routes, search, topic results, recommendations, dashboards, and related-content links. Filter discovery before pagination. An access prompt may show only authorized requirement information for a visible target. Serve restricted files from a private Laravel filesystem disk through an authorized inline or download route, checking both the requested association and any separately protected resource.
 
+### Access rule evaluation (ACCESS-03–08, ACCESS-14–17)
+
+Rules target a level, lesson, resource, video, exercise, exam, or the Ask Teacher feature. Each target can have one rule per requirement. All applicable rules must pass. A public rule adds no restriction. It never overrides another rule or the existing content classification. A level requirement checks the student's selection of the configured published level. A prerequisite requirement checks the student's recorded completion of the configured lesson and that lesson's publication hierarchy. Existing prerequisite guidance remains independent of access requirements.
+
+Registered access requires the student role. Managers use their authorized management routes for editing and preview. Resource and video placements retain their existing visibility semantics: standalone items can be accessed directly, and items assigned to levels require at least one accessible placement. A lesson-scoped resource route also checks its bound lesson and resource.
+
+Points access checks the student's grant for the exact target and its associated unlock. Existing unlocks are backfilled, and new grants are written with their debit and unlock in one transaction. Changing a cost does not change an existing grant. Premium access reads grants already recorded for the student and target. Both grant types must have started and be unexpired and unrevoked.
+
 ## Validation and workflow boundaries
 
 Use Form Requests for write operations and nontrivial filters. Authorize the action and validate shape, supported values, and references. Pass explicit validated fields to Eloquent. Validate relationship IDs within their parent scope and check state-dependent invariants in the write transaction. Enforce uniqueness and ownership in the database wherever the schema can express them.
@@ -106,6 +114,23 @@ Achievement criteria count distinct completed lessons, exercises, or exams, or c
 
 Administrators manage earning rules, achievements, and target costs. A cost identifies a single exercise, exam, points-classified resource, or the Ask Teacher feature. The spending action saves the debit and unlock together. Replaying a purchase returns its saved unlock at the original cost. Access enforcement and the confirmation screen are covered by the access and reward integration tasks.
 
+### Analytics definitions (ANALYTICS-03–08, ANALYTICS-14–18)
+
+Reports require inclusive UTC dates `from` and `through`. Reads start at midnight and exclude midnight after the last date. Daily and monthly active-user series use UTC calendar buckets clipped to the requested period and omit empty buckets.
+
+- Visitors are distinct browser sessions that successfully load a live public learning catalogue HTML page, including home and detail pages. Signed-in browsers count too. One visit per session per UTC day is stored using a hashed random token. A new session can count the same browser again.
+- Registrations count committed public student signups recorded since deployment. Active students are distinct student accounts with a lesson open or completion, exercise or interactive exam start or submission, resource open, or video playback. Daily and monthly active users apply this student definition. Visits, signups, and messaging alone do not qualify.
+- Resource opens count authorized GETs that resolve to an available PDF for display or download. Video playback counts the client signal from the embedded YouTube player entering its playing state, subject to current access. Each resource or video counts once per student account (or browser session for other viewers), target, and UTC day.
+- Lesson opens count once per student, lesson, and UTC day. An existing progress row contributes its latest recorded view if that day has no matching open event. Views overwritten before event recording cannot be recovered. Lesson completions use the first saved completion timestamp.
+- Assessment starts and completions are counted separately by their timestamps. An exercise repeat has an earlier attempt record for the same student and exercise, including attempts before the period. Exam counts cover interactive attempts. Expiration is not a completion.
+- Streak reporting uses REWARD's distinct student-days of lesson completion or assessment submission at midnight UTC. It reports student-days, students with any qualifying day, and students with at least two consecutive qualifying days within the period.
+- Assessment completion rates divide starts in the period submitted by its end by all starts in the period. Average scores give equal weight to submitted attempts with positive possible points, based on their saved percentages. Question difficulty divides incorrect results by all graded snapshot items from submissions in the period, grouped by source question and assessment type. Blank answers graded incorrect are included. Scores and rates with no denominator are null.
+- Lesson progress divides completed student–lesson pairs through the end of the period by currently visible student–lesson pairs for active students who still have the student role. Visibility is evaluated at query time because historical eligibility is unavailable.
+- Ask Teacher requests count conversations created in the period. Message totals include the initial request. Teacher replies use the saved sender classification. First reply latency averages elapsed seconds from conversation creation over conversations whose first teacher reply falls within the period.
+- The backend report endpoint is `admin/analytics-data/{report?}`, with overview as the default. Access requires the administrator role and administration entry ability. Commercial measures are null with an explicit unavailable reason.
+
+The live administration reports use `admin/analytics/{report?}` and default to the seven UTC dates ending today. Tabs preserve the selected dates. The chart shows the last seven dates or the full period if shorter. Communication reports show the current reply status of conversations active in the selected period. Student and conversation drill-downs require the destination policies. Business reporting explains which event sources are missing.
+
 ## Laravel folder organization
 
 
@@ -137,7 +162,30 @@ Organize folders as features land. Introduce an action or query class when it gi
 
 - **Feature tests** use Laravel HTTP tests, factories, and `RefreshDatabase` for persistence. Cover guest/student/manager policy combinations, privilege escalation, cross-student ownership, unpublished ancestors, protected file URLs, search and recommendation visibility, and locale fallback. Test the normal route for each write, including invalid and forged inputs.
 - **Unit tests** cover deterministic grading for all supported question types, answer normalization, date and streak boundaries, and ranking rules when extracted. Use Laravel time controls for availability and exam deadlines in feature tests.
-- **Data integrity tests** cover immutable history after authoring edits, duplicate submissions and completion, ledger replay, and atomic points spending and grants. Use the existing SQLite test setup for ordinary feature tests and a dedicated MySQL test database for production-engine constraints and concurrent transactions with separate connections. The Docker configuration uses MySQL 8.
+- **Data integrity tests** cover immutable history after authoring edits, duplicate submissions and completion, ledger replay, and atomic points spending and grants. Feature tests use the dedicated `laravel_test` database through the MySQL connection. Use separate connections when testing concurrent transactions. The Docker configuration uses MySQL 8.
 - **Browser and release checks** retain fixture smoke coverage while preview routes exist. Add persisted journeys from RELEASE for guest-to-student learning, management publishing and exams, Ask Teacher replies, and points unlocks. Review desktop and mobile, keyboard and focus behavior, zoom, reduced motion, and Arabic RTL alongside French and English. Verify conditional flows included in the selected release.
 
 Run `php artisan test` or `php artisan test --filter=...` for each implementation task. At release, run the full relevant suite, browser checks, and `npm run build`. Use local or testing seeders for the 2nd Baccalaureate demonstration journey.
+
+### Local MySQL setup
+
+Enable PHP's `pdo_mysql` extension and set the database host, port, name, and credentials in `.env`. Create the configured development database before running `composer setup` on a new checkout or `php artisan migrate` on an existing one.
+
+Before running feature tests, create an empty `laravel_test` database on your development server.
+
+```sql
+CREATE DATABASE laravel_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+The tests use the database host and credentials from the local environment and rebuild the `laravel_test` schema. The test account needs schema, trigger, and data privileges on that database. Run `php artisan config:clear` before testing if Laravel has cached its configuration.
+
+### Local demonstration data
+
+With `APP_ENV=local` and a migrated development database, run `php artisan db:seed`.
+Open `/learn/paths` to browse **2nd Baccalaureate · Demo**, or sign in at
+`/account/login` as `demo.student@example.test` with the factory password
+`password`. The student already has the demo level selected. Study Past
+participles and The passive voice, then find the practice exercise and the
+interactive grammar review through the Passive voice demo topic. The seed
+starts the student with an empty activity history so the journey generates
+its own progress and results.

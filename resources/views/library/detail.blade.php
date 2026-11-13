@@ -5,7 +5,7 @@
     <div class="split">
         <x-prototype.card class="reading">
             <span class="tile-icon"><x-prototype.icon name="file"/></span>
-            <x-prototype.badge>{{ __("library.access.$resource->access") }} · {{ __("library.types.$resource->type") }}</x-prototype.badge>
+            <x-access-labels :record="$resource" :suffix='__("library.types.$resource->type")'/>
             <h2 dir="auto">{{ $resource->title }}</h2>
             @if($resource->description)<p dir="auto">{{ $resource->description }}</p>@endif
             <dl class="details">

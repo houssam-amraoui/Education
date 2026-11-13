@@ -29,6 +29,7 @@ class CurriculumFiltersRequest extends FormRequest
 
         if ($this->routeIs('curriculum.exams.index')) {
             $rules['type'] = ['nullable', Rule::in(Exam::TYPES)];
+            $rules['selected'] = ['sometimes', Rule::in(['1']), 'prohibits:level_id'];
         }
 
         if ($this->routeIs('curriculum.exercises.index')) {
@@ -48,6 +49,11 @@ class CurriculumFiltersRequest extends FormRequest
 
     protected function getRedirectUrl(): string
     {
-        return route($this->route()->getName(), $this->route()->parameters());
+        $parameters = $this->route()->parameters();
+        if ($this->routeIs('curriculum.exams.index') && $this->query('selected') === '1') {
+            $parameters['selected'] = 1;
+        }
+
+        return route($this->route()->getName(), $parameters);
     }
 }

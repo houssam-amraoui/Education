@@ -28,7 +28,7 @@ class ContinueLearning
 
         return LessonProgress::where('student_id', $student->getKey())
             ->whereNotNull('last_viewed_at')
-            ->whereHas('lesson', fn (Builder $lesson) => $lesson->visibleToPublic()
+            ->whereHas('lesson', fn (Builder $lesson) => $lesson->visibleTo($student)
                 ->whereHas('category.unit', fn (Builder $unit) => $unit->whereIn('level_id', $selectedLevelIds)))
             ->with('lesson.category.unit.level')
             ->orderByDesc('last_viewed_at')

@@ -24,8 +24,8 @@ class GlobalSearch
         $search = trim($search);
         $pattern = '%'.strtr($search, ['!' => '!!', '%' => '!%', '_' => '!_']).'%';
         $sources = [
-            'lesson' => Lesson::visibleToPublic(),
-            'exercise' => Exercise::visibleToPublic(),
+            'lesson' => Lesson::visibleTo($user),
+            'exercise' => Exercise::visibleTo($user),
             'exam' => Exam::visibleTo($user),
             'resource' => Resource::visibleTo($user),
             'video' => Video::visibleTo($user),
@@ -47,20 +47,21 @@ class GlobalSearch
 
         $details = [];
         foreach ($page->getCollection()->groupBy('result_type') as $type => $rows) {
-            $details[$type] = $this->metadata($sources[$type], $type)->findMany($rows->pluck('id'))->keyBy('id');
+            $details[$type] = $this->metadata($sources[$type], $type, $user)->findMany($rows->pluck('id'))->keyBy('id');
         }
 
         // A record can disappear or lose visibility between the page and metadata reads.
         $page->setCollection($page->getCollection()->map(function (object $row) use ($details): ?array {
             $item = $details[$row->result_type]->get($row->id);
 
-            return $item === null ? null : LearningResult::from($row->result_type, $item);
+            return $item === null ? null : LearningResult::from($row->result_type, $item)
+                + ['access_labels' => app(AccessDestination::class)->labels($item)->all()];
         })->filter()->values());
 
         return $page;
     }
 
-    private function metadata(Builder $source, string $type): Builder
+    private function metadata(Builder $source, string $type, ?User $user): Builder
     {
         $columns = match ($type) {
             'lesson' => ['category_id'],
@@ -70,6 +71,6 @@ class GlobalSearch
             'topic' => ['description'],
         };
 
-        return $source->select('id', 'title', ...$columns)->with(LearningResult::relations($type));
+        return $source->select('id', 'title', ...$columns)->with(LearningResult::relations($type, viewer: $user));
     }
 }
