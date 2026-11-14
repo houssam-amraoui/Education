@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: always
     ports:
       - 8000:80
     depends_on:
@@ -13,11 +14,12 @@ services:
   db:
     image: mysql:8.0
     container_name: ${DOCKER_NAME}_mysql
+    restart: always
     environment:
-      MYSQL_DATABASE: laravel
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: edu
+      MYSQL_ROOT_PASSWORD: 123456
       MYSQL_USER: laravel
-      MYSQL_PASSWORD: laravel
+      MYSQL_PASSWORD: 123456
     #ports:
     #  - 3306:3306
     volumes:
@@ -26,10 +28,11 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: ${DOCKER_NAME}_phpmyadmin
+    restart: always
     environment:
       PMA_HOST: db
       PMA_USER: root
-      PMA_PASSWORD: root
+      PMA_PASSWORD: 123456
     ports:
       - 8080:80
     depends_on:
