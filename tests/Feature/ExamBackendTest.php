@@ -178,9 +178,18 @@ class ExamBackendTest extends TestCase
         $exam = Exam::findOrFail($id);
         $response = $this->get($paper)->assertOk()->assertHeader('Content-Type', 'application/pdf')
             ->assertHeader('Content-Disposition', 'inline; filename=sample-paper.pdf');
-        $this->assertSame($disk->path($exam->examFile->path), $response->baseResponse->getFile()->getPathname());
+        $this->assertSame(realpath($disk->path($exam->examFile->path)), $response->baseResponse->getFile()->getPathname());
         $response = $this->get($correction)->assertOk()->assertDownload('sample-correction.pdf');
-        $this->assertSame($disk->path($exam->correctionFile->path), $response->baseResponse->getFile()->getPathname());
+        $this->assertSame(realpath($disk->path($exam->correctionFile->path)), $response->baseResponse->getFile()->getPathname());
+        $this->get(route('curriculum.exams.file', [$exam, 'paper', 'attachment']))
+            ->assertOk()->assertDownload('sample-paper.pdf');
+        $this->get(route('curriculum.exams.file', [$exam, 'correction', 'inline']))
+            ->assertOk()->assertHeader('Content-Disposition', 'inline; filename=sample-correction.pdf');
+        $this->get(route('curriculum.exams.file', [$exam, 'invalid', 'inline']))->assertNotFound();
+        $exam->forceFill(['available_until' => now()->subMinute()])->save();
+        $this->get($paper)->assertNotFound();
+        $this->get($correction)->assertNotFound();
+        $exam->forceFill(['available_until' => null])->save();
         $disk->delete($exam->correctionFile->path);
         $this->get($correction)->assertNotFound();
         $unit->forceFill(['status' => CurriculumStatus::Draft])->save();

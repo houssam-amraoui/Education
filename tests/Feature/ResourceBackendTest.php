@@ -113,11 +113,15 @@ class ResourceBackendTest extends TestCase
         auth()->logout();
         $this->get($inline)->assertNotFound();
         $this->get($download)->assertNotFound();
+        $this->head($inline)->assertNotFound();
+        $this->get($inline, ['Range' => 'bytes=0-3'])->assertNotFound();
         $this->actingAs(User::factory()->hasAttached(Role::where('key', Role::STUDENT)->sole())->create());
         $response = $this->get($inline)->assertOk()->assertHeader('Content-Type', 'application/pdf')
             ->assertHeader('Content-Disposition', 'inline; filename=study-notes.pdf')
             ->assertHeader('X-Content-Type-Options', 'nosniff');
         $this->assertTrue($response->headers->hasCacheControlDirective('no-store'));
+        $this->assertTrue($response->headers->hasCacheControlDirective('private'));
+        $this->get($inline, ['Range' => 'bytes=0-3'])->assertStatus(206)->assertHeader('Content-Range', 'bytes 0-3/9');
         $this->get($download)->assertOk()->assertDownload('study-notes.pdf');
         $this->get(route('library.resources.file', [$resource, 'invalid']))->assertNotFound();
 
@@ -128,6 +132,26 @@ class ResourceBackendTest extends TestCase
         $this->get($inline)->assertOk();
         $disk->delete($resource->storedFile->path);
         $this->get($inline)->assertNotFound();
+    }
+
+    public function test_document_metadata_cannot_select_a_file_outside_private_document_storage(): void
+    {
+        Storage::fake(StoredFile::DISK);
+        Storage::fake('local')->put('guide.pdf', "%PDF-1.7\n");
+        $file = StoredFile::create([
+            'disk' => StoredFile::DISK,
+            'path' => '../local/guide.pdf',
+            'mime_type' => 'application/pdf',
+            'size' => 9,
+        ]);
+        $resource = Resource::forceCreate([
+            'title' => 'Guide', 'type' => 'pdf', 'status' => 'published', 'stored_file_id' => $file->id,
+        ]);
+        $url = route('library.resources.file', [$resource, 'inline']);
+        $this->get($url)->assertNotFound();
+
+        $file->update(['disk' => 'local', 'path' => 'guide.pdf']);
+        $this->get($url)->assertNotFound();
     }
 
     public function test_publication_and_learning_links_control_file_visibility(): void
@@ -170,6 +194,8 @@ class ResourceBackendTest extends TestCase
 
         $this->get($standalone)->assertOk();
         $this->get($attachment)->assertOk()->assertDownload('study-notes.pdf');
+        $this->get(route('library.lessons.resources.file', [$lesson, $id, 'inline']))
+            ->assertOk()->assertHeader('Content-Disposition', 'inline; filename=study-notes.pdf');
         $this->get(route('library.lessons.resources.file', [$unlinked, $id, 'attachment']))->assertNotFound();
         $unit->forceFill(['status' => CurriculumStatus::Draft])->save();
         $this->get($attachment)->assertNotFound();
