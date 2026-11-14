@@ -506,19 +506,19 @@ Screens: S16–S18, A33–A37 excluding optional daily rewards/leaderboards. PRD
 
 ### 2. Backend implementation tasks
 
-- [ ] **REWARD-05** — Add immutable point-ledger persistence and balance queries with source-event deduplication.
+- [x] **REWARD-05** — Add immutable point-ledger persistence and balance queries with source-event deduplication.
 - [x] **REWARD-06** — Add validated management of earning rules for lesson completion, exercise results, exam completion, and streak milestones.
 - [x] **REWARD-07** — Award configured points from finalized learning events exactly once; replays and retries follow explicit rule eligibility.
 - [x] **REWARD-08** — Add learning-day/streak calculation and configurable streak rules using an explicit timezone/day-boundary policy.
 - [x] **REWARD-09** — Add achievement definitions, criteria management, and unique student achievement awards from qualifying events.
-- [ ] **REWARD-10** — Add configured spending costs and atomic point debit/unlock records; concurrent requests cannot overspend or charge twice for one unlock.
+- [x] **REWARD-10** — Add configured spending costs and atomic point debit/unlock records; concurrent requests cannot overspend or charge twice for one unlock.
 
 ### 3. Integration tasks
 
 - [x] **REWARD-11** — Connect points-rule management and streak settings forms to persisted configuration.
 - [x] **REWARD-12** — Connect achievement management and student reward/detail views to live awards and criteria.
 - [x] **REWARD-13** — Bind dashboard points/streak/achievement summaries to real balances and awards.
-- [ ] **REWARD-14** — Connect unlock confirmation to atomic spending and the resulting access entitlement.
+- [x] **REWARD-14** — Connect unlock confirmation to atomic spending and the resulting access entitlement.
 
 ### 4. Testing tasks
 

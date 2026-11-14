@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Actions\Rewards\UnlockWithPoints;
+use App\Models\AccessRule;
 use App\Models\Level;
 use App\Models\PointCost;
 use App\Models\PointTransaction;
+use App\Models\Resource;
 use App\Models\Role;
 use App\Models\Unit;
 use App\Models\User;
@@ -58,6 +60,21 @@ class RewardBackendTest extends TestCase
         $this->postJson(route($costs.'store'), $cost)->assertUnprocessable()->assertJsonValidationErrors('target_id');
         $this->putJson(route($costs.'update', $id), ['points' => 15, 'enabled' => false])
             ->assertOk()->assertJsonPath('points', 15)->assertJsonPath('enabled', false);
+    }
+
+    public function test_resource_cost_requires_points_classification(): void
+    {
+        $this->actingAs($this->user(Role::ADMINISTRATOR));
+        $resource = Resource::create(['title' => 'Worksheet', 'type' => 'worksheet', 'access' => 'public']);
+        $url = route('admin.reward-configuration.point-costs.store');
+        $cost = ['target_type' => 'resource', 'target_id' => $resource->id, 'points' => 10, 'enabled' => true];
+
+        $this->postJson($url, $cost)->assertUnprocessable()->assertJsonValidationErrors('target_id');
+        AccessRule::create(['target_type' => 'resource', 'target_id' => $resource->id, 'requirement' => 'points']);
+        $this->postJson($url, $cost)->assertCreated();
+
+        $pointsResource = Resource::create(['title' => 'Study guide', 'type' => 'study-guide', 'access' => 'points']);
+        $this->postJson($url, array_replace($cost, ['target_id' => $pointsResource->id]))->assertCreated();
     }
 
     public function test_lesson_replays_preserve_ledger_and_achievement_awards_across_midnight(): void

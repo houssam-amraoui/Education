@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Models\PointCost;
+use App\Models\Resource;
 use App\Support\AccountPages;
 use App\Support\RewardTarget;
 use Illuminate\Database\Query\Builder;
@@ -39,7 +40,12 @@ class SavePointCostRequest extends FormRequest
             'target_type' => ['required', Rule::enum(RewardTarget::class)],
             'target_id' => [
                 'bail', 'required', 'integer',
-                $model === null ? 'in:0' : Rule::exists($model, 'id'),
+                match ($target) {
+                    RewardTarget::Resource => Rule::exists(Resource::class, 'id')
+                        ->where(fn (Builder $query) => $query->whereIn('id', Resource::pointsClassified()->select('id'))),
+                    RewardTarget::Exercise, RewardTarget::Exam => Rule::exists($model, 'id'),
+                    default => 'in:0',
+                },
                 Rule::unique('point_costs')->where(fn (Builder $query) => $query->where('target_type', $target?->value)),
             ],
         ];

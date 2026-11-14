@@ -57,6 +57,18 @@ class Resource extends Model
     }
 
     #[Scope]
+    protected function pointsClassified(Builder $query): void
+    {
+        $query->where(fn (Builder $resources) => $resources
+            ->where('resources.access', 'points')
+            ->orWhereExists(AccessRule::query()
+                ->where('target_type', 'resource')
+                ->where('requirement', 'points')
+                ->whereColumn('target_id', 'resources.id')
+                ->toBase()));
+    }
+
+    #[Scope]
     protected function visibleTo(Builder $query, ?User $user, bool $unlocking = false): void
     {
         $query->publishedForDelivery($user);

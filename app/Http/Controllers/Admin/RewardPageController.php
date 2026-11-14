@@ -63,9 +63,7 @@ class RewardPageController
             foreach (RewardTarget::cases() as $type) {
                 $model = $type->model();
                 $targets[$type->label()] = $model
-                      ? $model::query()->when($type === RewardTarget::Resource, fn ($query) => $query->where(fn ($resources) => $resources
-                          ->where('access', 'points')->orWhereExists(\App\Models\AccessRule::where('target_type', 'resource')
-                              ->where('requirement', 'points')->whereColumn('target_id', 'resources.id')->toBase())))
+                      ? $model::query()->when($type === RewardTarget::Resource, fn ($query) => $query->pointsClassified())
                         ->orderBy('title')->pluck('title', 'id')->mapWithKeys(fn ($title, $id) => [$type->value.':'.$id => $title])->all()
                     : [$type->value.':0' => $type->label()];
             }

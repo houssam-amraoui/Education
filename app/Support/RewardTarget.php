@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use App\Models\AccessRule;
 use App\Models\Exam;
 use App\Models\Exercise;
 use App\Models\Resource;
@@ -42,9 +41,7 @@ enum RewardTarget: string
             self::Exercise => Exercise::visibleTo($student, unlocking: true)->whereKey($id)->exists(),
             self::Exam => Exam::visibleTo($student, unlocking: true)->whereKey($id)->exists(),
             self::Resource => Resource::visibleTo($student, unlocking: true)->whereKey($id)
-                ->where(fn ($resources) => $resources->where('access', 'points')->orWhereExists(
-                    AccessRule::where(['target_type' => 'resource', 'target_id' => $id, 'requirement' => 'points'])->toBase()
-                ))->exists(),
+                ->pointsClassified()->exists(),
             self::AskTeacher => $id === 0 && app(ContentAccess::class)->allowsAskTeacher($student, unlocking: true),
         };
     }

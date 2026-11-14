@@ -48,6 +48,13 @@ class ContentAccess
             && $this->unmetRules(AccessTarget::FEATURE, 0, $studentId, $unlocking)->doesntExist();
     }
 
+    public function hasPointsGrant(string $type, int $id, User $viewer): bool
+    {
+        $studentId = $this->studentId($viewer);
+
+        return $studentId !== null && $this->grant($type, $id, $studentId, 'points')->exists();
+    }
+
     public function requirements(string $type, int $id, ?string $classification = null): Collection
     {
         $rules = $this->targetRules($type, $id)->where('requirement', '<>', 'public')->orderBy('id')->get()->keyBy('requirement');

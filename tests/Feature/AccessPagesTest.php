@@ -84,23 +84,46 @@ class AccessPagesTest extends TestCase
         $student = $this->user();
 
         $this->get($show, self::HTML)->assertRedirect(route('account.login.show'));
+        $this->post($spend, ['points' => 5], self::HTML)->assertRedirect(route('account.login.show'));
+        $this->actingAs($this->user(Role::TEACHER))->get($show, self::HTML)->assertForbidden();
+        $this->post($spend, ['points' => 5], self::HTML)->assertForbidden();
         $this->actingAs($student)->get($destination, self::HTML)->assertNotFound()->assertSee($show);
         $this->get(route('account.rewards.index'), self::HTML)->assertOk()->assertSee($exercise->title);
         $this->get($show, self::HTML)->assertOk()->assertSee('Insufficient point balance.');
         $this->post($spend, ['points' => 5], self::HTML)->assertRedirect($show)->assertSessionHasErrors('points');
         $this->assertDatabaseCount('point_transactions', 0);
         PointTransaction::create(['student_id' => $student->id, 'source_key' => 'earned', 'amount' => 10, 'recorded_at' => now()]);
+        $this->post($spend, [], self::HTML)->assertRedirect($show)->assertSessionHasErrors('points');
         $cost->update(['points' => 6]);
         $this->post($spend, ['points' => 5], self::HTML)->assertRedirect($show)->assertSessionHasErrors('points');
         $this->assertDatabaseCount('point_unlocks', 0);
         $this->get($show, self::HTML)->assertOk()->assertSee('Unlock for 6 points');
         $this->post($spend, ['points' => 6], self::HTML)->assertRedirect($show);
-        $this->get($show, self::HTML)->assertOk()->assertSee('Open unlocked content')->assertSee($destination);
+        $this->get($show, self::HTML)->assertOk()->assertSee('Open unlocked content')->assertSee('4 points')->assertSee($destination);
         $this->get($destination, self::HTML)->assertOk();
         $this->post($spend, ['points' => 6], self::HTML)->assertRedirect($show);
         $this->assertDatabaseCount('point_transactions', 2);
         $this->assertDatabaseCount('entitlements', 1);
         $this->actingAs($this->user())->get($destination, self::HTML)->assertNotFound();
+        $this->get($show, self::HTML)->assertOk()->assertDontSee('Open unlocked content');
+    }
+
+    public function test_unlock_page_distinguishes_existing_access_from_unavailable_spending(): void
+    {
+        $parameters = ['ask_teacher', 0];
+        $show = route('access.unlock.show', $parameters);
+        $spend = route('access.unlock.store', $parameters);
+        $this->actingAs($this->user())->get($show, self::HTML)->assertOk()
+            ->assertSee('You already have access to this destination.')
+            ->assertDontSee('Open unlocked content')->assertDontSee($spend);
+
+        AccessRule::create(['target_type' => 'ask_teacher', 'target_id' => 0, 'requirement' => 'points']);
+        $this->get($show, self::HTML)->assertOk()
+            ->assertSee('This points unlock is currently unavailable.')
+            ->assertSee(route('access.requirements', $parameters))->assertDontSee($spend);
+        $this->post($spend, ['points' => 5], self::HTML)->assertRedirect($show)->assertSessionHasErrors('points');
+        $this->assertDatabaseCount('point_transactions', 0);
+        $this->assertDatabaseCount('entitlements', 0);
     }
 
     private function user(string $role = Role::STUDENT): User

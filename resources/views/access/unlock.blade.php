@@ -4,11 +4,17 @@
     @include('curriculum.heading')
     @include('curriculum.feedback')
     <x-prototype.card class="reading">
-        <span class="tile-icon"><x-prototype.icon :name="$unlocked ? 'check' : 'lock'"/></span>
+        <span class="tile-icon"><x-prototype.icon :name="$canOpen ? 'check' : 'lock'"/></span>
         <h2 dir="auto">{{ $targetTitle }}</h2>
         @if($unlocked)
             <p class="notice success" role="status">You can now access this destination.</p>
+            <dl class="details">
+                <div><dt>Your balance</dt><dd>{{ $balance }} points</dd></div>
+            </dl>
             <x-prototype.link :href="$destination" variant="primary">Open unlocked content</x-prototype.link>
+        @elseif($canOpen)
+            <p class="notice info" role="status">You already have access to this destination.</p>
+            <x-prototype.link :href="$destination" variant="primary">Open content</x-prototype.link>
         @elseif($cost)
             <p>Use points to unlock this destination.</p>
             <dl class="details">
@@ -26,7 +32,7 @@
                 <x-prototype.link :href="$back" variant="tertiary">Cancel</x-prototype.link>
             </div>
         @else
-            <p class="notice info">This points unlock is currently unavailable.</p>
+            <p class="notice info" role="status">This points unlock is currently unavailable.</p>
             <x-prototype.link :href="$back">Back to access requirements</x-prototype.link>
         @endif
     </x-prototype.card>

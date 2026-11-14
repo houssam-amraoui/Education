@@ -6,6 +6,7 @@ use App\Actions\Rewards\UnlockWithPoints;
 use App\Http\Requests\ConfirmPointsUnlockRequest;
 use App\Models\Level;
 use App\Models\User;
+use App\Policies\ContentAccess;
 use App\Queries\AccessDestination;
 use App\Queries\PointBalance;
 use App\Support\AccountPages;
@@ -64,7 +65,7 @@ class AccessPageController
         return response($this->requirements($request, $type, $id, $record), 404);
     }
 
-    public function unlock(Request $request, string $type, int $target, PointBalance $points): View|RedirectResponse
+    public function unlock(Request $request, string $type, int $target, PointBalance $points, ContentAccess $policy): View
     {
         $student = $request->user();
         Gate::authorize('manageLearningProfile', $student);
@@ -72,17 +73,18 @@ class AccessPageController
         abort_unless($record || ($type === AccessTarget::FEATURE && $target === 0), 404);
 
         $destination = $this->destination($request, $type, $record);
-        $unlocked = $this->access->allows($type, $target, $student, $record);
-        $cost = $unlocked ? null : $this->access->cost($type, $target, $student, $this->access->outstanding($type, $target, $student, $record));
-        $balance = $points->for($student);
+        $canOpen = $this->access->allows($type, $target, $student, $record);
+        $unlocked = $canOpen && $policy->hasPointsGrant($type, $target, $student);
+        $cost = $canOpen ? null : $this->access->cost($type, $target, $student, $this->access->outstanding($type, $target, $student, $record));
 
         return AccountPages::view('S18', 'unlock', [
             'targetTitle' => $record?->title ?? 'Ask Teacher',
             'destination' => $destination,
             'back' => route('access.requirements', [$type, $target]),
             'submit' => route('access.unlock.store', [$type, $target]),
-            'balance' => $balance,
+            'balance' => ($cost || $unlocked) ? $points->for($student) : null,
             'cost' => $cost,
+            'canOpen' => $canOpen,
             'unlocked' => $unlocked,
             'parent' => 'S16',
         ], 'access.unlock');
