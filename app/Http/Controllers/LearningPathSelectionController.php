@@ -18,10 +18,14 @@ class LearningPathSelectionController extends Controller
         $student = $request->user();
         Gate::authorize('manageLearningProfile', $student);
 
+        $levels = Level::publishedInCurriculum()->ordered()->get();
+        $suggestedLevelId = $levels->first(fn (Level $level) => (string) $level->id === $request->query('level_id'))?->id;
+
         return AccountPages::view('S02', 'learning-goals', [
             'parent' => 'S01',
-            'levels' => Level::publishedInCurriculum()->ordered()->get(),
+            'levels' => $levels,
             'selected' => $student->selectedLevels()->pluck('levels.id')->all(),
+            'suggestedLevelId' => $suggestedLevelId,
             'returnTo' => AccountPages::destination($request, $request->query('return_to')),
         ]);
     }

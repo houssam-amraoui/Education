@@ -29,7 +29,11 @@ class ProfileController extends Controller
         $student = $request->user();
         Gate::authorize('manageLearningProfile', $student);
 
-        return AccountPages::view('S23', 'profile', ['parent' => 'S22', 'student' => $student]);
+        return AccountPages::view('S23', 'profile', [
+            'parent' => 'S22',
+            'student' => $student,
+            'selectedLevels' => $student->selectedLevels()->publishedInCurriculum()->ordered()->get(),
+        ]);
     }
 
     public function update(UpdateProfileRequest $request): Response|RedirectResponse

@@ -7,7 +7,16 @@
     }])
 
     @if($panel === 'level')
-        <div class="notice info"><x-prototype.icon name="book"/><div><strong>Build your confidence, one step at a time.</strong><p>Explore this learning path’s published units and categories.</p></div></div>
+        <div class="notice info">
+            <x-prototype.icon name="book"/>
+            <div>
+                <strong>Build your confidence, one step at a time.</strong>
+                <p>Explore this learning path’s published units and categories.</p>
+                @if(isset($destinations['S02']))
+                    <x-prototype.link :href="route('account.learning-goals.show', ['level_id' => $level->id])">Select this learning path</x-prototype.link>
+                @endif
+            </div>
+        </div>
         <div class="cards three">
             @foreach([
                 ['Units', 'Learn step by step through your course.', trans_choice('{1} :count structured unit|[0,*] :count structured units', $level->units_count), route('curriculum.level.units', $level)],

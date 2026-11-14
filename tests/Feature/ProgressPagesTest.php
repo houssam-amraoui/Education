@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Actions\Auth\SaveSelectedLevels;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\ExerciseAttempt;
@@ -9,11 +10,61 @@ use App\Models\Level;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class ProgressPagesTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_student_can_replace_repeat_and_clear_only_their_own_path_selections(): void
+    {
+        $student = $this->user(Role::STUDENT);
+        $other = $this->user(Role::STUDENT);
+        $first = Level::forceCreate(['title' => 'First path', 'status' => 'published']);
+        $second = Level::forceCreate(['title' => 'Second path', 'status' => 'published']);
+        $third = Level::forceCreate(['title' => 'Third path', 'status' => 'published']);
+        $student->selectedLevels()->attach($first);
+        $other->selectedLevels()->attach($first);
+        $url = route('account.learning-goals.update');
+        $input = ['user_id' => $other->id, 'level_ids' => [(string) $second->id, (string) $third->id]];
+
+        $this->putJson($url, $input)->assertUnauthorized();
+        $this->actingAs($this->user(Role::ADMINISTRATOR))->putJson($url, $input)->assertForbidden();
+        $this->actingAs($student)->put($url, $input)->assertStatus(303);
+        $this->put($url, $input)->assertStatus(303);
+        $this->assertEqualsCanonicalizing([$second->id, $third->id], $student->selectedLevels()->get()->modelKeys());
+
+        $this->put($url)->assertStatus(303);
+        $this->assertSame([], $student->selectedLevels()->get()->modelKeys());
+        $this->assertSame([$first->id], $other->selectedLevels()->get()->modelKeys());
+    }
+
+    public function test_path_save_rechecks_publication_and_uniqueness_before_replacing_selections(): void
+    {
+        $student = $this->user(Role::STUDENT);
+        $selected = Level::forceCreate(['title' => 'Saved path', 'status' => 'published']);
+        $replacement = Level::forceCreate(['title' => 'New path', 'status' => 'published']);
+        $unavailable = Level::forceCreate(['title' => 'Unavailable path', 'status' => 'archived']);
+        $missingId = $unavailable->id + 1;
+        $student->selectedLevels()->attach($selected);
+        $save = app(SaveSelectedLevels::class);
+
+        foreach ([
+            [$replacement->id, $unavailable->id],
+            [$replacement->id, $missingId],
+            [$replacement->id, (string) $replacement->id],
+        ] as $levelIds) {
+            try {
+                $save->handle($student, $levelIds);
+                $this->fail('Expected the save to reject invalid path selections.');
+            } catch (ValidationException $exception) {
+                $this->assertArrayHasKey('level_ids', $exception->errors());
+            }
+
+            $this->assertSame([$selected->id], $student->selectedLevels()->get()->modelKeys());
+        }
+    }
 
     public function test_student_can_save_paths_resume_a_lesson_and_see_completion_and_history(): void
     {

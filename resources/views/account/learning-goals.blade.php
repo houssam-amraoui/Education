@@ -1,4 +1,8 @@
-@php($chosen = (array) old('level_ids', $errors->any() ? [] : $selected))
+@php
+    $chosen = $errors->any() ? old('level_ids', []) : [...$selected, $suggestedLevelId];
+    $chosen = array_filter((array) $chosen, fn ($id) => is_int($id) || is_string($id));
+    $hasSelectionErrors = $errors->has('level_ids') || $errors->has('level_ids.*');
+@endphp
 @if($levels->isEmpty())
     <div class="empty-state"><h2>No learning paths are available yet</h2></div>
     <x-prototype.link :href="$url('S01')">Continue to dashboard</x-prototype.link>
@@ -7,7 +11,7 @@
         @csrf
         @method('PUT')
         @if($returnTo)<input type="hidden" name="return_to" value="{{ $returnTo }}">@endif
-        <fieldset class="stack" id="level_ids" tabindex="-1">
+        <fieldset class="stack" id="level_ids" tabindex="-1" @if($hasSelectionErrors) aria-invalid="true" @endif>
             <legend class="sr-only">Learning paths</legend>
             <div class="cards three">
                 @foreach($levels as $level)

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Level;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -75,6 +76,60 @@ class AccountPagesTest extends TestCase
                 ->assertRedirect(route('account.home'));
             $this->post(route('account.logout'));
         }
+    }
+
+    public function test_learning_paths_connect_discovery_settings_and_dashboard_across_sessions(): void
+    {
+        $student = $this->userWithRole(Role::STUDENT);
+        $saved = Level::forceCreate(['title' => 'Saved English Path', 'status' => 'published']);
+        $discovered = Level::forceCreate(['title' => 'Discovered English Path', 'status' => 'published']);
+        $draft = Level::create(['title' => 'Draft English Path']);
+        $student->selectedLevels()->attach($saved);
+        $level = route('curriculum.level', $discovered);
+        $goals = route('account.learning-goals.show');
+        $suggestion = route('account.learning-goals.show', ['level_id' => $discovered->id]);
+        $settings = route('account.preferences.show');
+        $settingsReturn = route('account.preferences.show', absolute: false);
+        $settingsGoals = route('account.learning-goals.show', ['return_to' => $settingsReturn]);
+        $update = route('account.learning-goals.update');
+        $dashboard = route('account.home');
+        $credentials = ['email' => $student->email, 'password' => 'password'];
+        $checked = fn (Level $path) => 'value="'.$path->id.'" checked';
+
+        $this->get($level)->assertOk()->assertDontSee($suggestion);
+        $this->get($goals)->assertRedirect(route('account.login.show'));
+        $this->post(route('account.login'), $credentials)->assertRedirect($goals);
+        $this->get(route('curriculum.paths'))->assertOk()->assertSee($level)->assertDontSee($draft->title);
+        $this->get($level)->assertOk()->assertSee($suggestion);
+        $this->get($suggestion)->assertOk()->assertSee($checked($saved), false)
+            ->assertSee($checked($discovered), false)->assertDontSee($draft->title);
+        $this->assertDatabaseMissing('level_user', ['user_id' => $student->id, 'level_id' => $discovered->id]);
+
+        $this->from($suggestion)->put($update, ['level_ids' => [$discovered->id, $draft->id]])
+            ->assertRedirect($suggestion)->assertSessionHasErrors('level_ids.1');
+        $this->get($suggestion)->assertOk()->assertSee('data-live-errors', false)
+            ->assertSee($checked($discovered), false)->assertDontSee($checked($saved), false);
+        $this->put($update, ['level_ids' => [$saved->id, $discovered->id]])->assertRedirect($dashboard);
+        $this->get($dashboard)->assertOk()->assertSee($goals)->assertSee($discovered->title);
+        $this->get($settings)->assertOk()->assertSee($settingsGoals)->assertSee($saved->title)->assertSee($discovered->title);
+        $this->get($settingsGoals)->assertOk()->assertSee($checked($saved), false)->assertSee($checked($discovered), false);
+        $this->put($update, ['level_ids' => [$discovered->id], 'return_to' => $settingsReturn])->assertRedirect($settings);
+
+        $this->post(route('account.logout'))->assertRedirect(route('account.login.show'));
+        $this->assertGuest();
+        $this->post(route('account.login'), $credentials)->assertRedirect($dashboard);
+        $this->get($goals)->assertOk()->assertSee($checked($discovered), false)->assertDontSee($checked($saved), false);
+        $this->get($settings)->assertOk()->assertSee($discovered->title)->assertDontSee($saved->title);
+    }
+
+    public function test_learning_path_selection_has_empty_and_restricted_states(): void
+    {
+        $goals = route('account.learning-goals.show');
+        $this->actingAs($this->userWithRole(Role::ADMINISTRATOR))->get($goals)
+            ->assertForbidden()->assertSee('Access restricted')->assertDontSee('Save learning paths');
+        $this->actingAs($this->userWithRole(Role::STUDENT))->get($goals)
+            ->assertOk()->assertSee('No learning paths are available yet')->assertDontSee('Save learning paths');
+        $this->get(route('account.preferences.show'))->assertOk()->assertSee('No learning paths selected.');
     }
 
     public function test_user_list_and_editor_show_persisted_values_and_save_identity_and_membership(): void

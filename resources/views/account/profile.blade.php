@@ -63,8 +63,12 @@
             @endif
             <a href="{{ $url('S23') }}" class="button button-secondary">Open settings</a>
         @else
-            <p>Learning path selection is currently unavailable.</p>
-            <a href="{{ $url('S01') }}" class="button button-secondary">Back to your account</a>
+            @forelse($selectedLevels as $level)
+                <p dir="auto">{{ $level->title }}</p>
+            @empty
+                <p>No learning paths selected.</p>
+            @endforelse
+            <x-prototype.link :href="route('account.learning-goals.show', ['return_to' => route('account.preferences.show', absolute: false)])">Change learning goals</x-prototype.link>
         @endif
     </x-prototype.card>
 </div>

@@ -2,8 +2,10 @@
 
 namespace App\Actions\Auth;
 
+use App\Models\Level;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class SaveSelectedLevels
 {
@@ -11,7 +13,15 @@ class SaveSelectedLevels
     {
         DB::transaction(function () use ($student, $levelIds): void {
             $current = User::lockForUpdate()->findOrFail($student->getKey());
-            $current->selectedLevels()->sync($levelIds);
+            $levels = Level::publishedInCurriculum()->whereKey($levelIds)->sharedLock()->get(['id']);
+
+            if ($levels->count() !== count($levelIds)) {
+                throw ValidationException::withMessages([
+                    'level_ids' => __('Select distinct published learning paths.'),
+                ]);
+            }
+
+            $current->selectedLevels()->sync($levels->modelKeys());
         });
     }
 }
