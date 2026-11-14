@@ -2,50 +2,104 @@
 
 namespace Tests\Feature;
 
+use App\Models\Exam;
+use App\Models\Exercise;
+use App\Models\Lesson;
 use App\Models\Level;
+use App\Models\Resource;
 use App\Models\Role;
 use App\Models\Topic;
 use App\Models\User;
 use Database\Seeders\DemonstrationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class DemonstrationSeederTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_demo_seed_provides_a_repeatable_learning_path(): void
+    public function test_seed_builds_a_repeatable_connected_catalogue_and_cohort(): void
     {
+        Storage::fake('documents');
+        $this->freezeTime();
         $this->seed();
-        $this->seed();
-
+        $tables = [
+            'users', 'role_user', 'levels', 'units', 'categories', 'lessons', 'lesson_progress', 'questions',
+            'exercises', 'exercise_attempts', 'exercise_attempt_items', 'exams', 'exam_attempts', 'exam_attempt_items',
+            'topics', 'resources', 'stored_files', 'videos', 'conversations', 'messages', 'analytics_events',
+            'point_rules', 'point_transactions', 'point_unlocks', 'achievements', 'student_achievements', 'access_rules', 'entitlements',
+        ];
+        $counts = [];
+        foreach ($tables as $table) {
+            $counts[$table] = DB::table($table)->count();
+            $this->assertGreaterThan(0, $counts[$table], $table);
+        }
         $student = User::where('email', 'demo.student@example.test')->sole();
         $this->assertTrue(Hash::check('password', $student->password));
         $this->assertSame([Role::STUDENT], $student->roles()->pluck('key')->all());
+        $this->assertCount(2, $student->selectedLevels);
+        $student->forceFill(['city' => 'Rabat'])->save();
 
-        $level = Level::visibleToPublic()->sole();
-        $this->assertTrue($student->selectedLevels()->sole()->is($level));
-        $unit = $level->units()->visibleToPublic()->sole();
-        $category = $unit->categories()->visibleToPublic()->sole();
-        $lesson = $category->lessons()->visibleToPublic()->where('title', 'The passive voice')->sole();
-        $preparation = $lesson->prerequisiteLessons()->sole();
-        $this->assertTrue($preparation->nextLessons()->sole()->is($lesson));
+        $this->seed();
+        foreach ($counts as $table => $count) {
+            $this->assertDatabaseCount($table, $count);
+        }
+        $this->assertSame('Rabat', $student->refresh()->city);
+        $this->assertCount(6, Storage::disk('documents')->allFiles());
+        $this->assertCount(2, Level::visibleToPublic()->get());
+        $this->assertCount(7, DB::table('questions')->distinct()->pluck('type'));
 
-        $exercise = $unit->exercises()->visibleToPublic()->sole();
-        $exam = $unit->exams()->visibleTo($student)->sole();
-        $this->assertTrue($exercise->prerequisiteLessons()->sole()->is($lesson));
-        $this->assertTrue($exam->prerequisiteLessons()->sole()->is($lesson));
-        $this->assertSame(['option_id' => 'a'], $exercise->questions()->sole()->answer);
-        $this->assertSame(['value' => true], $exam->questions()->sole()->answer);
+        $lesson = Lesson::visibleToPublic()->where('title', 'The passive voice')->sole();
+        $this->assertTrue($lesson->prerequisiteLessons()->sole()->nextLessons()->first()->is($lesson));
+        $this->assertStringContainsString('في المبني للمجهول', $lesson->body);
+        $topic = Topic::published()->where('title', 'Passive voice · Demo')->sole();
+        $this->assertTrue($topic->exercises()->sole()->prerequisiteLessons()->sole()->is($lesson));
 
-        $topic = Topic::published()->sole();
-        $this->assertCount(2, $topic->lessons);
-        $this->assertTrue($topic->exercises()->sole()->is($exercise));
-        $this->assertTrue($topic->exams()->sole()->is($exam));
-        $this->assertDatabaseCount('users', 1);
-        $this->assertDatabaseCount('lessons', 2);
-        $this->assertDatabaseCount('questions', 2);
+        $exercise = Exercise::where('title', 'Passive voice practice')->sole();
+        $attempts = $exercise->attempts()->where('student_id', $student->id)->orderBy('id')->get();
+        $this->assertSame([2, 7], $attempts->pluck('awarded_points')->all());
+        $this->assertDatabaseHas('exam_attempts', ['submitted_at' => null, 'awarded_points' => null]);
+        $this->assertSame(1, DB::table('exam_attempts')->whereNotNull('expired_at')->count());
+        $resource = Resource::where('title', 'A request someone can act on')->sole();
+        $this->assertTrue(Resource::visibleTo($student)->whereKey($resource)->exists());
+        $this->assertFalse(Resource::visibleTo(null)->whereKey($resource)->exists());
+    }
+
+    public function test_seeded_screens_show_content_and_keep_keys_behind_authorized_review(): void
+    {
+        Storage::fake('documents');
+        $this->seed();
+        $this->get('/learn/paths')->assertOk()->assertSee('Everyday English');
+        $this->get('/learn/videos')->assertOk()->assertSee('BBC Learning English');
+        $this->get('/learn/resources')->assertOk()->assertSee('Editing a school bulletin');
+        $paper = Exam::where('type', Exam::DOCUMENT)->sole();
+        $correction = "/learn/exams/{$paper->id}/files/correction/inline";
+        $this->get($correction)->assertNotFound();
+
+        $student = User::where('email', 'demo.student@example.test')->sole();
+        $this->actingAs($student)->get('/account')->assertOk()->assertSee('Reported speech in a meeting summary');
+        $this->get('/account/progress/activity')->assertOk()->assertSee('Passive voice practice');
+        $this->get('/account/messages')->assertOk()->assertSee('Choosing was or were in a report');
+        $this->get('/account/rewards')->assertOk()->assertSee('Steady learner');
+        $this->get($correction)->assertOk()->assertHeader('Content-Type', 'application/pdf');
+
+        $exercise = Exercise::where('title', 'Confirm or reschedule?')->sole();
+        $attempt = $exercise->attempts()->sole();
+        $url = "/learn/exercises/{$exercise->id}/attempts/{$attempt->id}";
+        $this->get($url)->assertNotFound();
+        $hanae = User::where('email', 'demo.hanae@example.test')->sole();
+        $this->actingAs($hanae)->get($url)->assertOk()
+            ->assertSee('Which message specifies a confirmed arrangement?')
+            ->assertDontSee('The present continuous with an exact time describes an arrangement.');
+
+        $teacher = User::where('email', 'demo.teacher@example.test')->sole();
+        $this->actingAs($teacher)->get('/admin/inbox')->assertOk()->assertSee('Comment nuancer la conclusion ?');
+        $admin = User::where('email', 'demo.admin@example.test')->sole();
+        $this->actingAs($admin)->get('/admin/accounts/users')->assertOk()->assertSee('Nour Benjelloun');
+        $this->get('/admin/analytics/learning')->assertOk()->assertSee('Exercise question #');
     }
 
     public function test_default_and_explicit_demo_seeds_skip_production(): void

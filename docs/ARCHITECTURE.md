@@ -181,11 +181,23 @@ The tests use the database host and credentials from the local environment and r
 
 ### Local demonstration data
 
-With `APP_ENV=local` and a migrated development database, run `php artisan db:seed`.
-Open `/learn/paths` to browse **2nd Baccalaureate · Demo**, or sign in at
-`/account/login` as `demo.student@example.test` with the factory password
-`password`. The student already has the demo level selected. Study Past
-participles and The passive voice, then find the practice exercise and the
-interactive grammar review through the Passive voice demo topic. The seed
-starts the student with an empty activity history so the journey generates
-its own progress and results.
+With `APP_ENV=local` and a migrated development or demo database, run
+`php artisan db:seed`. Browse `/learn/paths` for **2nd Baccalaureate · Demo**
+and **Everyday English · A2–B1**. The seeded accounts use the password
+`password` and addresses under `example.test`.
+
+| Account | Scenario |
+| --- | --- |
+| `demo.student@example.test` | English interface, two paths, graded retry, streak, teacher reply and a points-unlocked PDF |
+| `demo.imane@example.test` | Arabic interface, reading progress, expired timed exam and a question awaiting a reply |
+| `demo.ilyas@example.test` | French interface, evidence-based reading practice and a teacher reply in French |
+| `demo.hanae@example.test` | Everyday English learner with a practice attempt in progress |
+| `demo.yacine@example.test` | New student with no selected path or activity |
+| `demo.teacher@example.test` | Teacher inbox and lesson authoring |
+| `demo.admin@example.test` | Administration and analytics |
+
+The seed adds catalogue content, protected PDFs and video links before
+configuring access, rewards and student histories. Historical dates are
+relative to the first seed run. Existing demo accounts retain their activity
+and preferences on later runs. The original exam paper and marking guide
+are separate documents delivered through the existing exam access policy.
