@@ -159,7 +159,8 @@ async function verifyQuestionPreviews(page, base) {
 }
 
 (async () => {
-    const base = process.env.PROTOTYPE_URL || "http://127.0.0.1:8123";
+    const origin = new URL(process.env.PROTOTYPE_URL || "http://127.0.0.1:8123").origin;
+    const base = origin + "/prototype";
     const executablePath =
         process.env.CHROME_PATH ||
         "C:/Program Files/Google/Chrome/Application/chrome.exe";
@@ -191,7 +192,7 @@ async function verifyQuestionPreviews(page, base) {
         for (const width of [1440, 768, 320]) {
             await page.setViewportSize({ width, height: 1000 });
             for (const path of paths) {
-                const response = await page.goto(base + path);
+                const response = await page.goto(origin + path);
                 assert.equal(response.status(), 200, path);
                 assert.equal(
                     await page.locator("h1").count(),
@@ -210,7 +211,7 @@ async function verifyQuestionPreviews(page, base) {
                             .filter(
                                 (url) =>
                                     !url.hash &&
-                                    !url.pathname.startsWith("/prototype/"),
+                                    !url.pathname.startsWith("/prototype-media/"),
                             )
                             .map((url) => url.pathname),
                     );

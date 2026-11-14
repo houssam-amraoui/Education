@@ -36,8 +36,8 @@ class LearnerQuestionPagesTest extends TestCase
             'answer' => ['option_id' => 'two'], 'explanation' => 'Private correction explanation',
         ]);
         $this->get($instructions)->assertOk()->assertSee('Sign in with a student account');
-        $this->get(route('account.login.show', ['return_to' => '/learn/'.$resource.'/'.$assessment->id]))
-            ->assertSessionHas('url.intended', '/learn/'.$resource.'/'.$assessment->id);
+        $this->get(route('account.login.show', ['return_to' => '/'.$resource.'/'.$assessment->id]))
+            ->assertSessionHas('url.intended', '/'.$resource.'/'.$assessment->id);
         $this->post($start, [], $headers)->assertRedirect(route('account.login.show'));
         $this->actingAs(User::factory()->create())->post($start, [], $headers)->assertForbidden();
 

@@ -8,6 +8,11 @@ Use one Laravel 12 application with server-rendered Blade, Vite, Eloquent, and a
 
 The current prototype maps inventory IDs to static GET routes in `routes/web.php`. `PrototypeController`, `App\Support\Prototype`, and the prototype Blade views provide fixture data, navigation, and simulated outcomes. Preview roles and query parameters carry display state only. Reuse the shell and presentation components as live screens arrive. Replace fixture bindings with named routes, authorized model queries, and CSRF-protected forms under the relevant integration task. Keep unfinished previews separate from live routes and out of production navigation. Use screen IDs to verify coverage and task IDs to sequence work.
 
+The live homepage is served at `/`, and `/home` redirects there. Fixture screens
+are served under `/prototype` only in local and testing environments.
+Learning pages use direct URLs such as `/units`, `/paths`, and `/exercises`.
+Old `/learn/…` bookmarks redirect to the current URLs with their query parameters.
+
 ## Application modules
 
 | Module and backlog | Responsibility |
@@ -182,7 +187,7 @@ The tests use the database host and credentials from the local environment and r
 ### Local demonstration data
 
 With `APP_ENV=local` and a migrated development or demo database, run
-`php artisan db:seed`. Browse `/learn/paths` for **2nd Baccalaureate · Demo**
+`php artisan db:seed`. Browse `/paths` for **2nd Baccalaureate · Demo**
 and **Everyday English · A2–B1**. The seeded accounts use the password
 `password` and addresses under `example.test`.
 

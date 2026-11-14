@@ -7,6 +7,19 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## English Atlas entry points
+
+| Flow | Live app | Visual prototype (local or test environment) |
+| --- | --- | --- |
+| Homepage | `/` | `/prototype` |
+| Create a student account | `/register` | `/prototype/register` |
+| Sign in | `/login` | `/prototype/login` |
+| Student dashboard | `/dashboard` | `/prototype/dashboard` |
+
+Start at `/` to test real student flows with the application's configured database.
+Existing `/home` links redirect to `/`. The prototype uses sample data and simulates
+signup. See the [visual prototype review guide](docs/VISUAL_PROTOTYPE.md) for setup.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

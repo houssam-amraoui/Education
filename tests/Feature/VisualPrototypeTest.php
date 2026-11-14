@@ -30,23 +30,23 @@ class VisualPrototypeTest extends TestCase
 
     public function test_lesson_attaches_visible_context_to_teacher_composition(): void
     {
-        $this->get('/lessons/passive-voice')->assertSee('/messages/new?context=passive-voice', false);
-        $this->get('/messages/new?context=passive-voice')
+        $this->get('/prototype/lessons/passive-voice')->assertSee('/prototype/messages/new?context=passive-voice', false);
+        $this->get('/prototype/messages/new?context=passive-voice')
             ->assertOk()->assertSee('Attached learning context')->assertSee('The passive voice');
-        $this->get('/messages/new')->assertDontSee('Attached learning context');
+        $this->get('/prototype/messages/new')->assertDontSee('Attached learning context');
     }
 
     public function test_document_retains_its_source_and_editor_supports_both_modes(): void
     {
-        $this->get('/documents/study-guide?source=exam')->assertSee('Back to exam')->assertSee('Sample exam paper');
-        $this->get('/documents/study-guide?source=correction')->assertSee('Sample correction');
-        $this->get('/admin/lessons/editor')->assertSee('Create lesson');
-        $this->get('/admin/lessons/editor?mode=edit')->assertSee('Edit lesson')->assertSee('The passive voice');
+        $this->get('/prototype/documents/study-guide?source=exam')->assertSee('Back to exam')->assertSee('Sample exam paper');
+        $this->get('/prototype/documents/study-guide?source=correction')->assertSee('Sample correction');
+        $this->get('/prototype/admin/lessons/editor')->assertSee('Create lesson');
+        $this->get('/prototype/admin/lessons/editor?mode=edit')->assertSee('Edit lesson')->assertSee('The passive voice');
     }
 
     public function test_sample_results_and_unavailable_business_metrics_are_explicit(): void
     {
-        $this->get('/exercises/passive-voice/results')->assertSee('Fixed sample result');
+        $this->get('/prototype/exercises/passive-voice/results')->assertSee('Fixed sample result');
         $this->get(route(Prototype::routeName('A49')))->assertSee('Business metrics aren’t available yet.');
     }
 
@@ -73,21 +73,21 @@ class VisualPrototypeTest extends TestCase
 
     public function test_exam_catalogue_and_document_links_use_distinct_sample_files(): void
     {
-        $this->get('/exams')->assertSee('/exams/national-document', false)->assertSee('/exams/unit-one', false);
-        $this->get('/exams/national-document')
-            ->assertSee('/documents/study-guide?source=exam', false)
-            ->assertSee('/documents/study-guide?source=correction', false);
+        $this->get('/prototype/exams')->assertSee('/prototype/exams/national-document', false)->assertSee('/prototype/exams/unit-one', false);
+        $this->get('/prototype/exams/national-document')
+            ->assertSee('/prototype/documents/study-guide?source=exam', false)
+            ->assertSee('/prototype/documents/study-guide?source=correction', false);
 
-        $this->get('/documents/study-guide?source=exam')
-            ->assertSee('/prototype/exam-paper.txt')->assertDontSee('/prototype/exam-correction.txt');
-        $this->get('/documents/study-guide?source=correction')
-            ->assertSee('/prototype/exam-correction.txt')->assertDontSee('/prototype/exam-paper.txt');
-        $this->get('/documents/study-guide')->assertSee('/prototype/study-guide.txt');
+        $this->get('/prototype/documents/study-guide?source=exam')
+            ->assertSee('/prototype-media/exam-paper.txt')->assertDontSee('/prototype-media/exam-correction.txt');
+        $this->get('/prototype/documents/study-guide?source=correction')
+            ->assertSee('/prototype-media/exam-correction.txt')->assertDontSee('/prototype-media/exam-paper.txt');
+        $this->get('/prototype/documents/study-guide')->assertSee('/prototype-media/study-guide.txt');
     }
 
     public function test_interactive_exam_previews_timed_and_untimed_attempts(): void
     {
-        $exam = '/exams/unit-one';
+        $exam = '/prototype/exams/unit-one';
 
         $this->get($exam)->assertSee('30 min')->assertSee('Preview untimed exam');
         $this->get($exam.'?timing=untimed')->assertSee('No time limit')->assertSee($exam.'/attempt?timing=untimed', false);
@@ -101,7 +101,7 @@ class VisualPrototypeTest extends TestCase
 
     public function test_exam_history_only_links_to_unit_one_exam_results(): void
     {
-        $exam = '/exams/unit-one';
+        $exam = '/prototype/exams/unit-one';
 
         $this->get($exam.'/history')
             ->assertSeeInOrder(['Attempt 2', '15 / 20', 'Attempt 1', '10 / 20'])
@@ -133,19 +133,19 @@ class VisualPrototypeTest extends TestCase
 
     public function test_access_previews_show_the_requested_destination_and_its_recovery_action(): void
     {
-        $exercise = '/exercises/passive-voice';
-        $exam = '/exams/unit-one';
+        $exercise = '/prototype/exercises/passive-voice';
+        $exam = '/prototype/exams/unit-one';
 
         foreach ([
-            ['exercise-attempt', $exercise, 'Passive voice practice', 'Sign-in required', '/login?return=exercise'],
-            ['unit-exam', $exam, 'Unit 1 · Practice exam', 'Learning level required', '/learning-goals'],
-            ['passive-voice-practice', $exercise, 'Passive voice practice', 'Prerequisite required', '/lessons/passive-voice'],
-            ['grammar-worksheet', '/resources', 'Grammar revision worksheet', '100 points required', '/rewards/unlock'],
-            ['revision-pack', '/resources', 'Complete revision pack', 'Premium content', null],
+            ['exercise-attempt', $exercise, 'Passive voice practice', 'Sign-in required', '/prototype/login?return=exercise'],
+            ['unit-exam', $exam, 'Unit 1 · Practice exam', 'Learning level required', '/prototype/learning-goals'],
+            ['passive-voice-practice', $exercise, 'Passive voice practice', 'Prerequisite required', '/prototype/lessons/passive-voice'],
+            ['grammar-worksheet', '/prototype/resources', 'Grammar revision worksheet', '100 points required', '/prototype/rewards/unlock'],
+            ['revision-pack', '/prototype/resources', 'Complete revision pack', 'Premium content', null],
         ] as [$destination, $source, $title, $requirement, $action]) {
-            $path = '/access?destination='.$destination;
+            $path = '/prototype/access?destination='.$destination;
             $this->get($source)->assertSee('href="'.url($path).'"', false);
-            $this->get('/access')->assertSee('href="'.url($path).'"', false);
+            $this->get('/prototype/access')->assertSee('href="'.url($path).'"', false);
 
             $response = $this->get($path)
                 ->assertOk()
@@ -161,13 +161,13 @@ class VisualPrototypeTest extends TestCase
             }
         }
 
-        $this->get('/access?destination=unknown')->assertNotFound();
-        $this->get('/access?destination[]=unit-exam')->assertNotFound();
+        $this->get('/prototype/access?destination=unknown')->assertNotFound();
+        $this->get('/prototype/access?destination[]=unit-exam')->assertNotFound();
     }
 
     public function test_exercise_history_links_to_distinct_sample_corrections(): void
     {
-        $exercise = '/exercises/passive-voice';
+        $exercise = '/prototype/exercises/passive-voice';
 
         $this->get($exercise.'/history')
             ->assertOk()
@@ -195,13 +195,13 @@ class VisualPrototypeTest extends TestCase
 
     public function test_login_preview_uses_known_return_destinations_and_defaults_to_the_dashboard(): void
     {
-        $this->get('/exercises/passive-voice')->assertSee('/login?return=exercise', false);
-        $this->get('/exams/unit-one')->assertSee('/login?return=exam', false);
+        $this->get('/prototype/exercises/passive-voice')->assertSee('/prototype/login?return=exercise', false);
+        $this->get('/prototype/exams/unit-one')->assertSee('/prototype/login?return=exam', false);
 
-        $this->get('/login?return=exercise')->assertSee('/exercises/passive-voice/attempt', false);
-        $this->get('/login?return=exam')->assertSee('/exams/unit-one/attempt', false);
+        $this->get('/prototype/login?return=exercise')->assertSee('/prototype/exercises/passive-voice/attempt', false);
+        $this->get('/prototype/login?return=exam')->assertSee('/prototype/exams/unit-one/attempt', false);
 
-        foreach (['/login', '/login?return=unknown', '/login?return=https%3A%2F%2Fexample.test', '/login?return[]=exam'] as $url) {
+        foreach (['/prototype/login', '/prototype/login?return=unknown', '/prototype/login?return=https%3A%2F%2Fexample.test', '/prototype/login?return[]=exam'] as $url) {
             $this->get($url)->assertOk()->assertSee('Explore sample dashboard');
         }
     }
@@ -230,9 +230,9 @@ class VisualPrototypeTest extends TestCase
 
     public function test_student_navigation_is_retained_on_shared_learning_pages(): void
     {
-        $this->get('/dashboard')->assertSee('/lessons/passive-voice?preview=student', false);
-        $this->get('/lessons/passive-voice?preview=student')
+        $this->get('/prototype/dashboard')->assertSee('/prototype/lessons/passive-voice?preview=student', false);
+        $this->get('/prototype/lessons/passive-voice?preview=student')
             ->assertSee('Your learning space')->assertSee('Dashboard');
-        $this->get('/lessons/passive-voice')->assertSee('Explore English Atlas');
+        $this->get('/prototype/lessons/passive-voice')->assertSee('Explore English Atlas');
     }
 }

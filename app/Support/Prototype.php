@@ -143,16 +143,17 @@ class Prototype
             ['A38', 'Access rules', '/admin/access', 'admin-list', 'A01'],
             ['A39', 'Access rule', '/admin/access/editor', 'admin-editor', 'A38'],
             ['A43', 'Platform settings', '/admin/settings', 'settings', 'A01'],
-            ['A44', 'Analytics overview', '/prototype/admin/analytics', 'analytics', 'A01'],
-            ['A45', 'Acquisition analytics', '/prototype/admin/analytics/acquisition', 'analytics', 'A44'],
-            ['A46', 'Engagement analytics', '/prototype/admin/analytics/engagement', 'analytics', 'A44'],
-            ['A47', 'Learning analytics', '/prototype/admin/analytics/learning', 'analytics', 'A44'],
-            ['A48', 'Communication analytics', '/prototype/admin/analytics/communication', 'analytics', 'A44'],
-            ['A49', 'Business analytics', '/prototype/admin/analytics/business', 'analytics', 'A44'],
+            ['A44', 'Analytics overview', '/admin/analytics', 'analytics', 'A01'],
+            ['A45', 'Acquisition analytics', '/admin/analytics/acquisition', 'analytics', 'A44'],
+            ['A46', 'Engagement analytics', '/admin/analytics/engagement', 'analytics', 'A44'],
+            ['A47', 'Learning analytics', '/admin/analytics/learning', 'analytics', 'A44'],
+            ['A48', 'Communication analytics', '/admin/analytics/communication', 'analytics', 'A44'],
+            ['A49', 'Business analytics', '/admin/analytics/business', 'analytics', 'A44'],
         ];
 
         $screens = [];
         foreach ($definitions as [$id, $title, $path, $template, $parent]) {
+            $path = '/prototype'.rtrim($path, '/');
             $screens[$id] = compact('id', 'title', 'path', 'template', 'parent');
         }
 

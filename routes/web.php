@@ -58,8 +58,25 @@ use App\Support\Prototype;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 
+Route::name('account.')->middleware(SetLocale::class)->group(function (): void {
+    Route::get('/dashboard', [AccountPageController::class, 'home'])->middleware('auth:web')->name('home');
+    Route::middleware('guest:web')->group(function (): void {
+        Route::get('/register', [AccountPageController::class, 'register'])->name('register.show');
+        Route::post('/register', RegisterController::class)->name('register');
+        Route::get('/login', [AccountPageController::class, 'login'])->name('login.show');
+        Route::post('/login', [SessionController::class, 'store'])->name('login');
+    });
+});
+
+foreach (['/account/login' => 'account.login.show', '/account/register' => 'account.register.show', '/account' => 'account.home'] as $path => $destination) {
+    Route::get($path, function (\Illuminate\Http\Request $request) use ($destination) {
+        $query = $request->getQueryString();
+
+        return redirect()->to(route($destination).($query === null ? '' : '?'.$query), 301);
+    });
+}
+
 Route::prefix('account')->name('account.')->middleware(SetLocale::class)->group(function (): void {
-    Route::get('/', [AccountPageController::class, 'home'])->middleware('auth:web')->name('home');
     Route::middleware('auth:web')->group(function (): void {
         Route::get('learning-goals', [LearningPathSelectionController::class, 'show'])->name('learning-goals.show');
         Route::put('learning-goals', [LearningPathSelectionController::class, 'update'])->name('learning-goals.update');
@@ -72,12 +89,6 @@ Route::prefix('account')->name('account.')->middleware(SetLocale::class)->group(
     Route::get('preferences', [ProfileController::class, 'preferences'])->middleware('auth:web')->name('preferences.show');
     Route::put('preferences', [ProfileController::class, 'updatePreferences'])->middleware('auth:web')->name('preferences.update');
     Route::post('locale', [AccountPageController::class, 'locale'])->name('locale');
-    Route::middleware('guest:web')->group(function (): void {
-        Route::get('register', [AccountPageController::class, 'register'])->name('register.show');
-        Route::post('register', RegisterController::class)->name('register');
-        Route::get('login', [AccountPageController::class, 'login'])->name('login.show');
-        Route::post('login', [SessionController::class, 'store'])->name('login');
-    });
     Route::post('logout', [SessionController::class, 'destroy'])->middleware('auth:web')->name('logout');
 });
 
@@ -290,7 +301,7 @@ Route::prefix('admin/library')->name('admin.library.')
         Route::patch('videos/{video}/position', [VideoController::class, 'reorder'])->whereNumber('video')->name('videos.reorder');
     });
 
-Route::prefix('learn/access/{type}/{target}')->name('access.')
+Route::prefix('access/{type}/{target}')->name('access.')
     ->where(['type' => implode('|', [...array_keys(\App\Support\AccessTarget::MODELS), \App\Support\AccessTarget::FEATURE]), 'target' => '[0-9]+'])
     ->middleware([SetLocale::class, 'cache.headers:private;no_store'])
     ->controller(AccessPageController::class)->group(function (): void {
@@ -300,55 +311,56 @@ Route::prefix('learn/access/{type}/{target}')->name('access.')
     });
 
 Route::middleware([SetLocale::class, RecordLearnerVisit::class])->name('curriculum.')->group(function (): void {
-    Route::get('/learn/exams/{exam}/files/{document}/{disposition}', ExamFileController::class)
+    Route::get('/exams/{exam}/files/{document}/{disposition}', ExamFileController::class)
         ->whereNumber('exam')->whereIn('document', ['paper', 'correction'])
         ->whereIn('disposition', ['inline', 'attachment'])->name('exams.file');
-    Route::get('/learn/search', [DiscoveryController::class, 'search'])->name('search');
-    Route::get('/learn/topics', [DiscoveryController::class, 'topics'])->name('topics.index');
-    Route::get('/learn/topics/{topic}', [DiscoveryController::class, 'topic'])->whereNumber('topic')->name('topics.show');
-    Route::get('/home', [CurriculumController::class, 'home'])->name('home');
-    Route::get('/learn/paths', [CurriculumController::class, 'paths'])->name('paths');
-    Route::get('/learn/units', [CurriculumController::class, 'units'])->name('units');
-    Route::get('/learn/paths/{level}', [CurriculumController::class, 'level'])->whereNumber('level')->name('level');
-    Route::get('/learn/paths/{level}/units', [CurriculumController::class, 'units'])->whereNumber('level')->name('level.units');
-    Route::get('/learn/paths/{level}/units/{unit}', [CurriculumController::class, 'unit'])
+    Route::get('/search', [DiscoveryController::class, 'search'])->name('search');
+    Route::get('/topics', [DiscoveryController::class, 'topics'])->name('topics.index');
+    Route::get('/topics/{topic}', [DiscoveryController::class, 'topic'])->whereNumber('topic')->name('topics.show');
+    Route::get('/', [CurriculumController::class, 'home'])->name('home');
+    Route::redirect('/home', '/', 301);
+    Route::get('/paths', [CurriculumController::class, 'paths'])->name('paths');
+    Route::get('/units', [CurriculumController::class, 'units'])->name('units');
+    Route::get('/paths/{level}', [CurriculumController::class, 'level'])->whereNumber('level')->name('level');
+    Route::get('/paths/{level}/units', [CurriculumController::class, 'units'])->whereNumber('level')->name('level.units');
+    Route::get('/paths/{level}/units/{unit}', [CurriculumController::class, 'unit'])
         ->whereNumber(['level', 'unit'])->name('unit');
-    Route::get('/learn/paths/{level}/units/{unit}/categories/{category}', [CurriculumController::class, 'category'])
+    Route::get('/paths/{level}/units/{unit}/categories/{category}', [CurriculumController::class, 'category'])
         ->whereNumber(['level', 'unit', 'category'])->name('category');
-    Route::get('/learn/paths/{level}/units/{unit}/categories/{category}/lessons/{lesson}', [CurriculumController::class, 'lesson'])
+    Route::get('/paths/{level}/units/{unit}/categories/{category}/lessons/{lesson}', [CurriculumController::class, 'lesson'])
         ->whereNumber(['level', 'unit', 'category', 'lesson'])->name('lesson');
-    Route::post('/learn/paths/{level}/units/{unit}/categories/{category}/lessons/{lesson}/complete', [CurriculumController::class, 'completeLesson'])
+    Route::post('/paths/{level}/units/{unit}/categories/{category}/lessons/{lesson}/complete', [CurriculumController::class, 'completeLesson'])
         ->middleware('auth:web')->whereNumber(['level', 'unit', 'category', 'lesson'])->name('lesson.complete');
 });
 
 Route::middleware([SetLocale::class, RecordLearnerVisit::class])->name('library.')->scopeBindings()->group(function (): void {
-    Route::get('/learn/videos', [VideoPageController::class, 'index'])->name('videos.index');
-    Route::get('/learn/videos/{video}', [VideoPageController::class, 'show'])->whereNumber('video')->name('videos.show');
-    Route::post('/learn/videos/{video}/playback', [VideoPageController::class, 'playback'])
+    Route::get('/videos', [VideoPageController::class, 'index'])->name('videos.index');
+    Route::get('/videos/{video}', [VideoPageController::class, 'show'])->whereNumber('video')->name('videos.show');
+    Route::post('/videos/{video}/playback', [VideoPageController::class, 'playback'])
         ->whereNumber('video')->name('videos.playback');
-    Route::get('/learn/resources', [ResourcePageController::class, 'index'])->name('resources.index');
-    Route::get('/learn/resources/{resource}', [ResourcePageController::class, 'show'])->whereNumber('resource')->name('resources.show');
-    Route::get('/learn/resources/{resource}/document', [ResourcePageController::class, 'document'])->whereNumber('resource')->name('resources.document');
-    Route::get('/learn/resources/{resource}/file/{disposition}', [ResourceFileController::class, 'show'])
+    Route::get('/resources', [ResourcePageController::class, 'index'])->name('resources.index');
+    Route::get('/resources/{resource}', [ResourcePageController::class, 'show'])->whereNumber('resource')->name('resources.show');
+    Route::get('/resources/{resource}/document', [ResourcePageController::class, 'document'])->whereNumber('resource')->name('resources.document');
+    Route::get('/resources/{resource}/file/{disposition}', [ResourceFileController::class, 'show'])
         ->whereNumber('resource')->whereIn('disposition', ['inline', 'attachment'])->name('resources.file');
-    Route::get('/learn/lessons/{lesson}/resources/{resource}/document', [ResourcePageController::class, 'lessonDocument'])
+    Route::get('/lessons/{lesson}/resources/{resource}/document', [ResourcePageController::class, 'lessonDocument'])
         ->whereNumber(['lesson', 'resource'])->name('lessons.resources.document');
-    Route::get('/learn/lessons/{lesson}/resources/{resource}/file/{disposition}', [ResourceFileController::class, 'lesson'])
+    Route::get('/lessons/{lesson}/resources/{resource}/file/{disposition}', [ResourceFileController::class, 'lesson'])
         ->whereNumber(['lesson', 'resource'])->whereIn('disposition', ['inline', 'attachment'])->name('lessons.resources.file');
 });
 
 Route::middleware([SetLocale::class, RecordLearnerVisit::class])->group(function (): void {
-    Route::get('learn/exercises', [ExerciseAttemptController::class, 'catalogue'])->name('curriculum.exercises.index');
-    Route::get('learn/exercises/{exercise}', [ExerciseAttemptController::class, 'instructions'])
+    Route::get('exercises', [ExerciseAttemptController::class, 'catalogue'])->name('curriculum.exercises.index');
+    Route::get('exercises/{exercise}', [ExerciseAttemptController::class, 'instructions'])
         ->whereNumber('exercise')->name('curriculum.exercises.instructions');
-    Route::get('learn/exams', [ExamPageController::class, 'index'])->name('curriculum.exams.index');
-    Route::get('learn/exams/{exam}/document/{document}', [ExamPageController::class, 'document'])
+    Route::get('exams', [ExamPageController::class, 'index'])->name('curriculum.exams.index');
+    Route::get('exams/{exam}/document/{document}', [ExamPageController::class, 'document'])
         ->whereNumber('exam')->whereIn('document', ['paper', 'correction'])->name('curriculum.exams.document');
-    Route::get('learn/exams/{exam}', [ExamPageController::class, 'show'])
+    Route::get('exams/{exam}', [ExamPageController::class, 'show'])
         ->whereNumber('exam')->name('curriculum.exams.instructions');
 });
 
-Route::prefix('learn/exercises/{exercise}/attempts')->name('curriculum.exercises.attempts.')
+Route::prefix('exercises/{exercise}/attempts')->name('curriculum.exercises.attempts.')
     ->middleware([SetLocale::class, 'auth:web', 'cache.headers:private;no_store'])
     ->scopeBindings()
     ->where(['exercise' => '[0-9]+'])
@@ -360,7 +372,7 @@ Route::prefix('learn/exercises/{exercise}/attempts')->name('curriculum.exercises
         Route::post('{attempt}/retry', [ExerciseAttemptController::class, 'retry'])->whereNumber('attempt')->name('retry');
     });
 
-Route::prefix('learn/exams/{exam}/attempts')->name('curriculum.exams.attempts.')
+Route::prefix('exams/{exam}/attempts')->name('curriculum.exams.attempts.')
     ->middleware([SetLocale::class, 'auth:web', 'cache.headers:private;no_store'])
     ->scopeBindings()
     ->where(['exam' => '[0-9]+'])
@@ -371,12 +383,21 @@ Route::prefix('learn/exams/{exam}/attempts')->name('curriculum.exams.attempts.')
         Route::post('{attempt}/submit', [ExamAttemptController::class, 'submit'])->whereNumber('attempt')->name('submit');
     });
 
+// Keep existing learning bookmarks working while named routes generate the shorter URLs.
+Route::get('/learn/{section}/{path?}', function (\Illuminate\Http\Request $request, string $section, ?string $path = null) {
+    $destination = '/'.$section.($path === null ? '' : '/'.$path);
+    $query = $request->getQueryString();
+
+    return redirect()->to($destination.($query === null ? '' : '?'.$query), 301);
+})->whereIn('section', ['access', 'exams', 'exercises', 'lessons', 'paths', 'resources', 'search', 'topics', 'units', 'videos'])
+    ->where('path', '.*');
+
 // Keep the fixture catalogue separate from live routes.
 if (app()->environment(['local', 'testing'])) {
     Route::withoutMiddleware(StartSession::class)
         ->middleware([StartPreviewSession::class, SetLocale::class])
         ->group(function (): void {
-            Route::post('/locale', LocaleController::class)->name('locale.update');
+            Route::post('/prototype/locale', LocaleController::class)->name('locale.update');
             Route::view('/prototype/tokens', 'prototype.fixtures.tokens')->name('prototype.tokens');
             Route::get('/prototype/primitives', [PrototypeController::class, 'primitives'])->name('prototype.primitives');
 
@@ -386,6 +407,4 @@ if (app()->environment(['local', 'testing'])) {
                     ->name(Prototype::routeName($screen['id']));
             }
         });
-} else {
-    Route::redirect('/', '/home');
 }

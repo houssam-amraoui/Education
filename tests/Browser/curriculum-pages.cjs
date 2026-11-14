@@ -40,7 +40,7 @@ const assert = require("node:assert/strict");
             const row = (name) => manager.getByRole("row").filter({ hasText: name });
 
             await manager.goto(levels);
-            await manager.waitForURL(base + "/account/login");
+            await manager.waitForURL(base + "/login");
             await manager.locator("#email").fill(email);
             await manager.locator("#password").fill(password);
             await manager.getByRole("button", { name: "Sign in", exact: true }).click();
@@ -60,7 +60,7 @@ const assert = require("node:assert/strict");
             await manager.getByRole("button", { name: "Save learning path" }).click();
             await manager.waitForURL(levels);
             assert(await row(title).getByText("Draft").isVisible());
-            await guest.goto(base + "/learn/paths");
+            await guest.goto(base + "/paths");
             assert.equal(await guest.getByRole("heading", { name: title, exact: true }).count(), 0);
 
             await row(title).getByRole("button", { name: "Publish " + title }).click();

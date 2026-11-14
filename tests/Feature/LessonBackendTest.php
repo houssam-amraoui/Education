@@ -64,7 +64,7 @@ class LessonBackendTest extends TestCase
             <p lang="ar" dir="rtl" onclick="ignore"><strong>مثال</strong></p>
             <script>ignore</script><iframe src="https://example.com"></iframe>
             <a href="javascript:void(0)">Plain text</a>
-            <a href="/learn/paths">Paths</a>
+            <a href="/paths">Paths</a>
             <img src="https://example.com/image.png">
             <img src="data:image/png;base64,bm90IGFuIGltYWdl">
             <img src="$image" alt="An example" onerror="ignore" srcset="https://example.com/image.png">
@@ -77,7 +77,7 @@ class LessonBackendTest extends TestCase
         $body = $category->lessons()->findOrFail($id)->body;
         $this->assertStringContainsString('<p lang="ar" dir="rtl"><strong>مثال</strong></p>', $body);
         $this->assertStringContainsString('Plain text', $body);
-        $this->assertStringContainsString('<a href="/learn/paths">Paths</a>', $body);
+        $this->assertStringContainsString('<a href="/paths">Paths</a>', $body);
         $this->assertStringContainsString('<img src="'.$image.'" alt="An example" loading="lazy">', $body);
         foreach (['ignore', 'onclick', 'javascript:', 'iframe', 'example.com', 'bm90IGFuIGltYWdl', 'onerror', 'srcset'] as $discarded) {
             $this->assertStringNotContainsString($discarded, $body);

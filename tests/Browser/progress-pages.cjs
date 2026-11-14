@@ -19,7 +19,7 @@ const assert = require("node:assert/strict");
 
     async function signIn(page, email, destination) {
         await page.goto(base + destination);
-        await page.waitForURL(base + "/account/login");
+        await page.waitForURL(base + "/login");
         await page.locator("#email").fill(email);
         await page.locator("#password").fill(password);
         await page.getByRole("button", { name: "Sign in", exact: true }).click();
@@ -35,18 +35,18 @@ const assert = require("node:assert/strict");
             const errors = [];
             for (const tab of [page, admin]) tab.on("pageerror", error => errors.push(error.message));
 
-            await signIn(page, email, "/account");
+            await signIn(page, email, "/dashboard");
             assert(await page.getByText("No learning paths selected.").isVisible());
             await page.getByRole("link", { name: "Change learning path" }).click();
             await layout(page);
             await page.getByRole("checkbox").first().check();
             await page.getByRole("button", { name: "Save learning paths" }).click();
-            await page.waitForURL(base + "/account");
+            await page.waitForURL(base + "/dashboard");
             assert(await page.getByRole("status").getByText("Learning paths saved.").isVisible());
 
             await page.goto(base + lesson);
             await layout(page);
-            await page.goto(base + "/account");
+            await page.goto(base + "/dashboard");
             await layout(page);
             await page.getByRole("link", { name: "Continue learning" }).click();
             await page.getByRole("button", { name: "Mark as complete" }).click();

@@ -34,7 +34,7 @@ const assert = require("node:assert/strict");
         }
         const region = width < 1024 ? page.locator("#mobile-navigation") : page.locator(".sidebar");
         await region.getByRole("button", { name: "Sign out" }).click();
-        await page.waitForURL(base + "/account/login");
+        await page.waitForURL(base + "/login");
     }
 
     try {
@@ -45,7 +45,7 @@ const assert = require("node:assert/strict");
             const userList = base + "/admin/accounts/users";
             const roleList = base + "/admin/accounts/roles";
 
-            await page.goto(base + "/account/register");
+            await page.goto(base + "/register");
             await layout();
             await page.locator("#name").fill("Browser Learner");
             await page.locator("#email").fill(email);
@@ -58,19 +58,19 @@ const assert = require("node:assert/strict");
             await page.locator("#password").fill(password);
             await page.locator("#password_confirmation").fill(password);
             await page.getByRole("button", { name: "Create account" }).click();
-            await page.waitForURL(base + "/account/login");
+            await page.waitForURL(base + "/login");
             await layout();
             await signIn(email, "incorrect");
             await page.locator("[data-live-errors]:focus").waitFor();
             await signIn(email, password);
-            await page.waitForURL(base + "/account");
+            await page.waitForURL(base + "/dashboard");
             assert(await page.getByText(email, { exact: true }).isVisible());
             assert.equal((await page.goto(userList)).status(), 403);
             assert(await page.getByRole("heading", { name: "Access restricted" }).isVisible());
             await signOut(width);
 
             await page.goto(userList + "?search=nonexistent-account");
-            await page.waitForURL(base + "/account/login");
+            await page.waitForURL(base + "/login");
             await signIn(adminEmail, adminPassword);
             await page.waitForURL(userList + "?search=nonexistent-account");
             assert(await page.getByRole("heading", { name: "No matching records" }).isVisible());

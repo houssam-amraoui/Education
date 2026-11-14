@@ -15,6 +15,7 @@ class CurriculumPagesTest extends TestCase
 
     public function test_public_pages_follow_real_ancestry_and_show_empty_states(): void
     {
+        $this->get('/learn/units?search=grammar')->assertMovedPermanently()->assertRedirect('/units?search=grammar');
         $this->get(route('curriculum.home'))->assertOk()->assertSee('No learning paths yet');
 
         $level = Level::create(['title' => 'Published path']);
@@ -44,7 +45,8 @@ class CurriculumPagesTest extends TestCase
 
         $level->forceFill(['status' => CurriculumStatus::Draft])->save();
         $this->get($categoryUrl)->assertNotFound();
-        $this->get(route('curriculum.units'))->assertOk()->assertSee('No units yet');
+        $this->assertSame('/units', route('curriculum.units', absolute: false));
+        $this->get('/units')->assertOk()->assertSee('No units yet');
     }
 
     public function test_html_management_requires_authorization_and_returns_validation_and_feedback(): void

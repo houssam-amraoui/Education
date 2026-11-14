@@ -23,6 +23,18 @@ class AccountPagesTest extends TestCase
     {
         $register = route('account.register.show');
         $login = route('account.login.show');
+        $this->assertSame('/register', route('account.register', absolute: false));
+        $this->assertSame('/login', route('account.login', absolute: false));
+        $this->get('/account/register')->assertMovedPermanently()->assertRedirect('/register');
+        $this->get('/account/login?return_to=%2Funits')->assertMovedPermanently()->assertRedirect('/login?return_to=%2Funits');
+        $this->get('/account')->assertMovedPermanently()->assertRedirect('/dashboard');
+        $this->get('/dashboard')->assertRedirect($login);
+        $this->get('/home')->assertMovedPermanently()->assertRedirect('/');
+        $this->get('/')->assertOk()
+            ->assertSee('href="'.$register.'"', false)
+            ->assertDontSee('Visual prototype')
+            ->assertDontSee('/prototype');
+
         $this->get($register)->assertOk()->assertSee('Create account')->assertSee('name="_token"', false)->assertDontSee('Sample data only');
 
         $identity = ['name' => 'Live Learner', 'email' => 'learner@example.test', 'password' => 'lesson-password'];
@@ -57,7 +69,7 @@ class AccountPagesTest extends TestCase
         $this->get($list)->assertForbidden()->assertSee('Access restricted')->assertDontSee($admin->email);
         $this->post(route('account.logout'));
 
-        foreach (['https://example.test/account', '//example.test/account', '/\\example.test/account', '/dashboard', '/account/logout'] as $destination) {
+        foreach (['https://example.test/account', '//example.test/account', '/\\example.test/account', '/prototype/dashboard', '/account/logout'] as $destination) {
             $this->withSession(['url.intended' => $destination])
                 ->post(route('account.login'), ['email' => $student->email, 'password' => 'password', 'return_to' => 'https://example.test'])
                 ->assertRedirect(route('account.home'));

@@ -19,12 +19,12 @@ The PHP path above is the existing local XAMPP installation. On other machines,
 use the installed PHP executable. The existing Laravel dependencies and `.env`
 application key must be available. Database setup is not required.
 Use the local application environment for the preview routes. The Artisan server
-routes A44–A49 through Laravel even though their URLs start with `/prototype/`,
-which also contains static files.
+routes preview screens through Laravel under the
+`/prototype` URL prefix. Sample media is served from `/prototype-media`. The live homepage is at `/`.
 
-- Public home: <http://127.0.0.1:8123/>
-- Student dashboard: <http://127.0.0.1:8123/dashboard>
-- Administration: <http://127.0.0.1:8123/admin>
+- Public home: <http://127.0.0.1:8123/prototype>
+- Student dashboard: <http://127.0.0.1:8123/prototype/dashboard>
+- Administration: <http://127.0.0.1:8123/prototype/admin>
 - Use **Screen directory** on any page to find each inventory ID.
 - Use **Explore / Student / Admin** to switch preview roles. This is not authentication.
 - Shared learning links retain the student preview through a query parameter, with
@@ -144,7 +144,7 @@ formatting checks passed. No test failures remain.
 - `resources/views/prototype/`: shared layout, page dispatcher, and feature partials.
 - `resources/css/app.css`: design tokens, components, responsive and RTL styling.
 - `resources/js/app.js`: temporary UI state and simulated interactions.
-- `public/prototype/study-guide.txt`: downloadable sample educational content.
+- `public/prototype-media/study-guide.txt`: downloadable sample educational content.
 - `package.json`, `package-lock.json`: bundled fonts, browser test dependency and script.
 - `tests/Feature/VisualPrototypeTest.php`: rendering and prototype boundary checks.
 - `tests/Browser/visual-prototype.cjs`: responsive browser and interaction checks.

@@ -72,15 +72,15 @@ class DemonstrationSeederTest extends TestCase
     {
         Storage::fake('documents');
         $this->seed();
-        $this->get('/learn/paths')->assertOk()->assertSee('Everyday English');
-        $this->get('/learn/videos')->assertOk()->assertSee('BBC Learning English');
-        $this->get('/learn/resources')->assertOk()->assertSee('Editing a school bulletin');
+        $this->get('/paths')->assertOk()->assertSee('Everyday English');
+        $this->get('/videos')->assertOk()->assertSee('BBC Learning English');
+        $this->get('/resources')->assertOk()->assertSee('Editing a school bulletin');
         $paper = Exam::where('type', Exam::DOCUMENT)->sole();
-        $correction = "/learn/exams/{$paper->id}/files/correction/inline";
+        $correction = "/exams/{$paper->id}/files/correction/inline";
         $this->get($correction)->assertNotFound();
 
         $student = User::where('email', 'demo.student@example.test')->sole();
-        $this->actingAs($student)->get('/account')->assertOk()->assertSee('Reported speech in a meeting summary');
+        $this->actingAs($student)->get('/dashboard')->assertOk()->assertSee('Reported speech in a meeting summary');
         $this->get('/account/progress/activity')->assertOk()->assertSee('Passive voice practice');
         $this->get('/account/messages')->assertOk()->assertSee('Choosing was or were in a report');
         $this->get('/account/rewards')->assertOk()->assertSee('Steady learner');
@@ -88,7 +88,7 @@ class DemonstrationSeederTest extends TestCase
 
         $exercise = Exercise::where('title', 'Confirm or reschedule?')->sole();
         $attempt = $exercise->attempts()->sole();
-        $url = "/learn/exercises/{$exercise->id}/attempts/{$attempt->id}";
+        $url = "/exercises/{$exercise->id}/attempts/{$attempt->id}";
         $this->get($url)->assertNotFound();
         $hanae = User::where('email', 'demo.hanae@example.test')->sole();
         $this->actingAs($hanae)->get($url)->assertOk()

@@ -2,11 +2,11 @@ const assert = require("node:assert/strict");
 const { chromium } = require("playwright");
 
 async function signIn(page, base, credentials) {
-    await page.goto(base + "/account/login");
+    await page.goto(base + "/login");
     await page.locator("#email").fill(credentials.email);
     await page.locator("#password").fill(credentials.password);
     await Promise.all([
-        page.waitForURL(base + "/account"),
+        page.waitForURL(base + "/dashboard"),
         page.locator("main form button").click(),
     ]);
 }
@@ -89,8 +89,8 @@ async function audit(page, base, flow, path, locale, width, findings) {
     try {
         for (const width of [1440, 320]) {
             const flows = [
-                ["G02", "/learn/paths"],
-                ["S01", "/account", { email: "demo.student@example.test", password: "password" }],
+                ["G02", "/paths"],
+                ["S01", "/dashboard", { email: "demo.student@example.test", password: "password" }],
                 ["A01", "/admin/overview", { email: adminEmail, password: adminPassword }],
             ];
             for (const [flow, path, credentials] of flows) {
