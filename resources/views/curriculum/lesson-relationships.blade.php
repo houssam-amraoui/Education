@@ -16,6 +16,27 @@
         @include('curriculum.prerequisite-fields')
         <fieldset id="resource_ids">
             <legend>Related learning content</legend>
+            @foreach(['exercise_ids' => ['Exercise', 'exercises'], 'exam_ids' => ['Exam', 'exams']] as $field => [$label, $plural])
+                @php
+                    [$linkedIds, $options] = $assessments[$field];
+                    $checkedIds = array_map('strval', array_filter((array) old($field, $linkedIds->all()), 'is_scalar'));
+                @endphp
+                <div id="{{ $field }}">
+                    <input type="hidden" name="{{ $field }}" value="">
+                    @forelse($options as $option)
+                        @php($archived = $option->status === App\Support\CurriculumStatus::Archived)
+                        <label class="choice">
+                            <input type="checkbox" name="{{ $field }}[]" value="{{ $option->id }}"
+                                @checked(in_array((string) $option->id, $checkedIds, true)) @disabled($archived)>
+                            <span><bdi>{{ $option->title }}</bdi><br>
+                                <small>{{ $label }} · <bdi>{{ $option->unit->level->title }} · {{ $option->unit->title }}</bdi>
+                                    · {{ $archived ? 'Archived (removed on save)' : ucfirst($option->status->value) }}</small></span>
+                        </label>
+                    @empty
+                        <p>No {{ $plural }} are available to link.</p>
+                    @endforelse
+                </div>
+            @endforeach
             <input type="hidden" name="resource_ids" value="">
             @forelse($resources as $resource)
                 <label class="choice">

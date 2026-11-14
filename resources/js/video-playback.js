@@ -1,29 +1,31 @@
-const frame = document.querySelector("iframe[data-playback-url]");
+const frames = document.querySelectorAll("iframe[data-playback-url]");
 
-if (frame) {
-    let reported = false;
-
+if (frames.length) {
     window.onYouTubeIframeAPIReady = () => {
-        new window.YT.Player(frame, {
-            events: {
-                async onStateChange(event) {
-                    if (reported || event.data !== window.YT.PlayerState.PLAYING) {
-                        return;
-                    }
+        frames.forEach((frame) => {
+            let reported = false;
 
-                    reported = true;
-                    try {
-                        const response = await fetch(frame.dataset.playbackUrl, {
-                            method: "POST",
-                            headers: { "X-CSRF-TOKEN": frame.dataset.playbackToken },
-                            keepalive: true,
-                        });
-                        reported = response.ok;
-                    } catch {
-                        reported = false;
-                    }
+            new window.YT.Player(frame, {
+                events: {
+                    async onStateChange(event) {
+                        if (reported || event.data !== window.YT.PlayerState.PLAYING) {
+                            return;
+                        }
+
+                        reported = true;
+                        try {
+                            const response = await fetch(frame.dataset.playbackUrl, {
+                                method: "POST",
+                                headers: { "X-CSRF-TOKEN": frame.dataset.playbackToken },
+                                keepalive: true,
+                            });
+                            reported = response.ok;
+                        } catch {
+                            reported = false;
+                        }
+                    },
                 },
-            },
+            });
         });
     };
 

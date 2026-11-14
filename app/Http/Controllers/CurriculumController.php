@@ -110,7 +110,9 @@ class CurriculumController extends Controller
             'links' => $this->context($record, $unitRecord, $categoryRecord),
             'lesson' => $lessonRecord,
             'prerequisites' => $preparation->guidance($student, $lessonRecord),
-            'nextLessons' => $canTrack ? $recommendations->nextLessons($student, $lessonRecord) : $lessonRecord->nextLessons,
+            'nextLessons' => $canTrack
+                ? $recommendations->nextLessons($student, $lessonRecord)->merge($lessonRecord->nextLessons)
+                : $lessonRecord->nextLessons,
             'canTrack' => $canTrack,
             'completed' => $canTrack && LessonProgress::where('student_id', $student->id)
                 ->where('lesson_id', $lessonRecord->id)->whereNotNull('completed_at')->exists(),

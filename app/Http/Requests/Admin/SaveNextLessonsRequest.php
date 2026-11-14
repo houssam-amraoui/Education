@@ -12,7 +12,7 @@ class SaveNextLessonsRequest extends FormRequest
     {
         // An unchecked checkbox group submits only the empty hidden field.
         if (AccountPages::html($this)) {
-            foreach (['next_lesson_ids', 'resource_ids', 'prerequisite_lesson_ids'] as $field) {
+            foreach (['next_lesson_ids', 'resource_ids', 'prerequisite_lesson_ids', 'exercise_ids', 'exam_ids'] as $field) {
                 if ($this->has($field) && $this->input($field) === null) {
                     $this->merge([$field => []]);
                 }
@@ -28,8 +28,15 @@ class SaveNextLessonsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'next_lesson_ids' => ['present', 'array', 'list', 'max:100'],
+            'next_lesson_ids' => [
+                $this->hasAny(['exercise_ids', 'exam_ids']) ? 'sometimes' : 'present',
+                'array', 'list', 'max:100',
+            ],
             'next_lesson_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
+            'exercise_ids' => ['sometimes', 'array', 'list', 'max:100'],
+            'exercise_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
+            'exam_ids' => ['sometimes', 'array', 'list', 'max:100'],
+            'exam_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
             'prerequisite_lesson_ids' => ['sometimes', 'array', 'list', 'max:100'],
             'prerequisite_lesson_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
             'resource_ids' => ['sometimes', 'array', 'list', 'max:100'],

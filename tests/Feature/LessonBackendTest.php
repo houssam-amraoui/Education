@@ -3,14 +3,20 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Exam;
+use App\Models\Exercise;
 use App\Models\Level;
+use App\Models\Resource;
 use App\Models\Role;
+use App\Models\StoredFile;
 use App\Models\User;
+use App\Models\Video;
 use App\Queries\VisibleLessonDetail;
 use App\Support\Ability;
 use App\Support\CurriculumStatus;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class LessonBackendTest extends TestCase
@@ -89,6 +95,44 @@ class LessonBackendTest extends TestCase
         ])->assertOk()->assertJsonPath('body', 'Text<p>Updated</p>');
     }
 
+    public function test_authoring_links_existing_media_and_scopes_attachment_delivery(): void
+    {
+        $this->signInAsTeacher();
+        $category = $this->category();
+        $disk = Storage::fake(StoredFile::DISK);
+        $disk->put('resources/notes.pdf', "%PDF-1.7\n");
+        $file = StoredFile::create([
+            'disk' => StoredFile::DISK, 'path' => 'resources/notes.pdf', 'mime_type' => 'application/pdf', 'size' => 9,
+        ]);
+        $resource = Resource::create(['title' => 'Notes', 'type' => 'pdf']);
+        $resource->storedFile()->associate($file);
+        $resource->forceFill(['status' => CurriculumStatus::Published])->save();
+        $video = new Video(['title' => 'Example']);
+        $video->forceFill(['provider' => 'youtube', 'provider_id' => 'dQw4w9WgXcQ'])->save();
+
+        $store = route('admin.curriculum.lessons.store', $category);
+        $ids = ['resource_ids' => [$resource->id], 'video_ids' => [$video->id]];
+        $id = $this->postJson($store, ['title' => 'Source'] + $ids)->assertCreated()->json('id');
+        $lesson = $category->lessons()->findOrFail($id);
+        $update = route('admin.curriculum.lessons.update', [$category, $lesson]);
+        $this->putJson($update, ['title' => 'Updated'] + $ids)->assertOk();
+        $this->putJson($update, ['title' => 'Updated'])->assertOk();
+        $this->putJson($update, ['title' => 'Rejected', 'resource_ids' => [99999], 'video_ids' => []])
+            ->assertUnprocessable()->assertJsonValidationErrors('resource_ids.0');
+        $this->assertSame('Updated', $lesson->refresh()->title);
+        $this->assertDatabaseCount('lesson_resource', 1);
+        $this->assertSame([$video->id], $lesson->videos()->pluck('videos.id')->all());
+
+        $fileUrl = route('library.lessons.resources.file', [$lesson, $resource, 'attachment']);
+        $this->get($fileUrl)->assertNotFound();
+        $lesson->forceFill(['status' => CurriculumStatus::Published])->save();
+        $this->get($fileUrl)->assertOk()->assertDownload('notes.pdf');
+        $this->putJson($update, ['title' => 'Updated', 'resource_ids' => [], 'video_ids' => []])->assertOk();
+        $this->get($fileUrl)->assertNotFound();
+        $this->assertFalse($lesson->videos()->exists());
+        $disk->assertExists($file->path);
+    }
+
     public function test_next_lessons_validate_targets_and_replace_links_atomically(): void
     {
         $this->signInAsTeacher();
@@ -109,6 +153,68 @@ class LessonBackendTest extends TestCase
         $this->assertSame([$target->id], $lesson->nextLessons()->pluck('lessons.id')->all());
         $this->putJson($route, ['next_lesson_ids' => []])->assertNoContent();
         $this->assertFalse($lesson->nextLessons()->exists());
+    }
+
+    public function test_related_assessments_are_validated_and_saved_with_next_lessons(): void
+    {
+        $category = $this->category();
+        $other = $this->category();
+        $lesson = $category->lessons()->create(['title' => 'Source']);
+        $next = $other->lessons()->create(['title' => 'Next']);
+        $exercise = Exercise::create(['unit_id' => $other->unit_id, 'title' => 'Practice', 'instructions' => 'Answer.']);
+        $exam = Exam::create([
+            'unit_id' => $category->unit_id, 'title' => 'Assessment', 'type' => Exam::INTERACTIVE, 'instructions' => 'Answer.',
+        ]);
+        $archived = $exam->replicate();
+        $archived->forceFill(['status' => CurriculumStatus::Archived])->save();
+        $save = route('admin.curriculum.lessons.next-lessons.update', [$category, $lesson]);
+        $links = ['next_lesson_ids' => [$next->id], 'exercise_ids' => [(string) $exercise->id], 'exam_ids' => [$exam->id]];
+
+        $this->putJson($save, $links)->assertUnauthorized();
+        $this->signInAsTeacher();
+        $this->putJson(route('admin.curriculum.lessons.next-lessons.update', [$other, $lesson]), $links)->assertNotFound();
+        $this->putJson($save, [])->assertUnprocessable()->assertJsonValidationErrors('next_lesson_ids');
+        $this->putJson($save, $links)->assertNoContent();
+        $this->putJson($save, $links)->assertNoContent();
+        $this->putJson($save, ['exercise_ids' => [$exercise->id, $exercise->id]])
+            ->assertUnprocessable()->assertJsonValidationErrors('exercise_ids.1');
+        $this->putJson($save, ['exercise_ids' => [99999]])
+            ->assertUnprocessable()->assertJsonValidationErrors('exercise_ids');
+        $this->putJson($save, ['exam_ids' => [$archived->id], 'exercise_ids' => [], 'next_lesson_ids' => []])
+            ->assertUnprocessable()->assertJsonValidationErrors('exam_ids');
+        $this->assertSame([$next->id], $lesson->nextLessons()->pluck('lessons.id')->all());
+        $this->assertSame([$exercise->id], $lesson->relatedExercises()->pluck('exercises.id')->all());
+        $this->assertSame([$exam->id], $lesson->relatedExams()->pluck('exams.id')->all());
+
+        $this->putJson($save, ['exercise_ids' => [], 'exam_ids' => []])->assertNoContent();
+        $this->assertFalse($lesson->relatedExercises()->exists());
+        $this->assertFalse($lesson->relatedExams()->exists());
+        $this->assertTrue($lesson->nextLessons()->exists());
+    }
+
+    public function test_visible_lesson_detail_only_loads_accessible_related_assessments(): void
+    {
+        $category = $this->category();
+        $lesson = $category->lessons()->create(['title' => 'Source']);
+        $lesson->forceFill(['status' => CurriculumStatus::Published])->save();
+        $exercise = Exercise::create(['unit_id' => $category->unit_id, 'title' => 'Practice', 'instructions' => 'Answer.']);
+        $exam = Exam::create([
+            'unit_id' => $category->unit_id, 'title' => 'Assessment', 'type' => Exam::INTERACTIVE, 'access' => 'registered',
+            'instructions' => 'Answer.',
+        ]);
+        $exam->forceFill(['status' => CurriculumStatus::Published])->save();
+        $lesson->relatedExercises()->attach($exercise);
+        $lesson->relatedExams()->attach($exam);
+        $detail = app(VisibleLessonDetail::class);
+        $guest = $detail->findOrFail($category, $lesson->id);
+        $this->assertTrue($guest->relatedExercises->isEmpty());
+        $this->assertTrue($guest->relatedExams->isEmpty());
+
+        $exercise->forceFill(['status' => CurriculumStatus::Published])->save();
+        $this->signInWithRole(Role::where('key', Role::STUDENT)->sole());
+        $student = $detail->findOrFail($category, $lesson->id, auth()->user());
+        $this->assertSame([$exercise->id], $student->relatedExercises->modelKeys());
+        $this->assertSame([$exam->id], $student->relatedExams->modelKeys());
     }
 
     public function test_lifecycle_and_order_respect_category_scope(): void

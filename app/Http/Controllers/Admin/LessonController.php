@@ -25,7 +25,7 @@ class LessonController extends Controller
 {
     public function store(SaveLessonRequest $request, Category $category, SaveLesson $save): JsonResponse|RedirectResponse
     {
-        $lesson = $save->handle($category, new Lesson, $request->safe()->only(['title', 'body']), $request->validated('video_ids'));
+        $lesson = $this->save($request, $category, new Lesson, $save);
 
         return AccountPages::html($request)
             ? $this->backToList($category, 'Lesson created.')
@@ -34,7 +34,7 @@ class LessonController extends Controller
 
     public function update(SaveLessonRequest $request, Category $category, Lesson $lesson, SaveLesson $save): JsonResponse|RedirectResponse
     {
-        $lesson = $save->handle($category, $lesson, $request->safe()->only(['title', 'body']), $request->validated('video_ids'));
+        $lesson = $this->save($request, $category, $lesson, $save);
 
         return AccountPages::html($request)
             ? $this->backToList($category, 'Lesson updated.')
@@ -47,7 +47,13 @@ class LessonController extends Controller
             if ($request->validated('prerequisite_lesson_ids') !== null) {
                 $prerequisites->handle($lesson, $request->validated('prerequisite_lesson_ids'));
             }
-            $save->handle($lesson, $request->validated('next_lesson_ids'), $request->validated('resource_ids'));
+            $save->handle(
+                $lesson,
+                $request->validated('next_lesson_ids'),
+                $request->validated('resource_ids'),
+                $request->validated('exercise_ids'),
+                $request->validated('exam_ids'),
+            );
         }, 3);
 
         return AccountPages::html($request)
@@ -79,6 +85,17 @@ class LessonController extends Controller
         return AccountPages::html($request)
             ? $this->backToList($category, 'Order updated.')
             : response()->noContent();
+    }
+
+    private function save(SaveLessonRequest $request, Category $category, Lesson $lesson, SaveLesson $save): Lesson
+    {
+        return $save->handle(
+            $category,
+            $lesson,
+            $request->safe()->only(['title', 'body']),
+            $request->validated('video_ids'),
+            $request->validated('resource_ids'),
+        );
     }
 
     private function backToList(Category $category, string $status): RedirectResponse

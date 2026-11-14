@@ -42,6 +42,16 @@ class Lesson extends Model
         return $this->belongsToMany(self::class, 'lesson_prerequisite_lesson', 'lesson_id', 'prerequisite_lesson_id');
     }
 
+    public function relatedExercises(): BelongsToMany
+    {
+        return $this->belongsToMany(Exercise::class);
+    }
+
+    public function relatedExams(): BelongsToMany
+    {
+        return $this->belongsToMany(Exam::class);
+    }
+
     public function progress(): HasMany
     {
         return $this->hasMany(LessonProgress::class);

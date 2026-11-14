@@ -180,15 +180,15 @@ Screens: G07, A13–A15. PRD §§7, 19–20.
 
 - [x] **LESSON-04** — Add lesson persistence and validated create/update actions within a category; hierarchy remains consistent.
 - [x] **LESSON-05** — Add safe rich-content processing and image handling; stored content cannot execute injected scripts or unsafe URLs.
-- [ ] **LESSON-06** — Add lesson attachment/video/resource relationships using existing media records and authorized file references.
-- [ ] **LESSON-07** — Add explicit related-exercise, related-exam, and next-lesson relationships with validated targets.
+- [x] **LESSON-06** — Add lesson attachment/video/resource relationships using existing media records and authorized file references.
+- [x] **LESSON-07** — Add explicit related-exercise, related-exam, and next-lesson relationships with validated targets.
 - [x] **LESSON-08** — Add lesson publish/unpublish/archive/reorder actions and a visibility-scoped lesson detail query.
 
 ### 3. Integration tasks
 
-- [ ] **LESSON-09** — Bind lesson listing/reading to real content, safe rendering, and authorized media links.
+- [x] **LESSON-09** — Bind lesson listing/reading to real content, safe rendering, and authorized media links.
 - [x] **LESSON-10** — Connect lesson management listing/editor and publication/order controls to real actions.
-- [ ] **LESSON-11** — Connect the related-content selector to persisted relationships and navigable learner links.
+- [x] **LESSON-11** — Connect the related-content selector to persisted relationships and navigable learner links.
 
 ### 4. Testing tasks
 

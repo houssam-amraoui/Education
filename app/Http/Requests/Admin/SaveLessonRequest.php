@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Resource;
 use App\Models\Video;
 use App\Support\AccountPages;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,6 +29,8 @@ class SaveLessonRequest extends FormRequest
             'body' => ['nullable', 'string', 'max:500000'],
             'video_ids' => ['sometimes', 'array', 'list', 'max:100'],
             'video_ids.*' => ['bail', 'required', 'integer', 'min:1', 'distinct', Rule::exists(Video::class, 'id')],
+            'resource_ids' => ['sometimes', 'array', 'list', 'max:100'],
+            'resource_ids.*' => ['bail', 'required', 'integer', 'min:1', 'distinct', Rule::exists(Resource::class, 'id')],
         ];
     }
 }

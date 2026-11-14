@@ -12,7 +12,11 @@ class VisibleLessonDetail
     {
         return $category->lessons()
             ->visibleTo($viewer)
-            ->with('category.unit.level')
+            ->with([
+                'category.unit.level',
+                'relatedExercises' => fn ($links) => $links->visibleTo($viewer)->ordered(),
+                'relatedExams' => fn ($links) => $links->visibleTo($viewer)->ordered(),
+            ])
             ->withVisibleNextLessons($viewer)
             ->findOrFail($lessonId);
     }

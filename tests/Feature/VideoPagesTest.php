@@ -82,7 +82,8 @@ class VideoPagesTest extends TestCase
         $this->get($index.'&search=missing')->assertOk()->assertSee('No matching content');
         $this->get($detail)->assertOk()->assertSee('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
             ->assertSee($lessonPage)->assertDontSee('Hidden lesson');
-        $this->get($lessonPage)->assertOk()->assertSee($detail)->assertDontSee('Hidden video');
+        $this->get($lessonPage)->assertOk()->assertSee($detail)->assertSee($video->youtubeUrl(embed: true))
+            ->assertDontSee('Hidden video')->assertDontSee(route('library.videos.playback', $restricted, false));
         $this->get(route('library.videos.show', $restricted))->assertNotFound();
 
         $video->forceFill(['provider_id' => 'invalid'])->save();

@@ -17,6 +17,17 @@
             @else
                 <div class="empty-state"><h2>No lesson content yet</h2></div>
             @endif
+            @if($lesson->relationLoaded('videos') && $lesson->videos->isNotEmpty())
+                <section aria-labelledby="lesson-video-heading" class="stack">
+                    <h2 id="lesson-video-heading">Watch an example</h2>
+                    @foreach($lesson->videos as $video)
+                        <div class="stack">
+                            <h3 dir="auto">{{ $video->title }}</h3>
+                            @include('videos.player')
+                        </div>
+                    @endforeach
+                </section>
+            @endif
             @if($canTrack ?? false)
                 <div class="actions">
                     @if($completed)
@@ -59,6 +70,17 @@
             @if(isset($prerequisites) && $prerequisites->isNotEmpty())
                 <x-prototype.card>
                     @include('curriculum.prerequisite-guidance')
+                </x-prototype.card>
+            @endif
+            @if($lesson->relationLoaded('relatedExercises') && ($lesson->relatedExercises->isNotEmpty() || $lesson->relatedExams->isNotEmpty()))
+                <x-prototype.card>
+                    <h3>Related learning content</h3>
+                    @foreach($lesson->relatedExercises as $exercise)
+                        <x-prototype.link :href="route('curriculum.exercises.instructions', $exercise)"><bdi>{{ $exercise->title }}</bdi></x-prototype.link>
+                    @endforeach
+                    @foreach($lesson->relatedExams as $exam)
+                        <x-prototype.link :href="route('curriculum.exams.instructions', $exam)"><bdi>{{ $exam->title }}</bdi></x-prototype.link>
+                    @endforeach
                 </x-prototype.card>
             @endif
             @php($recommendedLessons = $nextLessons ?? $lesson->nextLessons)

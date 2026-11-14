@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CurriculumFiltersRequest;
 use App\Models\Category;
+use App\Models\Exam;
+use App\Models\Exercise;
 use App\Models\Lesson;
 use App\Models\Level;
 use App\Models\Resource;
@@ -76,9 +78,21 @@ class CurriculumPageController extends Controller
             ->orderBy('category_id')->ordered()->get();
         $attached = $lesson->resources()->pluck('resources.id');
         $resources = Resource::matching([])->get();
+        $assessments = [
+            'exercise_ids' => [$lesson->relatedExercises()->allRelatedIds(), Exercise::query()],
+            'exam_ids' => [$lesson->relatedExams()->allRelatedIds(), Exam::query()],
+        ];
+        foreach ($assessments as $field => [$linkedIds, $query]) {
+            $assessments[$field] = [
+                $linkedIds,
+                $query->with('unit.level')
+                    ->where(fn (Builder $query) => $query->where('status', '!=', CurriculumStatus::Archived)->orWhereIn('id', $linkedIds))
+                    ->orderBy('title')->orderBy('id')->get(),
+            ];
+        }
 
         return $this->lessonPage($category, $lesson, 'A15', 'editor', 'curriculum.lesson-relationships',
-            compact('selected', 'candidates', 'attached', 'resources') + $prerequisites->forContent($lesson));
+            compact('selected', 'candidates', 'attached', 'resources', 'assessments') + $prerequisites->forContent($lesson));
     }
 
     public function previewLesson(Category $category, Lesson $lesson): View
